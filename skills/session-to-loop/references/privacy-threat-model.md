@@ -1,8 +1,13 @@
-# Privacy Threat Model
+# Local Artifact Guardrails
 
-Session transcripts are sensitive because they combine prompts, tool calls, code, logs, paths, credentials, and private decisions.
+These guardrails exist to keep generated artifacts useful, clean, and safe to inspect or commit.
+They are not the core product value. The core value is better mechanism selection from past agent
+sessions.
 
-## Assets to Protect
+Session transcripts may combine prompts, tool calls, code, logs, paths, credentials, and private
+decisions, so generated outputs should avoid accidental leakage and prompt-injection mistakes.
+
+## Assets to Keep Out of Artifacts
 
 - Raw transcript files.
 - Private source code and diffs.
@@ -32,7 +37,7 @@ Stale inference:
 - Old sessions may describe commands or architecture that no longer exist.
 - Verify current project facts before turning old evidence into rules.
 
-## Required Mitigations
+## Required Guardrails
 
 - Keep raw and private outputs in ignored directories.
 - Redact before rendering shareable artifacts.

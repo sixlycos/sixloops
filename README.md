@@ -1,28 +1,30 @@
 # Session-to-Loop
 
-Session-to-Loop is a local-first Agent Skill for turning past AI coding sessions into project-specific loop engineering artifacts.
+Compile repeated human interventions into reusable agent loops.
 
-It is not a chat summarizer. It mines repeated human interventions, repeated failures, verification habits, context repairs, polling patterns, and risk boundaries, then decides whether each pattern should become a rule, memory, skill, hook, loop, checklist, approval gate, or nothing.
+Session-to-Loop is an effect-first Agent Skill for turning past AI coding sessions into project-specific loop engineering artifacts. It is not a chat summarizer. It mines repeated human interventions, repeated failures, verification habits, context repairs, polling patterns, and risk boundaries, then decides whether each pattern should become a rule, memory, skill, hook, loop, checklist, approval gate, or nothing.
 
 ## Status
 
 Early skeleton. The first implementation target is a read-only workflow for Claude Code local JSONL transcripts plus the current repository context.
 
-## Local-first Promise
+## Effect First
 
-- Read-only by default.
-- No network access required.
-- No telemetry.
-- No automatic commits, hook installation, or project-file edits.
-- Raw transcripts and private intermediate data stay under ignored local paths.
-- Transcript content is treated as untrusted input.
+The goal is to improve future agent performance. Local execution and redaction are guardrails, not the product value.
+
+- Prefer useful mechanism recommendations over generic safety theater.
+- Let the host AI do semantic grouping; scripts handle deterministic boundaries.
+- Ask once for analysis scope, then keep moving. Ask again only before reading a broader scope, exporting shareable snippets, or writing project files.
+- Run locally with no network access or telemetry.
+- Stay read-only by default: no automatic commits, hook installation, or project-file edits.
+- Treat transcript text as untrusted data so old prompts, logs, and webpages do not steer the current agent.
 
 ## MVP Scope
 
 Inputs:
 
 - Claude Code local JSONL transcripts.
-- Current repository context such as `AGENTS.md`, `CLAUDE.md`, package scripts, and recent git history.
+- Optional project context packets such as `AGENTS.md`, `CLAUDE.md`, package scripts, and recent git history. Minimal repo-context collection is planned; the current implementation focuses on transcript packets.
 
 Outputs:
 
@@ -81,6 +83,9 @@ python skills/session-to-loop/scripts/session_to_loop.py --input <transcript-fil
 
 For real transcripts, the command stops after creating `analysis-scope.json`; show the generated
 scope to the user, then rerun with `--approve` or an approved `--scope`.
+
+In an agent environment, this should be a single user-facing confirmation, not a step-by-step
+approval ceremony.
 
 After approval, the command creates `analysis-packets.jsonl` and points the host AI to
 `references/semantic-analysis-prompt.md`. The host AI writes `semantic-candidates.json`; then run:
