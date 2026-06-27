@@ -77,6 +77,9 @@ analysis_window: "last-30-days"
 source_summary:
   transcript_files: 12
   task_episodes: 34
+  providers:
+    codex: 8
+    claude: 4
   redaction: "enabled"
 top_findings:
   - id: "ci-babysitter"
@@ -122,6 +125,8 @@ content_policy:
 ```yaml
 packet_id: "packet-000001"
 packet_type: "transcript_event"
+provider: "codex"
+event_kind: "message"
 source: "session:synthetic-ci-1#event-1"
 source_file: "evals/fixtures/repeated-ci-failure.jsonl"
 session_id: "synthetic-ci-1"
@@ -131,6 +136,10 @@ text: "CI is red again. Please inspect the failed job logs before guessing."
 text_hash: "9b2f5c7e1d0a4b33"
 text_truncated: false
 redacted: true
+structured:
+  response_item:
+    type: "message"
+    role: "user"
 ```
 
 ## Semantic Candidate

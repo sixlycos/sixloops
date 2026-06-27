@@ -20,6 +20,16 @@
     }
   },
   {
+    "id": "claude-code-native",
+    "fixture": "evals/fixtures/claude-code-native.jsonl",
+    "expected": {
+      "include_candidates": ["ci-babysitter"],
+      "include_mechanisms": ["loop", "skill"],
+      "require_packet_provider": "claude",
+      "require_session_ids": ["claude-ci-1", "claude-ci-2"]
+    }
+  },
+  {
     "id": "one-off-bugfix",
     "fixture": "evals/fixtures/one-off-bugfix.jsonl",
     "expected": {

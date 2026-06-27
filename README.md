@@ -71,9 +71,12 @@ The analysis model is user-message-primary:
 
 - User messages are primary evidence for repeated corrections, verification requests, risk
   boundaries, and approval requirements.
+- Codex and Claude Code JSONL records are normalized through native adapters before analysis.
+  Codex `response_item`, `function_call`, `function_call_output`, and `event_msg` records keep
+  provider and event-kind metadata. Claude `message.content`, `tool_use`, and `tool_result` records
+  are normalized separately.
 - Tool events are supporting evidence for repeated commands, failed statuses, CI/deploy polling,
-  and verification habits. Codex `response_item` messages are mapped by role; Codex
-  `function_call`, `function_call_output`, and `event_msg` records become supporting tool packets.
+  and verification habits.
 - Assistant messages are not used as primary recommendation evidence.
 - Transcript JSONL is processed line by line after redaction; the extractor does not load full
   transcript files into memory.

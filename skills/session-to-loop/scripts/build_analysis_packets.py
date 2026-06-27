@@ -10,7 +10,9 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Iterator
+
+from transcript_adapters import NormalizedEvent, iter_normalized_events
 
 
 DEFAULT_INDEX = Path(".session-to-loop/private/redacted-index.json")
@@ -28,135 +30,11 @@ def load_index(path: Path) -> dict:
     return data
 
 
-def iter_jsonl(path: Path) -> Iterator[tuple[int, Any]]:
-    with path.open("r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            if line.strip():
-                yield line_number, json.loads(line)
-
-
-def lower_str(value: Any) -> str:
-    return value.lower() if isinstance(value, str) else ""
-
-
-def flatten_text(value: Any) -> str:
-    if isinstance(value, str):
-        return value
-    if isinstance(value, list):
-        return " ".join(flatten_text(item) for item in value)
-    if isinstance(value, dict):
-        preferred = []
-        for key in (
-            "text",
-            "content",
-            "message",
-            "name",
-            "command",
-            "arguments",
-            "output",
-            "result",
-            "stdout",
-            "stderr",
-            "summary",
-            "msg",
-        ):
-            if key in value:
-                preferred.append(flatten_text(value[key]))
-        if preferred:
-            return " ".join(part for part in preferred if part)
-        return " ".join(flatten_text(item) for item in value.values())
-    return ""
-
-
-def codex_session_meta_id(record: dict) -> str | None:
-    meta = record.get("session_meta")
-    if not isinstance(meta, dict):
-        return None
-    payload = meta.get("payload")
-    if isinstance(payload, dict):
-        for key in ("id", "session_id", "conversation_id"):
-            if payload.get(key):
-                return str(payload[key])
-    for key in ("id", "session_id", "conversation_id"):
-        if meta.get(key):
-            return str(meta[key])
-    return None
-
-
-def role_of(record: Any) -> str:
-    if not isinstance(record, dict):
-        return "unknown"
-
-    item = record.get("response_item")
-    if isinstance(item, dict):
-        item_type = lower_str(item.get("type"))
-        role = lower_str(item.get("role"))
-        if role in {"user", "assistant"}:
-            return role
-        if item_type in {"function_call", "function_call_output", "tool_call", "tool_result"}:
-            return "tool"
-        if item_type in {"reasoning", "message"}:
-            return "assistant"
-
-    if isinstance(record.get("event_msg"), dict):
-        return "tool"
-
-    role = record.get("type") or record.get("role")
-    if isinstance(role, str):
-        lowered = role.lower()
-        if lowered in {"user", "assistant", "tool"}:
-            return lowered
-    message = record.get("message")
-    if isinstance(message, dict) and isinstance(message.get("role"), str):
-        return message["role"].lower()
-    return "unknown"
-
-
-def packet_payload(record: Any) -> Any:
-    if isinstance(record, dict):
-        if isinstance(record.get("response_item"), dict):
-            return record["response_item"]
-        if isinstance(record.get("event_msg"), dict):
-            return record["event_msg"]
-    return record
-
-
 def compact_text(text: str, max_chars: int) -> tuple[str, bool]:
     compact = re.sub(r"\s+", " ", text).strip()
     if len(compact) <= max_chars:
         return compact, False
     return compact[: max_chars - 3].rstrip() + "...", True
-
-
-def session_id_of(record: Any) -> str:
-    if isinstance(record, dict):
-        meta_id = codex_session_meta_id(record)
-        if meta_id:
-            return meta_id
-        item = record.get("response_item")
-        if isinstance(item, dict):
-            for key in ("session_id", "conversation_id"):
-                if item.get(key):
-                    return str(item[key])
-        return str(record.get("session_id") or record.get("conversation_id") or "unknown-session")
-    return "unknown-session"
-
-
-def tool_name_of(record: Any) -> str | None:
-    if not isinstance(record, dict):
-        return None
-    item = record.get("response_item")
-    if isinstance(item, dict) and isinstance(item.get("name"), str):
-        return item["name"]
-    event = record.get("event_msg")
-    if isinstance(event, dict):
-        if isinstance(event.get("name"), str):
-            return event["name"]
-        if isinstance(event.get("tool_name"), str):
-            return event["tool_name"]
-    if isinstance(record.get("name"), str):
-        return record["name"]
-    return None
 
 
 def text_hash(text: str) -> str:
@@ -171,6 +49,26 @@ def snippets_allowed(index: dict) -> bool:
     return bool(index.get("scope_policy", {}).get("allow_redacted_snippets", True))
 
 
+def packet_from_event(event: NormalizedEvent, sequence: int, source_file: str, max_chars: int, allow_text: bool) -> dict:
+    packet_text, truncated = compact_text(event.text, max_chars)
+    return {
+        "packet_id": f"packet-{sequence:06d}",
+        "packet_type": "transcript_event",
+        "provider": event.provider,
+        "event_kind": event.event_kind,
+        "source": event.source,
+        "source_file": source_file,
+        "session_id": event.session_id,
+        "role": event.role,
+        "tool_name": event.tool_name,
+        "text": packet_text if allow_text else "[SNIPPET_DISABLED_BY_SCOPE]",
+        "text_hash": text_hash(event.text),
+        "text_truncated": truncated,
+        "redacted": True,
+        "structured": event.structured if allow_text else {},
+    }
+
+
 def iter_packets(index: dict, max_chars: int) -> Iterator[dict]:
     roles = allowed_roles(index)
     allow_text = snippets_allowed(index)
@@ -178,35 +76,11 @@ def iter_packets(index: dict, max_chars: int) -> Iterator[dict]:
     for file_info in index.get("files", []):
         path = Path(file_info["path"])
         source_file = file_info.get("source_label", path.name)
-        current_session_id = "unknown-session"
-        for event_index, record in iter_jsonl(path):
-            if isinstance(record, dict):
-                current_session_id = codex_session_meta_id(record) or current_session_id
-                if "session_meta" in record and len(record) == 1:
-                    continue
-            role = role_of(record)
-            if role not in roles:
+        for event in iter_normalized_events(path):
+            if event.role not in roles:
                 continue
-            payload = packet_payload(record)
-            text = flatten_text(payload)
-            packet_text, truncated = compact_text(text, max_chars)
-            session_id = session_id_of(record)
-            if session_id == "unknown-session":
-                session_id = current_session_id
             sequence += 1
-            yield {
-                "packet_id": f"packet-{sequence:06d}",
-                "packet_type": "transcript_event",
-                "source": f"session:{session_id}#event-{event_index}",
-                "source_file": source_file,
-                "session_id": session_id,
-                "role": role,
-                "tool_name": tool_name_of(record),
-                "text": packet_text if allow_text else "[SNIPPET_DISABLED_BY_SCOPE]",
-                "text_hash": text_hash(text),
-                "text_truncated": truncated,
-                "redacted": True,
-            }
+            yield packet_from_event(event, sequence, source_file, max_chars, allow_text)
 
 
 def parse_args() -> argparse.Namespace:
@@ -233,9 +107,12 @@ def main() -> int:
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     packet_count = 0
+    provider_counts: dict[str, int] = {}
     with out.open("w", encoding="utf-8") as handle:
         for packet in iter_packets(index, args.max_chars):
             packet_count += 1
+            provider = str(packet.get("provider", "unknown"))
+            provider_counts[provider] = provider_counts.get(provider, 0) + 1
             handle.write(json.dumps(packet, ensure_ascii=False) + "\n")
 
     packet_index = {
@@ -245,10 +122,12 @@ def main() -> int:
         "redacted_index": str(Path(args.redacted_index)),
         "packets": str(out),
         "packet_count": packet_count,
+        "provider_counts": provider_counts,
         "scope_policy": index.get("scope_policy", {}),
         "source": {
             "transcript_files": index.get("file_count", 0),
             "records": index.get("record_count", 0),
+            "providers": provider_counts,
         },
         "redaction": {
             "enabled": bool(index.get("redaction_enabled")),

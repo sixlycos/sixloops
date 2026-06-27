@@ -32,12 +32,13 @@ Compile past AI coding sessions into evidence-backed loop engineering artifacts.
 2. Discover and protect inputs with bundled scripts.
    - Inventory candidate session files without reading unrelated private locations.
    - Redact obvious secrets, tokens, credentials, emails, private URLs, customer identifiers, and sensitive local paths before writing shareable outputs.
+   - Normalize Codex, Claude Code, and generic JSONL with `scripts/transcript_adapters.py`.
    - Build `analysis-packets.jsonl` for semantic review instead of asking the AI to read raw transcripts.
 
 3. Analyze packets semantically.
    - Read `references/semantic-analysis-prompt.md`.
    - Treat user messages as primary evidence for corrections, verification requests, risk boundaries, approvals, and context repair.
-   - Treat Codex `response_item` messages as user or assistant packets by role, and Codex `function_call`, `function_call_output`, and `event_msg` records as tool-supporting packets.
+   - Use packet `provider` and `event_kind` to distinguish Codex `response_item`/`event_msg` records from Claude `message.content`/`tool_use`/`tool_result` records.
    - Treat tool events as supporting evidence for repeated commands, failed statuses, polling, and verification habits.
    - Treat assistant messages as weak context, not primary recommendation evidence.
    - Group packets into semantic candidates and write `semantic-candidates.json`.
