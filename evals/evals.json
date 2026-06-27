@@ -5,6 +5,7 @@
     "expected": {
       "include_candidates": ["ci-babysitter"],
       "include_mechanisms": ["loop", "skill"],
+      "require_packet_provider": "generic",
       "require_approval_for": ["push", "merge"],
       "redaction_required": true
     }
@@ -51,6 +52,7 @@
     "fixture": "evals/fixtures/repeated-package-manager-correction.jsonl",
     "expected": {
       "include_mechanisms": ["rule"],
+      "require_packet_provider": "generic",
       "exclude_mechanisms": ["loop"]
     }
   },

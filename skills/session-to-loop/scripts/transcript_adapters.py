@@ -134,6 +134,18 @@ def detect_provider(record: Any) -> str:
     return "generic"
 
 
+def looks_generic_transcript(records: list[Any]) -> bool:
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        role = record.get("role") or record.get("type")
+        if isinstance(role, str) and role.lower() in {"user", "assistant", "tool"}:
+            return True
+        if record.get("session_id") and ("text" in record or "content" in record or "message" in record):
+            return True
+    return False
+
+
 def classify_file(path: Path, sample_size: int = 20) -> SourceClassification:
     records = []
     providers: dict[str, int] = {}
@@ -148,6 +160,8 @@ def classify_file(path: Path, sample_size: int = 20) -> SourceClassification:
         return SourceClassification("codex", "native-transcript", "high", "matched Codex session_meta/response_item/event_msg shape")
     if providers.get("claude", 0):
         return SourceClassification("claude", "native-transcript", "high", "matched Claude sessionId/message/tool content shape")
+    if looks_generic_transcript(records):
+        return SourceClassification("generic", "generic-jsonl", "medium", "matched generic role/session transcript shape")
     if looks_auxiliary_evidence(path, records):
         return SourceClassification("auxiliary", "auxiliary-evidence", "medium", "matched engineering log/audit/result indicators")
     return SourceClassification("generic", "generic-jsonl", "low", "JSONL shape did not match native transcript indicators")
@@ -159,34 +173,30 @@ def looks_auxiliary_evidence(path: Path, records: list[Any]) -> bool:
         "audit",
         "browse",
         "soak",
-        "result",
         "results/raw",
-        "log",
-        "eval",
         "report",
         "screenshot",
         "latency",
     )
-    if any(hint in path_text for hint in name_hints):
-        return True
+    path_matches = sum(1 for hint in name_hints if hint in path_text)
 
     text = " ".join(flatten_text(record).lower() for record in records[:10])
     content_hints = (
+        "soak",
+        "browser-audit",
         "http 200",
-        "status",
+        "http_status",
         "latency",
+        "latency_ms",
         "assertion",
         "screenshot",
         "snapshot",
         "goto",
         "click",
         "fill",
-        "request",
-        "response",
-        "passed",
-        "failed",
     )
-    return any(hint in text for hint in content_hints)
+    content_matches = sum(1 for hint in content_hints if hint in text)
+    return content_matches >= 2 or (path_matches > 0 and content_matches > 0)
 
 
 class CodexAdapter:

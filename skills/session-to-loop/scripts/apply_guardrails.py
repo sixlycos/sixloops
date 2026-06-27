@@ -51,6 +51,13 @@ def positive_int(value: Any, default: int) -> int:
     return parsed if parsed > 0 else default
 
 
+def integer(value: Any, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def normalize_managed_loop(
     raw: dict,
     candidate_id: str,
@@ -172,8 +179,8 @@ def normalize_candidate(raw: dict) -> dict:
         "confidence": str(raw.get("confidence", "medium")),
         "mechanism": mechanisms[0] if mechanisms else "none",
         "mechanisms": mechanisms,
-        "score": int(raw.get("score", 70)),
-        "pre_gate_score": int(raw.get("score", 70)),
+        "score": integer(raw.get("score"), 70),
+        "pre_gate_score": integer(raw.get("score"), 70),
         "summary": summary,
         "evidence": evidence,
         "trigger": trigger,
