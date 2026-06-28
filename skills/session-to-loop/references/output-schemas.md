@@ -9,7 +9,7 @@ Use these structures when producing machine-readable artifacts. Markdown reports
 - `managed_loop.heartbeat`: `session`, `goal`, `scheduled`, or `event`.
 - `managed_loop.recommended_maturity`: `read-only-report`, `goal-loop`, `isolated-draft`, `verified-pr-draft`, `scheduled-readonly`, or `scheduled-draft`.
 - `decision_card`: user-facing readiness summary: `can_use_now`, `can_confirm`, `can_delegate`, `missing_before_delegate`, `next_action`, and `confirmation_options`.
-- `first_run_packet`: the confirmable starter contract: `recommended_action`, `reply_to_confirm`, `starter_goal_prompt`, `first_run_mode`, `state_file`, `stop_after`, and `human_gate`.
+- `first_run_packet`: the confirmable starter contract: `recommended_action`, `reply_to_confirm`, `starter_goal_prompt`, `first_run_mode`, `state_file`, `observe`, `decide`, `act`, `verify`, `stop_after`, and `human_gate`.
 - `managed_loop.completion_contract`: mandatory for real loops; defines success criteria, verifier commands, evaluator, pass evidence, reject conditions, and no-progress policy.
 - `managed_loop.state_schema`: minimal durable state ledger the loop must update before stopping.
 - `managed_loop.status_protocol`: allowed statuses: `DONE`, `CONTINUE`, `BLOCKED`, `NEEDS_HUMAN`, and `BUDGET_STOPPED`.
@@ -44,9 +44,10 @@ first_run_packet:
     - A focused verifier passes, or the blocker is recorded.
     Each round:
     1. Observe CI status, failed logs, and current diff.
-    2. Act on at most 1-3 directly evidenced failures.
-    3. Verify with the focused project check.
-    4. Update .session-to-loop/state/ci-babysitter.json before stopping.
+    2. Decide the next failure, action, verifier, and escalation path.
+    3. Act on at most 1-3 directly evidenced failures.
+    4. Verify with the focused project check.
+    5. Update .session-to-loop/state/ci-babysitter.json before stopping.
     Stop after 8 iterations, two repeated failure signatures, or a human gate.
 trigger:
   - "Open PR has pending or failed CI."
@@ -96,7 +97,7 @@ managed_loop:
   cycle_steps:
     - "Read the previous state file if it exists."
     - "Inspect CI status, failed logs, and current git diff."
-    - "Pick at most 1-3 actionable failures by impact and confidence."
+    - "Decide at most 1-3 actionable failures by impact, confidence, and risk."
     - "Attempt only low-risk local fixes with direct evidence."
     - "Run focused verification and record the result."
   selection_policy:
@@ -308,6 +309,10 @@ first_run_packet:
   stop_after: "8 iterations or two repeated failure signatures"
   human_gate: "Do not push, merge, deploy, migrate, or change credentials without approval."
   starter_goal_prompt: "Goal: Keep CI failures moving toward a verified fix without guessing..."
+  observe: "Read previous state, current CI status, failed logs, and diff."
+  decide: "Choose the next failure, verifier, and escalation path."
+  act: "Attempt only low-risk fixes with direct evidence."
+  verify: "Run the focused verifier and record evidence."
 trigger:
   - "CI is pending or failed."
 inputs:
@@ -345,7 +350,7 @@ managed_loop:
   cycle_steps:
     - "Read previous state."
     - "Inspect current CI and logs."
-    - "Pick at most 1-3 high-value failures."
+    - "Decide at most 1-3 high-value failures and the verifier for each."
     - "Attempt low-risk fixes."
     - "Verify and record state."
   selection_policy:

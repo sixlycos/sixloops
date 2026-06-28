@@ -68,7 +68,7 @@ No-progress policy:
 
 ## Selection Policy
 
-Pick at most {{max_items_per_cycle}} item(s) per cycle.
+Decide at most {{max_items_per_cycle}} item(s) per cycle.
 
 {{selection_policy}}
 

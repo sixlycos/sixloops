@@ -50,7 +50,7 @@ Each proposal is a Loop Card. It says:
 - Heartbeat: whether it should start as a session loop, goal loop, scheduled run, or event trigger.
 - Starting level: read-only report, goal loop, isolated draft, PR draft, or scheduled draft.
 - Trigger: when the loop starts.
-- Cycle: what the agent observes, does, and checks.
+- Cycle: what the agent observes, decides, does, and verifies.
 - Verifier: primary check, checker role, PASS evidence, and status protocol.
 - Stop conditions: when the agent must stop.
 - Iteration cap: the maximum number of rounds before it reports a blocker.
@@ -98,6 +98,16 @@ The safest build order is:
 4. Only then add scheduled or lifecycle automation.
 
 SixLoops should recommend the lowest useful level first. A good proposal may start as a read-only report or goal loop before it earns isolated edits, PR drafts, or scheduled execution.
+
+Before any unattended or draft-producing loop, require the minimum safety checklist:
+
+- Success criteria that a verifier can actually check.
+- Hard caps for iterations, time, or budget.
+- Isolated branch or worktree for edits.
+- Read-only checker or deterministic verifier.
+- State file that is read first and updated before stopping.
+- Human gate for risky, irreversible, product, release, or data decisions.
+- Logs or notifications so failures are visible.
 
 ## Why Not Just Ask Codex To Notice Patterns?
 
@@ -252,7 +262,7 @@ It should not feel like this:
 | Person-specific preference | Memory or local rule |
 | Repeatable on-demand workflow | Agent Skill |
 | Deterministic lifecycle check | Hook or script |
-| Repeated observe-act-check cycle with state, verification, resume policy, and stop conditions | Loop |
+| Repeated observe-decide-act-verify cycle with state, verification, resume policy, and stop conditions | Loop |
 | High-risk human decision | Approval gate or checklist |
 | One-off event | Reject |
 

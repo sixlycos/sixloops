@@ -123,6 +123,10 @@ def first_run_defaults(candidate: dict, managed_loop: dict, contract: dict) -> d
             "observe",
             "read the state file, current inputs, and latest verifier evidence",
         )),
+        "first_run_decide": str(packet.get(
+            "decide",
+            f"choose at most {managed_loop.get('max_items_per_cycle', 3)} item(s), the next action, and any human gate",
+        )),
         "first_run_act": str(packet.get(
             "act",
             f"pick at most {managed_loop.get('max_items_per_cycle', 3)} directly evidenced item(s)",
@@ -140,7 +144,7 @@ def mechanism_decision(candidate: dict, managed_loop: dict) -> dict[str, str]:
     decision = candidate.get("mechanism_decision") or {}
     mechanisms = candidate.get("mechanisms", [])
     if "loop" in mechanisms:
-        why = "This needs repeated observe-act-check behavior with state, verification, stop conditions, and resume behavior."
+        why = "This needs repeated observe-decide-act-verify behavior with state, verification, stop conditions, and resume behavior."
         smaller = "A rule, skill, or checklist alone would not preserve state or drive repeated verification."
     else:
         why = "This is useful, but the evidence does not justify a managed loop yet."
@@ -277,6 +281,7 @@ def render_loop_proposals(candidates: list[dict]) -> str:
                     "First run:",
                     "",
                     f"- Observe: {first_run['first_run_observe']}",
+                    f"- Decide: {first_run['first_run_decide']}",
                     f"- Act: {first_run['first_run_act']}",
                     f"- Verify: {first_run['first_run_verify']}",
                     f"- State: {state_file}",
@@ -378,6 +383,7 @@ def candidate_card(candidate: dict) -> str:
         "first_run_goal": first_run["first_run_goal"],
         "first_run_success_criteria": first_run["first_run_success_criteria"],
         "first_run_observe": first_run["first_run_observe"],
+        "first_run_decide": first_run["first_run_decide"],
         "first_run_act": first_run["first_run_act"],
         "first_run_verify": first_run["first_run_verify"],
         "first_run_stop_after": first_run["first_run_stop_after"],

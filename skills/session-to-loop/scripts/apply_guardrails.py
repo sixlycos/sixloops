@@ -110,7 +110,7 @@ def normalize_managed_loop(
     default_cycle = [
         "Read the previous state file if it exists.",
         "Inspect current inputs and observable status.",
-        "Pick at most 1-3 high-value items by impact, confidence, and reversibility.",
+        "Decide at most 1-3 high-value items by impact, confidence, reversibility, and verifier availability.",
         "Run only bounded actions supported by the evidence.",
         "Verify the result and record state for the next run.",
     ]

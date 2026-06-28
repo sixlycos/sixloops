@@ -115,6 +115,7 @@ Use `--rule-fallback` only for offline synthetic evals or when the host AI is un
 - For each proposal, show confirm-this-loop options, first-run packet, decision card, mechanism decision, goal, heartbeat, recommended starting level, trigger, cycle, verifier box, stop conditions, approval boundary, and why this loop should exist.
 - Use exact confirmation strings: `adopt <candidate-id> as read-only`, `adopt <candidate-id> as goal-loop`, `shrink <candidate-id> to skill`, or `reject <candidate-id>`.
 - Only render goal-ready loop artifacts when the candidate has an acceptance contract: success criteria, verifier, state schema, resume policy, stop policy, budget cap, and human checkpoint.
+- For unattended or draft-producing loops, include the minimum safety checklist: success criteria, hard caps, isolation, read-only checker or deterministic verifier, state file, human gate, and visible logs or notifications.
 - Ask the user to confirm which proposal(s) to adopt, convert to a smaller mechanism, or reject.
 - Match the user's language in the final response. Keep internal schemas and deterministic script fields in English.
 - Separate private raw evidence from shareable summaries.

@@ -41,7 +41,7 @@ PROFILES = {
             "cycle_steps": [
                 "Read the previous state file if it exists.",
                 "Inspect CI status, failed logs, and current git diff.",
-                "Pick at most 1-3 actionable failures by impact and confidence.",
+                "Decide at most 1-3 actionable failures by impact, confidence, risk, and verifier availability.",
                 "Attempt only low-risk local fixes with direct evidence.",
                 "Run focused verification and record the result.",
             ],
@@ -99,7 +99,7 @@ PROFILES = {
         "actions": [
             "Run a small repeated relay suite against the changed provider path.",
             "Classify each result as transport, schema, model echo, semantic assertion, evaluator normalization, or latency.",
-            "Pick at most 1-3 failures by release impact and reproducibility.",
+            "Decide at most 1-3 failures by release impact, reproducibility, risk, and verifier availability.",
             "Attempt only local, reversible fixes or record a provider limitation.",
         ],
         "verification": [
@@ -122,7 +122,7 @@ PROFILES = {
                 "Read the previous provider acceptance state file if it exists.",
                 "Run or inspect the bounded relay acceptance result set.",
                 "Bucket failures into transport, schema, model echo, semantic assertion, evaluator normalization, and latency.",
-                "Pick at most 1-3 high-impact reproducible failures.",
+                "Decide at most 1-3 high-impact reproducible failures and the verifier for each.",
                 "Apply only low-risk local fixes, then rerun the focused acceptance check and record state.",
             ],
             "selection_policy": [
@@ -153,7 +153,7 @@ PROFILES = {
             "Run the relevant i18n or static frontend check.",
             "Open the changed routes with a browser audit script.",
             "Capture screenshots or snapshots for the main states.",
-            "Pick at most 1-3 visible regressions by user impact.",
+            "Decide at most 1-3 visible regressions by user impact, risk, and verifier availability.",
         ],
         "verification": [
             "Target routes render without blocking errors.",

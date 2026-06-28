@@ -17,7 +17,7 @@ For each proposal, include:
 - Heartbeat: session, goal, scheduled, or event.
 - Recommended starting level: read-only, goal loop, isolated draft, PR draft, or scheduled draft.
 - Trigger: when the user or agent should run it.
-- Cycle: the observe-act-check steps.
+- Cycle: the observe-decide-act-verify steps.
 - Verifier box: primary verifier, checker, required PASS evidence, and status protocol.
 - Stop conditions: when the agent must stop.
 - Iteration cap: the maximum number of rounds before it reports a blocker.

@@ -6,7 +6,7 @@ Use this reference before recommending a `loop` mechanism.
 
 - Prompt: one instruction, then the user decides the next step.
 - Skill: reusable task instructions the agent can load on demand.
-- Loop: a repeated observe-act-check cycle around a goal.
+- Loop: a repeated observe-decide-act-verify cycle around a goal.
 - Automation: a trigger that starts the loop without the user opening a chat.
 
 Do not collapse these into one mechanism. A task usually matures in this order:
@@ -27,6 +27,13 @@ Every real loop turn has five moves:
 - Scheduling: make the next turn happen by trigger or cadence.
 
 Verification is the heart of the loop. Without an external check, the agent is mostly judging its own work.
+
+Each operational turn has four beats:
+
+- Observe: read state, inputs, logs, diffs, queues, and prior blockers.
+- Decide: choose the next item, action, verifier, and escalation path.
+- Act: make the smallest bounded move that the current evidence supports.
+- Verify: run the independent check, record evidence, and decide whether to stop, continue, retry, or escalate.
 
 The six parts that usually realize those moves are:
 
@@ -114,6 +121,20 @@ A managed loop must compile these gates into an acceptance contract:
 Do not render a goal-ready loop artifact when the acceptance contract is missing. Render a rule,
 skill, checklist, approval gate, or rejection instead.
 
+## Minimum Safety Checklist
+
+Before recommending unattended execution or draft-producing autonomy, require:
+
+- Success criteria that a verifier can actually check.
+- Hard caps for iterations, time, token, dollar, or item count.
+- Isolated branch, checkout, or worktree for edits.
+- Read-only checker, deterministic verifier, or both.
+- State file that is read first and updated before stopping.
+- Human gate for risky, irreversible, product, release, security, data, or cost decisions.
+- Logs or notifications so failures, blockers, and created artifacts are visible.
+
+If any item is missing, start lower on the adoption ladder.
+
 ## Common Loop Failures
 
 - Nodding loop: verification is skipped and the maker approves its own work.
@@ -132,6 +153,7 @@ Use these heuristics:
 
 - Keep the first version lightweight.
 - Prefer deterministic verifiers before model-based review.
+- Use stronger models for planning and checking, cheaper models for routine execution when quality permits.
 - Limit each cycle to 1-3 high-value items.
 - Stop when the same failure repeats.
 - Record state compactly.

@@ -34,7 +34,7 @@ For each candidate, decide:
 
 - What repeated behavior or friction exists.
 - Whether it appears across sessions or only once.
-- Whether tool usage confirms a recurring observe-act-check cycle.
+- Whether tool usage confirms a recurring observe-decide-act-verify cycle.
 - Whether the work shape is `process-shaped`, `tool-assisted`, or `goal-driven`.
 - Which practical archetype it fits, such as `engineering-maintenance`,
   `frontend-verification`, `monitoring-research`, `document-batch`, or `delivery-governance`.
@@ -118,15 +118,17 @@ Write only JSON:
         "discovery_sources": ["CI status", "failed job logs", "git diff"],
         "state_file": ".session-to-loop/state/ci-babysitter.json",
         "state_schema": {
+          "status": "Current loop status and stop reason.",
           "items": "Tracked failures with status: inbox, active, blocked, done.",
           "attempts": "Attempt log with action, verification result, and timestamp.",
           "failures": "Failure signatures, repeat count, and blocker reason.",
+          "progress_metrics": "Evidence that changed or did not change since the prior iteration.",
           "next_cursor": "Where the next run should resume."
         },
         "cycle_steps": [
           "Read the previous state file if it exists.",
           "Inspect CI status, failed logs, and current git diff.",
-          "Pick at most 1-3 actionable failures by impact and confidence.",
+          "Decide at most 1-3 actionable failures by impact, confidence, risk, and verifier availability.",
           "Attempt only low-risk local fixes with direct evidence.",
           "Run focused verification and record the result."
         ],

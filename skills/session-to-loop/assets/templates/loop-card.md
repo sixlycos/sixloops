@@ -31,9 +31,10 @@ Success criteria:
 
 Each round:
 1. Observe: {{first_run_observe}}
-2. Act: {{first_run_act}}
-3. Verify: {{first_run_verify}}
-4. Update state: {{managed_state_file}}
+2. Decide: {{first_run_decide}}
+3. Act: {{first_run_act}}
+4. Verify: {{first_run_verify}}
+5. Update state: {{managed_state_file}}
 
 Stop after:
 {{first_run_stop_after}}
