@@ -37,6 +37,11 @@ End the proposal section by asking the user to choose one of these actions:
 
 Ask once. Do not make the user approve each internal pipeline step after the scope has been confirmed.
 
+After the user confirms `adopt <candidate-id> as <level>`, generate the adoption packet with
+`scripts/adopt_candidate.py`. The user-facing next artifact should be concrete: `GOAL.md`,
+`STATE.json`, `HANDOFF.md`, and a draft `AGENTS-snippet.md`. Do not silently install the
+snippet into project instructions.
+
 ## Language
 
 Match the user's language in the final response. Use English for internal JSON fields, script names, and artifact identifiers.

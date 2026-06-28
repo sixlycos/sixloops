@@ -75,6 +75,7 @@ Recommended unified entry:
 4. Read `references/semantic-analysis-prompt.md` and analyze the packets with the host AI.
 5. Save AI output as `semantic-candidates.json`.
 6. Rerun `scripts/session_to_loop.py --input <file-or-dir> --scope <approved-scope.json> --semantic-candidates <semantic-candidates.json>`.
+7. After the user confirms a proposal, run `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --level <level> --out-dir <adoption-dir>` to create the goal, state, handoff, and project-rule snippet.
 
 Low-level deterministic scripts remain available:
 
@@ -84,6 +85,7 @@ Low-level deterministic scripts remain available:
 4. `scripts/build_analysis_packets.py --redacted-index <redacted-index.json> --out <packets.jsonl>`
 5. `scripts/apply_guardrails.py --semantic-candidates <semantic-candidates.json> --packet-index <packet-index.json> --out <candidates.json>`
 6. `scripts/render_artifacts.py --candidates <candidates.json> --out-dir <artifact-dir>`
+7. `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --level goal-loop --out-dir <adoption-dir>`
 
 Only pass explicit transcript files or narrow directories. Keep raw and intermediate outputs under
 `.session-to-loop/private/` or `.session-to-loop/tmp/` unless the user asks for shareable artifacts.
@@ -117,6 +119,7 @@ Use `--rule-fallback` only for offline synthetic evals or when the host AI is un
 - Only render goal-ready loop artifacts when the candidate has an acceptance contract: success criteria, verifier, state schema, resume policy, stop policy, budget cap, and human checkpoint.
 - For unattended or draft-producing loops, include the minimum safety checklist: success criteria, hard caps, isolation, read-only checker or deterministic verifier, state file, human gate, and visible logs or notifications.
 - Ask the user to confirm which proposal(s) to adopt, convert to a smaller mechanism, or reject.
+- After confirmation, generate an adoption packet with `GOAL.md`, `STATE.json`, `HANDOFF.md`, and a draft `AGENTS-snippet.md`; do not silently install it into the target project.
 - Match the user's language in the final response. Keep internal schemas and deterministic script fields in English.
 - Separate private raw evidence from shareable summaries.
 - Quote only short redacted snippets when necessary.

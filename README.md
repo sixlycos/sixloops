@@ -180,6 +180,19 @@ The first useful actions should look like `adopt ci-babysitter as read-only`,
 `adopt ci-babysitter as goal-loop`, `shrink ci-babysitter to skill`, or
 `reject ci-babysitter`.
 
+After choosing one proposal, generate the concrete adoption packet:
+
+```bash
+python skills/session-to-loop/scripts/adopt_candidate.py \
+  --candidates .session-to-loop/tmp/repeated-ci/private/candidates.json \
+  --candidate-id ci-babysitter \
+  --level goal-loop \
+  --out-dir .session-to-loop/tmp/repeated-ci/adopted
+```
+
+That creates `GOAL.md`, `STATE.json`, `HANDOFF.md`, and a draft `AGENTS-snippet.md`.
+The packet is ready to paste into a delegated goal, but it is not installed into the target project automatically.
+
 For real local logs:
 
 ```bash
@@ -245,7 +258,7 @@ The skill should feel like this:
 4. Let the host AI infer repeated semantic patterns.
 5. Present 1-3 loop proposals first.
 6. Ask which proposal to adopt with a run level, shrink, or reject.
-7. Generate concrete loop cards, skills, hooks, checklists, or approval gates only after confirmation.
+7. Generate concrete loop cards, skills, hooks, checklists, approval gates, or adoption packets only after confirmation.
 
 It should not feel like this:
 
@@ -304,6 +317,12 @@ Validate the skill:
 
 ```bash
 python C:/Users/Administrator/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/session-to-loop
+```
+
+Run all synthetic evals:
+
+```bash
+python evals/run_evals.py --keep-going
 ```
 
 Run a representative fixture:

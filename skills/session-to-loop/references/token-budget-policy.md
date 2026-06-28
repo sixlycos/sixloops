@@ -28,6 +28,8 @@ Prefer small packets containing:
 - event_kind
 - role
 - tool_name
+- interaction_kind
+- turn_index and adjacent packet pointers
 - source pointer
 - short redacted text
 - hash
@@ -43,6 +45,7 @@ For broad transcript sets, do not send every allowed packet to the host AI. Use 
 - Treat assistant packets as weak context unless explicitly scoped.
 - Record kept and dropped counts in `analysis-packets-index.json`.
 - Keep source pointers and `text_hash` so a narrow evidence window can be recovered later.
+- Use `interaction_kind`, `prev_packet_id`, and `next_packet_id` to recover a small local turn window instead of expanding to the whole transcript.
 
 Use `--max-packets`, `--target-token-budget`, and `--role-quota role=count` when the packet file would be too large for economical semantic review.
 

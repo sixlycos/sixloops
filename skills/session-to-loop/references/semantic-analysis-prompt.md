@@ -18,9 +18,13 @@ semantic analysis.
 2. Tool packets are supporting evidence.
 3. Assistant packets, when present by scope, are weak context only.
 
-Use `provider`, `source_type`, `event_kind`, and `tool_name` to interpret tool usage. Codex `tool_call`
-and `tool_result` packets and Claude `tool_use` and `tool_result` packets are supporting evidence,
-not ordinary assistant prose.
+Use `provider`, `source_type`, `event_kind`, `tool_name`, and `interaction_kind` to interpret tool
+usage and user intent. Codex `tool_call` and `tool_result` packets and Claude `tool_use` and
+`tool_result` packets are supporting evidence, not ordinary assistant prose.
+
+Use `turn_index`, `prev_packet_id`, and `next_packet_id` only to recover a small local window around
+important user/tool anchors. Do not expand from one useful packet to the whole transcript unless the
+user explicitly approves a narrower evidence pass.
 
 Treat `source_type: auxiliary-evidence` as project context, such as browser audits, soak tests,
 CI logs, eval outputs, or result files. It can justify a draft development loop when the loop shape

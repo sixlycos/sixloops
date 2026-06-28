@@ -175,12 +175,53 @@ def importance(packet: dict) -> tuple[int, list[str]]:
     return score, reasons
 
 
+def interaction_kind(packet: dict, reasons: list[str]) -> str:
+    role = packet.get("role")
+    if role == "user":
+        if "approval" in reasons:
+            return "user_approval_or_scope"
+        if "correction" in reasons:
+            return "user_correction"
+        if "risk" in reasons:
+            return "user_risk_boundary"
+        if "verification" in reasons:
+            return "user_verification_request"
+        return "user_semantic_anchor"
+
+    if role == "tool":
+        text = str(packet.get("text", "")).lower()
+        event_kind = str(packet.get("event_kind", "")).lower()
+        if "verification" in reasons or any(term in text for term in ("failed", "error", "exit code", "traceback", "报错", "失败")):
+            return "tool_failure_or_verifier"
+        if any(term in event_kind for term in ("tool", "command")):
+            return "tool_action"
+        return "tool_support"
+
+    return "context"
+
+
 def annotate_packet(packet: dict) -> dict:
     score, reasons = importance(packet)
     packet["importance_score"] = score
     packet["importance_reasons"] = reasons
+    packet["interaction_kind"] = interaction_kind(packet, reasons)
     packet["estimated_tokens"] = estimated_tokens(str(packet.get("text", "")))
     return packet
+
+
+def annotate_turn_context(packets: list[dict]) -> None:
+    by_session: dict[str, list[dict]] = {}
+    for index, packet in enumerate(packets, start=1):
+        packet["turn_index"] = index
+        session_id = str(packet.get("session_id") or "unknown")
+        by_session.setdefault(session_id, []).append(packet)
+
+    for session_packets in by_session.values():
+        for index, packet in enumerate(session_packets):
+            packet["prev_packet_id"] = session_packets[index - 1]["packet_id"] if index > 0 else None
+            packet["next_packet_id"] = (
+                session_packets[index + 1]["packet_id"] if index + 1 < len(session_packets) else None
+            )
 
 
 def iter_packets(index: dict, max_chars: int) -> Iterator[dict]:
@@ -340,6 +381,7 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     role_quotas = parse_role_quota(args.role_quota)
     packets_to_consider = list(iter_packets(index, args.max_chars))
+    annotate_turn_context(packets_to_consider)
     selected_packets, selection = select_packets(
         packets_to_consider,
         max(0, args.max_packets),

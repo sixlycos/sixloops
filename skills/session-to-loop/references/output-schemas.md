@@ -199,6 +199,15 @@ shareable_outputs:
 version: 1
 approved: true
 approval_mode: "explicit-cli-flag"
+scope_fingerprint: "7a15c5c5e1328a0b"
+scope_lease:
+  fingerprint: "7a15c5c5e1328a0b"
+  reuse_until_inputs_change: true
+  ask_again_when:
+    - "allowed files change"
+    - "allowed roles change"
+    - "snippet policy changes"
+    - "output visibility changes"
 manifest: ".session-to-loop/private/discovered-sessions.json"
 allowed_files:
   - path: "/absolute/path/to/session.jsonl"
@@ -236,6 +245,10 @@ source_file: "evals/fixtures/repeated-ci-failure.jsonl"
 session_id: "synthetic-ci-1"
 role: "user"
 tool_name: null
+interaction_kind: "user_verification_request"
+turn_index: 1
+prev_packet_id: null
+next_packet_id: "packet-000002"
 text: "CI is red again. Please inspect the failed job logs before guessing."
 text_hash: "9b2f5c7e1d0a4b33"
 text_truncated: false
@@ -406,6 +419,56 @@ economics:
   demote_if: "Acceptance rate falls below 50% or verifier evidence stays weak."
 artifacts:
   - "loop-card"
+```
+
+## Adoption Packet Manifest
+
+Generated only after a user confirms a candidate with an adoption level.
+
+```yaml
+version: 1
+created_at: "2026-06-28T00:00:00+00:00"
+candidate_id: "ci-babysitter"
+candidate_name: "CI Babysitter Loop"
+decision: "draft"
+mechanisms:
+  - "loop"
+  - "skill"
+adoption_level: "goal-loop"
+source_candidates: ".session-to-loop/private/candidates.json"
+source_analysis_model: "user-message-primary-tool-usage-supporting-v1"
+files:
+  state: ".session-to-loop/adopted/ci-babysitter/STATE.json"
+  goal: ".session-to-loop/adopted/ci-babysitter/GOAL.md"
+  handoff: ".session-to-loop/adopted/ci-babysitter/HANDOFF.md"
+  agents_snippet: ".session-to-loop/adopted/ci-babysitter/AGENTS-snippet.md"
+```
+
+## Adoption State
+
+```yaml
+version: 1
+loop_id: "ci-babysitter"
+name: "CI Babysitter Loop"
+status: "pending"
+adoption_level: "goal-loop"
+objective_hash: "0f9d4d8e3c2a5b71"
+objective: "Keep CI failures moving toward a verified fix without guessing."
+heartbeat: "goal"
+success_criteria:
+  - "Relevant local test passes."
+reject_conditions:
+  - "Same failure repeats twice."
+approval_boundary:
+  - "push"
+  - "merge"
+items: []
+attempts: []
+failure_signatures: []
+progress_metrics: []
+human_queue: []
+next_cursor: null
+last_status: null
 ```
 
 ## Eval Case

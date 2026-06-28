@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from datetime import datetime, timezone
@@ -35,6 +36,26 @@ def normalize_roles(roles: list[str]) -> list[str]:
     return normalized
 
 
+def scope_fingerprint(files: list[dict], roles: list[str], snippets: bool, visibility: str) -> str:
+    stable = {
+        "allowed_files": [
+            {
+                "path": item.get("path"),
+                "size_bytes": item.get("size_bytes"),
+                "mtime": item.get("mtime"),
+                "provider": item.get("provider"),
+                "source_type": item.get("source_type"),
+            }
+            for item in files
+        ],
+        "allowed_roles": roles,
+        "allow_redacted_snippets": snippets,
+        "output_visibility": visibility,
+    }
+    payload = json.dumps(stable, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()[:16]
+
+
 def build_scope(args: argparse.Namespace) -> dict:
     manifest_path = Path(args.manifest)
     manifest = load_manifest(manifest_path)
@@ -53,15 +74,28 @@ def build_scope(args: argparse.Namespace) -> dict:
         }
         for item in manifest.get("files", [])
     ]
+    allow_snippets = not args.source_pointers_only
+    fingerprint = scope_fingerprint(files, roles, allow_snippets, args.output_visibility)
     return {
         "version": 1,
         "created_at": now_iso(),
         "approved": bool(args.approve),
         "approval_mode": "explicit-cli-flag" if args.approve else "pending-user-confirmation",
+        "scope_fingerprint": fingerprint,
+        "scope_lease": {
+            "fingerprint": fingerprint,
+            "reuse_until_inputs_change": True,
+            "ask_again_when": [
+                "allowed files change",
+                "allowed roles change",
+                "snippet policy changes",
+                "output visibility changes",
+            ],
+        },
         "manifest": str(manifest_path),
         "allowed_files": files,
         "allowed_roles": roles,
-        "allow_redacted_snippets": not args.source_pointers_only,
+        "allow_redacted_snippets": allow_snippets,
         "output_visibility": args.output_visibility,
         "notes": args.note or "",
         "content_policy": {
