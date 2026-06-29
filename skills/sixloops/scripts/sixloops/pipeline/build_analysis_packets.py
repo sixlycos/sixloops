@@ -18,6 +18,7 @@ from sixloops.core.transcript_adapters import NormalizedEvent, iter_normalized_e
 DEFAULT_INDEX = Path(".sixloops/private/redacted-index.json")
 DEFAULT_OUT = Path(".sixloops/private/analysis-packets.jsonl")
 DEFAULT_PACKET_INDEX = Path(".sixloops/private/analysis-packets-index.json")
+DEFAULT_EVIDENCE_LEDGER = Path(".sixloops/private/evidence-ledger.json")
 DEFAULT_ROLE_QUOTAS = {"user": 0, "tool": 0}
 
 HIGH_VALUE_TERMS = {
@@ -343,6 +344,46 @@ def select_packets(
     }
 
 
+def ledger_entry(packet: dict) -> dict:
+    return {
+        "packet_id": packet.get("packet_id"),
+        "source": packet.get("source"),
+        "source_file": packet.get("source_file"),
+        "provider": packet.get("provider"),
+        "source_type": packet.get("source_type"),
+        "session_id": packet.get("session_id"),
+        "role": packet.get("role"),
+        "event_kind": packet.get("event_kind"),
+        "interaction_kind": packet.get("interaction_kind"),
+        "tool_name": packet.get("tool_name"),
+        "text_hash": packet.get("text_hash"),
+        "selection_reason": packet.get("selection_reason"),
+        "importance_score": packet.get("importance_score"),
+        "importance_reasons": packet.get("importance_reasons", []),
+        "prev_packet_id": packet.get("prev_packet_id"),
+        "next_packet_id": packet.get("next_packet_id"),
+    }
+
+
+def write_evidence_ledger(path: Path, selected_packets: list[dict], selection: dict, index: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    ledger = {
+        "version": 1,
+        "created_at": now_iso(),
+        "packet_selection": selection,
+        "source": {
+            "transcript_files": index.get("file_count", 0),
+            "records": index.get("record_count", 0),
+        },
+        "redaction": {
+            "enabled": bool(index.get("redaction_enabled")),
+            "redactions": index.get("redactions", 0),
+        },
+        "packets": [ledger_entry(packet) for packet in selected_packets],
+    }
+    path.write_text(json.dumps(ledger, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build redacted JSONL packets for AI semantic analysis.")
     parser.add_argument(
@@ -355,6 +396,11 @@ def parse_args() -> argparse.Namespace:
         "--packet-index",
         default=str(DEFAULT_PACKET_INDEX),
         help=f"Packet index JSON output. Default: {DEFAULT_PACKET_INDEX}",
+    )
+    parser.add_argument(
+        "--evidence-ledger",
+        default=str(DEFAULT_EVIDENCE_LEDGER),
+        help=f"Lightweight selected-packet ledger. Default: {DEFAULT_EVIDENCE_LEDGER}",
     )
     parser.add_argument("--max-chars", type=int, default=1200, help="Maximum text chars per event packet.")
     parser.add_argument("--max-packets", type=int, default=0, help="Maximum packets to keep after importance ranking. 0 keeps all.")
@@ -399,6 +445,8 @@ def main() -> int:
             provider_counts[provider] = provider_counts.get(provider, 0) + 1
             source_type_counts[source_type] = source_type_counts.get(source_type, 0) + 1
             handle.write(json.dumps(packet, ensure_ascii=False) + "\n")
+    evidence_ledger = Path(args.evidence_ledger)
+    write_evidence_ledger(evidence_ledger, selected_packets, selection, index)
 
     packet_index = {
         "version": 1,
@@ -406,6 +454,7 @@ def main() -> int:
         "analysis_model": "ai-semantic-packets-v1",
         "redacted_index": str(Path(args.redacted_index)),
         "packets": str(out),
+        "evidence_ledger": str(evidence_ledger),
         "packet_count": packet_count,
         "provider_counts": provider_counts,
         "packet_selection": selection,

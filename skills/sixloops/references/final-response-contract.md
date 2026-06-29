@@ -87,8 +87,9 @@ that mode or generate the adoption packet with
 snippet into project instructions.
 
 When the user asks to design from a goal, generate the goal-design packet with
-`scripts/design_goal_loop.py`. The user-facing artifacts should be `GOAL.md`, `TEAM.md`,
-`STATE.json`, `HANDOFF.md`, and `goal-loop-design.json`.
+`scripts/design_goal_loop.py`. Lead with the `GOAL.md` execution contract. The agent-facing
+harness files are `STATE.json`, `RUN.md`, `VERIFY.md`, `TEAM.md`, `HANDOFF.md`, and
+`goal-loop-design.json`.
 
 When the user explicitly asks to start a team loop and subagent tools are available, state which
 roles will run this cycle, then use `TEAM.md` prompts for the needed subagents. Spawn maker roles

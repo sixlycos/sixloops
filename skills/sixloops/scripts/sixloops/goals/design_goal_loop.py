@@ -111,9 +111,11 @@ BASE_STATE_SCHEMA = {
     "objective_hash": "Stable hash of objective and success criteria.",
     "items": "Tracked work items with id, status, evidence, owner_role, verifier, and risk.",
     "attempts": "Attempt log with role, action, changed evidence, verification result, and timestamp.",
+    "evidence_delta": "What changed since the previous cycle; CONTINUE requires changed or likely new verifier evidence.",
     "failure_signatures": "Repeated failure signatures and repeat counts.",
     "progress_metrics": "Evidence that changed, passed, failed, or stayed unchanged.",
     "human_queue": "Decisions, approvals, or missing context that require a human.",
+    "budgets": "Item, iteration, time, token, or cost caps for the current run.",
     "next_cursor": "Where the next run should resume.",
 }
 
@@ -171,7 +173,19 @@ def design_language(design: dict) -> str:
 
 
 ZH_START_CARD_TEXT = {
+    "read-only": "只读",
+    "low-risk edit": "低风险本地修改",
+    "worktree draft": "隔离草稿",
+    "PR draft": "PR 草稿",
+    "phased": "分阶段执行",
+    "subagent-team": "子代理团队",
+    "none": "单代理执行",
     "Run the focused project verifier identified during the Decide step.": "运行 Decide 阶段确定的聚焦项目验证。",
+    "The requested outcome is produced with required verifier evidence.": "产出符合目标，并留下可复核的验收证据。",
+    "Same failure repeats twice.": "同一失败重复两次。",
+    "No evidence changes across two iterations.": "连续两轮证据没有变化。",
+    "A review boundary is reached.": "触达需要人工审查的边界。",
+    "The verifier is unavailable or ambiguous.": "验收信号不可用或结论不清。",
     "Same visible failure repeats twice.": "同一可见问题重复出现两次。",
     "No new screenshot, console, network, or i18n evidence appears across two iterations.": "连续两轮没有新的截图、控制台、网络或 i18n 证据。",
     "The browser verifier or dev server is unavailable.": "浏览器验证器或开发服务器不可用。",
@@ -181,6 +195,9 @@ ZH_START_CARD_TEXT = {
     "translation tone or terminology decisions": "翻译语气或术语决策",
     "route behavior changes": "路由行为变更",
     "auth or data fixture changes": "认证或数据夹具变更",
+    "production action": "生产环境操作",
+    "destructive changes": "破坏性变更",
+    "large refactor": "大范围重构",
     "scope expansion": "范围扩张",
     "irreversible changes": "不可逆变更",
 }
@@ -203,16 +220,17 @@ def first_cycle_card(design: dict) -> str:
     max_items = managed_loop["max_items_per_cycle"]
     max_iterations = managed_loop["max_iterations_per_run"]
     verifier = start_card_text(first(contract["verifier_commands"], "Run the focused verifier."), language)
+    mode = start_card_text(level_to_mode(design["adoption_level"]), language)
     approval_separator = "、" if language == "zh" else ", "
     approvals = approval_separator.join(start_card_items(design["safety"]["requires_approval_for"], language))
 
     if language == "zh":
         return "\n".join(
             [
-                f"1. Clarify：读取 `STATE.json`、当前目标、项目规则和输入；本轮最多选择 {max_items} 个事项。",
-                f"2. Act：只在 `{level_to_mode(design['adoption_level'])}` 边界内处理有直接证据支撑的事项。",
-                f"3. Verify：{verifier}",
-                f"4. Deliver / Stop：更新 `STATE.json`；达到 {max_iterations} 轮、重复无进展、触达审查边界，或需要 {approvals} 时返回。",
+                f"1. 确认：读取 `STATE.json`、当前目标、项目规则和输入；本轮最多选择 {max_items} 个事项。",
+                f"2. 执行：只在“{mode}”边界内处理有直接证据支撑的事项。",
+                f"3. 验收：{verifier}",
+                f"4. 交还：更新 `STATE.json`；达到 {max_iterations} 轮、重复无进展、触达审查边界，或需要{approvals}时返回。",
             ]
         )
 
@@ -555,7 +573,7 @@ def build_design(args: argparse.Namespace) -> dict:
     state_file = "STATE.json"
     approval_boundary = list(dict.fromkeys(profile["approval"] + ["scope expansion", "irreversible changes"]))
     success_criteria = args.success_criteria or profile["verification"]
-    verifier_commands = args.verifier or ["Run the focused project verifier identified during the Decide step."]
+    verifier_commands = args.verifier or profile["verification"]
     reject_conditions = profile.get(
         "reject_conditions",
         [
@@ -677,9 +695,14 @@ def build_state(design: dict) -> dict:
         "approval_boundary": design["safety"]["requires_approval_for"],
         "items": [],
         "attempts": [],
+        "evidence_delta": [],
         "failure_signatures": [],
         "progress_metrics": [],
         "human_queue": [],
+        "budgets": {
+            "max_items_per_cycle": managed_loop["max_items_per_cycle"],
+            "max_iterations_per_run": managed_loop["max_iterations_per_run"],
+        },
         "next_cursor": None,
         "last_status": None,
         "last_exit_status": None,
@@ -700,13 +723,20 @@ def render_goal(design: dict) -> str:
     exit_contract = managed_loop["loop_exit_contract"]
     mode = level_to_mode(design["adoption_level"])
     language = design_language(design)
+    mode_display = start_card_text(mode, language)
+    team_display = start_card_text(design["team_mode"], language)
     intro = (
-        "这是一份 SixLoops 运行包。先按 Start Card 跑第一轮，细节和退出协议保留在后面。"
+        "先看这张执行合同。确认后，agent 按 `RUN.md` 运行，按 `VERIFY.md` 验收，并在触达边界时返回审查。"
         if language == "zh"
-        else "Use this as a SixLoops run packet. Start with the card below; keep the full protocol for details."
+        else "Start with this execution contract. After confirmation, the agent follows `RUN.md`, verifies with `VERIFY.md`, and returns at review boundaries."
     )
+    contract_label = "执行合同" if language == "zh" else "Execution Contract"
+    reply_label = "推荐回复" if language == "zh" else "Recommended reply"
+    reply_text = "开始执行" if language == "zh" else "start"
+    mode_label = "运行模式" if language == "zh" else "Mode"
+    team_label = "协作方式" if language == "zh" else "Team mode"
     goal_label = "目标" if language == "zh" else "Goal"
-    first_cycle_label = "第一轮" if language == "zh" else "First cycle"
+    will_do_label = "我会做" if language == "zh" else "I will do"
     verify_label = "验证方式" if language == "zh" else "Verifier"
     stop_label = "停止/返回审查" if language == "zh" else "Stop / return for review"
     ask_label = "返回审查前需要批准" if language == "zh" else "Ask before"
@@ -714,17 +744,17 @@ def render_goal(design: dict) -> str:
 
 {intro}
 
-## Start Card
+## {contract_label}
 
-- Mode: `{mode}`
-- Internal level: `{design["adoption_level"]}`
-- Team mode: `{design["team_mode"]}`
+- {reply_label}: `{reply_text}`
+- {mode_label}: {mode_display}
+- {team_label}: {team_display}
 
 {goal_label}:
 
 {design["goal"]}
 
-{first_cycle_label}:
+{will_do_label}:
 
 {first_cycle_card(design)}
 
@@ -875,13 +905,18 @@ def render_handoff(design: dict, artifact_dir: Path) -> str:
     contract = managed_loop["completion_contract"]
     mode = level_to_mode(design["adoption_level"])
     language = design_language(design)
+    mode_display = start_card_text(mode, language)
+    team_display = start_card_text(design["team_mode"], language)
     intro = (
-        "这个目录是一份 goal-ready SixLoops 设计。先看 Start Card，再按 `GOAL.md` 的完整协议执行。"
+        "这个目录是一份可执行 loop harness。先看 `GOAL.md` 的执行合同，再按 `RUN.md` 运行、按 `VERIFY.md` 验收。"
         if language == "zh"
-        else "This folder contains a goal-ready SixLoops design. Start with the card below, then use `GOAL.md` for the full protocol."
+        else "This folder contains an executable loop harness. Start with the `GOAL.md` execution contract, then run with `RUN.md` and verify with `VERIFY.md`."
     )
+    contract_label = "执行合同" if language == "zh" else "Execution Contract"
+    mode_label = "运行模式" if language == "zh" else "Mode"
+    team_label = "协作方式" if language == "zh" else "Team mode"
     goal_label = "目标" if language == "zh" else "Goal"
-    first_cycle_label = "第一轮" if language == "zh" else "First cycle"
+    will_do_label = "我会做" if language == "zh" else "I will do"
     verify_label = "验证方式" if language == "zh" else "Verifier"
     stop_label = "停止/返回审查" if language == "zh" else "Stop / return for review"
     ask_label = "返回审查前需要批准" if language == "zh" else "Ask before"
@@ -889,17 +924,16 @@ def render_handoff(design: dict, artifact_dir: Path) -> str:
 
 {intro}
 
-## Start Card
+## {contract_label}
 
-- Mode: `{mode}`
-- Internal level: `{design["adoption_level"]}`
-- Team mode: `{design["team_mode"]}`
+- {mode_label}: {mode_display}
+- {team_label}: {team_display}
 
 {goal_label}:
 
 {design["goal"]}
 
-{first_cycle_label}:
+{will_do_label}:
 
 {first_cycle_card(design)}
 
@@ -925,8 +959,9 @@ def render_handoff(design: dict, artifact_dir: Path) -> str:
 ## Start Here
 
 1. Read `GOAL.md`.
-2. If team tools are available and team mode is `subagent-team`, use `TEAM.md` to split planner, maker, checker, verifier, and integrator roles.
-3. Keep `STATE.json` beside the run and update it before stopping.
+2. Read `RUN.md` and `VERIFY.md`.
+3. If team tools are available and team mode is `subagent-team`, use `TEAM.md` to split planner, maker, checker, verifier, and integrator roles.
+4. Keep `STATE.json` beside the run and update it before stopping.
 
 ## Exit Contract
 
@@ -958,10 +993,153 @@ human acceptance, next adjustment, and demotion recommendation in `STATE.json`.
 ## Files
 
 - `{artifact_dir / "GOAL.md"}`
-- `{artifact_dir / "TEAM.md"}`
 - `{artifact_dir / "STATE.json"}`
+- `{artifact_dir / "RUN.md"}`
+- `{artifact_dir / "VERIFY.md"}`
+- `{artifact_dir / "TEAM.md"}`
 - `{artifact_dir / "goal-loop-design.json"}`
 - `{artifact_dir / "AGENTS-snippet.md"}`
+"""
+
+
+def render_run(design: dict) -> str:
+    managed_loop = design["managed_loop"]
+    exit_contract = managed_loop["loop_exit_contract"]
+    language = design_language(design)
+    if language == "zh":
+        title = "运行协议"
+        read_first = "先读"
+        cycle = "循环步骤"
+        exit_rule = "退出规则"
+        continue_only_if = "继续下一轮的条件"
+        stop_conditions = "停止条件"
+        state_update = "停止前更新状态"
+        status_intro = "停止前只能返回一个状态："
+        state_intro = "返回前，更新 `STATE.json`："
+        status_lines = [
+            "`CONTINUE`：只有下一轮能产生新的验收证据时才继续。",
+            "`DONE`：只有成功标准通过并留下证据时才完成。",
+            "`NEEDS_HUMAN`：需要审查、批准、缺失上下文或更高权限动作时返回。",
+            "`BLOCKED`：同一失败重复两次、证据不再变化或验收器不可用时阻塞。",
+            "`BUDGET_STOPPED`：事项、轮次、时间、token 或成本上限到达时停止。",
+        ]
+        state_lines = ["选中的事项", "采取的动作", "验收证据", "证据变化", "失败签名（如有）", "最终状态", "下次位置或待用户确认事项"]
+    else:
+        title = "Run Protocol"
+        read_first = "Read First"
+        cycle = "Cycle"
+        exit_rule = "Exit Rule"
+        continue_only_if = "Continue Only If"
+        stop_conditions = "Stop Conditions"
+        state_update = "State Update"
+        status_intro = "Return exactly one status before stopping:"
+        state_intro = "Before returning, update `STATE.json` with:"
+        status_lines = [
+            "`CONTINUE`: only when the next cycle can produce new verifier evidence.",
+            "`DONE`: only when success criteria pass with required evidence.",
+            "`NEEDS_HUMAN`: when review, approval, missing context, or higher-impact action is required.",
+            "`BLOCKED`: when the same failure repeats twice, evidence stops changing, or the verifier is unavailable.",
+            "`BUDGET_STOPPED`: when an item, iteration, time, token, or cost cap is reached.",
+        ]
+        state_lines = [
+            "selected items",
+            "action taken",
+            "verifier evidence",
+            "evidence_delta",
+            "failure signature when any",
+            "final status",
+            "next_cursor or human_queue",
+        ]
+    return f"""# {title}: {design["name"]}
+
+## {read_first}
+
+1. Read `GOAL.md`.
+2. Read `STATE.json`.
+3. Read `VERIFY.md`.
+4. Choose at most `{managed_loop["max_items_per_cycle"]}` item(s) for this cycle.
+
+## {cycle}
+
+{numbered(managed_loop["cycle_steps"])}
+
+## {exit_rule}
+
+{status_intro}
+
+{bullet(status_lines)}
+
+## {continue_only_if}
+
+{bullet(exit_contract["continue_only_if"])}
+
+## {stop_conditions}
+
+{bullet(start_card_items(managed_loop["completion_contract"]["reject_conditions"], language))}
+
+## {state_update}
+
+{state_intro}
+
+{bullet(state_lines)}
+"""
+
+
+def render_verify(design: dict) -> str:
+    managed_loop = design["managed_loop"]
+    contract = managed_loop["completion_contract"]
+    language = design_language(design)
+    if language == "zh":
+        title = "验收协议"
+        success = "成功标准"
+        verifier = "验收方式"
+        pass_evidence = "必须留下的通过证据"
+        failure = "失败分类"
+        review = "审查边界"
+        failure_lines = [
+            "验收信号缺失或不可用",
+            "同一失败重复两次",
+            "连续两轮没有证据变化",
+            "结果需要产品、设计、发布、安全、数据、成本或架构判断",
+            "动作需要比当前模式更高的批准",
+        ]
+        review_text = "审查可以拒绝风险、范围或判断；审查不能替代验收证据，也不能单独宣布 `DONE`。"
+    else:
+        title = "Verification Protocol"
+        success = "Success Criteria"
+        verifier = "Verifier"
+        pass_evidence = "Required Pass Evidence"
+        failure = "Failure Classes"
+        review = "Review Boundary"
+        failure_lines = [
+            "verifier missing or unavailable",
+            "same failure repeated twice",
+            "no evidence_delta across two cycles",
+            "output needs product, design, release, security, data, cost, or architecture judgment",
+            "action needs stronger approval than the current mode allows",
+        ]
+        review_text = "Review can reject risk, scope, or judgment. Review cannot replace verifier evidence or mark `DONE`."
+    return f"""# {title}: {design["name"]}
+
+## {success}
+
+{bullet(start_card_items(contract["success_criteria"], language))}
+
+## {verifier}
+
+{bullet(start_card_items(contract["verifier_commands"], language))}
+
+## {pass_evidence}
+
+{bullet(start_card_items(contract["pass_evidence_required"], language))}
+
+## {failure}
+
+{bullet(failure_lines)}
+
+## {review}
+
+{review_text}
 """
 
 
@@ -1010,6 +1188,8 @@ def write_artifacts(design: dict, out_root: Path, overwrite: bool) -> Path:
             "goal": str(artifact_dir / "GOAL.md"),
             "team": str(artifact_dir / "TEAM.md"),
             "state": str(artifact_dir / "STATE.json"),
+            "run": str(artifact_dir / "RUN.md"),
+            "verify": str(artifact_dir / "VERIFY.md"),
             "design": str(artifact_dir / "goal-loop-design.json"),
             "handoff": str(artifact_dir / "HANDOFF.md"),
             "agents_snippet": str(artifact_dir / "AGENTS-snippet.md"),
@@ -1018,6 +1198,8 @@ def write_artifacts(design: dict, out_root: Path, overwrite: bool) -> Path:
     write_json(artifact_dir / "goal-loop-design.json", design, overwrite)
     write_json(artifact_dir / "STATE.json", build_state(design), overwrite)
     write_text(artifact_dir / "GOAL.md", render_goal(design), overwrite)
+    write_text(artifact_dir / "RUN.md", render_run(design), overwrite)
+    write_text(artifact_dir / "VERIFY.md", render_verify(design), overwrite)
     write_text(artifact_dir / "TEAM.md", render_team(design), overwrite)
     write_text(artifact_dir / "HANDOFF.md", render_handoff(design, artifact_dir), overwrite)
     write_text(artifact_dir / "AGENTS-snippet.md", render_agents_snippet(design), overwrite)
@@ -1050,8 +1232,10 @@ def main() -> int:
     artifact_dir = write_artifacts(design, Path(args.out_dir), args.overwrite)
     print(f"Created goal loop design: {artifact_dir}")
     print(f"- {artifact_dir / 'GOAL.md'}")
-    print(f"- {artifact_dir / 'TEAM.md'}")
     print(f"- {artifact_dir / 'STATE.json'}")
+    print(f"- {artifact_dir / 'RUN.md'}")
+    print(f"- {artifact_dir / 'VERIFY.md'}")
+    print(f"- {artifact_dir / 'TEAM.md'}")
     print(f"- {artifact_dir / 'goal-loop-design.json'}")
     return 0
 

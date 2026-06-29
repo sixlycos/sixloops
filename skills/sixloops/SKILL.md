@@ -89,14 +89,14 @@ Implementation code lives under `scripts/sixloops/` and is grouped into
 Direct goal entry:
 
 1. Run `scripts/design_goal_loop.py --goal "<user goal>" --domain auto --team-mode auto --level auto --out-dir <artifact-dir>`.
-2. Read the generated `GOAL.md`, `STATE.json`, `HANDOFF.md`, `TEAM.md`, and `goal-loop-design.json`.
-3. Present the start mode, verifier, state file, stop conditions, and review boundary before any execution.
+2. Read the generated `GOAL.md`, `STATE.json`, `RUN.md`, `VERIFY.md`, `HANDOFF.md`, `TEAM.md`, and `goal-loop-design.json`.
+3. Present the `GOAL.md` execution contract first: objective, allowed work, verifier, stop boundary, and the one recommended confirmation reply.
 
 Transcript or project-evidence pipeline entry:
 
 1. Run `scripts/sixloops.py --input <file-or-dir>`.
 2. If it stops with a pending scope, ask the user to confirm files, roles, snippet policy, and output visibility.
-3. Rerun with `--approve` or `--scope <approved-scope.json>` to produce `analysis-packets.jsonl`, `analysis-packets-index.json`, and `analysis-run.json`.
+3. Rerun with `--approve` or `--scope <approved-scope.json>` to produce `analysis-packets.jsonl`, `analysis-packets-index.json`, `evidence-ledger.json`, and `analysis-run.json`.
 4. Read `analysis-run.json`, `references/semantic-analysis-prompt.md`, `schemas/semantic-candidates.schema.json`, and the selected packets.
 5. Use host AI semantic judgment to write `semantic-candidates.json`; do not use regex matching as the primary product path.
 6. Continue with the `analysis-run.json` `continue_command`, or rerun `scripts/sixloops.py --input <file-or-dir> --scope <approved-scope.json> --semantic-candidates <semantic-candidates.json>`.
@@ -113,15 +113,18 @@ Low-level deterministic scripts remain available:
 6. `scripts/render_artifacts.py --candidates <candidates.json> --out-dir <artifact-dir>`
 7. `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --mode "low-risk edit" --out-dir <adoption-dir>`
 
-Only pass explicit transcript files or narrow directories. Keep raw and intermediate outputs under
-`.sixloops/private/` or `.sixloops/tmp/` unless the user asks for shareable artifacts.
+Only pass explicit transcript files or narrow directories. By default, full redacted transcript copies
+are deleted after selected packets are built; pass `--keep-private` only when the user wants a local
+audit trail. Keep raw and intermediate outputs under `.sixloops/private/` or `.sixloops/tmp/` unless
+the user asks for shareable artifacts.
 Use the host agent's user-question capability when available; otherwise ask directly in chat before
 running `prepare_analysis_scope.py --approve`. Do not approve a scope silently for real transcripts, but avoid repeated approval prompts after the scope is confirmed.
 For synthetic evals only, `--approve` may be used non-interactively.
 The extractor processes JSONL line by line after redaction and must not load whole transcript
 files into memory for normal analysis.
-For broad transcript sets, pass `--max-packets`, `--target-token-budget`, and optional
-`--role-quota role=count` so semantic review sees the highest-value user/tool packets first.
+The transcript entrypoint defaults to a bounded packet budget. For full audit runs, pass
+`--target-token-budget 0 --keep-private`; for narrower runs, pass `--max-packets`,
+`--target-token-budget`, and optional `--role-quota role=count`.
 
 Use `--rule-fallback` only for offline synthetic evals, fixture development, or when the host AI is unavailable. It is not the main product path.
 

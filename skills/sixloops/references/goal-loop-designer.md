@@ -29,6 +29,7 @@ Every goal loop must include:
 - Stop conditions and no-progress policy.
 - Loop exit contract with `CONTINUE`, `DONE`, review-needed, `BLOCKED`, and `BUDGET_STOPPED` boundaries. Internal JSON may still use `NEEDS_HUMAN`.
 - State file and resume policy.
+- Run protocol and verifier protocol.
 - Review boundary and the mode required for higher-impact actions.
 - Optional subagent team roles.
 
@@ -88,8 +89,10 @@ python skills/sixloops/scripts/design_goal_loop.py \
 The script writes:
 
 - `GOAL.md`
-- `TEAM.md`
 - `STATE.json`
+- `RUN.md`
+- `VERIFY.md`
+- `TEAM.md`
 - `HANDOFF.md`
 - `AGENTS-snippet.md`
 - `goal-loop-design.json`
@@ -99,7 +102,7 @@ Use `--domain frontend|backend|fullstack|architecture|review|delivery|maintenanc
 
 Use `--team-mode subagent-team` only when team decomposition is useful. Use `--team-mode phased` when the same agent should run the roles sequentially.
 
-Before presenting the result, check `loop-exit-contract.md`. The generated loop must explain when another cycle will add verified certainty and when it must return to the human.
+Before presenting the result, check `loop-exit-contract.md`. The generated loop must explain when another cycle will add verified certainty and when it must return to the human. User-facing presentation should lead with the `GOAL.md` execution contract and one recommended confirmation reply; `RUN.md`, `VERIFY.md`, and `STATE.json` are agent-facing harness files.
 
 ## Output First
 

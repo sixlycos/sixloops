@@ -226,6 +226,10 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
             command = analysis_run.get("continue_command", [])
             if "--semantic-candidates" not in command:
                 failures.append("analysis-run continue_command must include --semantic-candidates")
+            if "--target-token-budget" not in command:
+                failures.append("analysis-run continue_command must preserve --target-token-budget")
+            if not analysis_run.get("evidence_ledger_path"):
+                failures.append("analysis-run missing evidence_ledger_path")
 
     for candidate_id, expected_value in expected.get("require_can_delegate", {}).items():
         actual = decision_cards.get(candidate_id, {}).get("can_delegate")

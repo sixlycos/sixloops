@@ -11,7 +11,7 @@
       "require_exit_contract": true,
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },
   {
@@ -26,7 +26,7 @@
       "require_exit_contract": true,
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },
   {
@@ -41,7 +41,7 @@
       "require_exit_contract": true,
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },
   {
@@ -56,7 +56,7 @@
       "require_exit_contract": true,
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },
   {
@@ -71,7 +71,7 @@
       "require_exit_contract": true,
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },
   {
@@ -86,7 +86,7 @@
       "require_exit_contract": true,
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },
   {
@@ -103,7 +103,7 @@
       "require_handoff_exit_contract": true,
       "require_rationale": true,
       "forbid_done_blocker": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },
   {
@@ -118,7 +118,7 @@
       "require_exit_contract": true,
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+      "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   }
 ]
