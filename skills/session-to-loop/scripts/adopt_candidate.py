@@ -111,6 +111,37 @@ def exit_contract(candidate: dict) -> dict:
     )
 
 
+def first_text(*values: object) -> str:
+    for value in values:
+        items = strings(value)
+        if items:
+            return items[0]
+    return ""
+
+
+def rationale(candidate: dict, managed_loop: dict, level: str) -> dict:
+    safety = candidate.get("safety") if isinstance(candidate.get("safety"), dict) else {}
+    mode = level_to_mode(level)
+    return {
+        "why_this_loop": first_text(
+            candidate.get("why_this_loop"),
+            candidate.get("why_this_mechanism"),
+            candidate.get("summary"),
+            managed_loop.get("objective"),
+            "This candidate needs bounded cycles with verifier evidence and state.",
+        ),
+        "why_not_smaller": first_text(
+            candidate.get("why_not_smaller"),
+            "A smaller rule or checklist would not preserve state, verifier evidence, failure signatures, and the next cursor across runs.",
+        ),
+        "why_not_more_autonomous": first_text(
+            candidate.get("why_not_more_autonomous"),
+            f"Start as {mode}; stronger autonomy needs accepted verifier evidence and the recorded human gates.",
+        ),
+        "human_gates": strings(safety.get("requires_approval_for")),
+    }
+
+
 def build_state(candidate: dict, level: str, artifact_dir: Path) -> dict:
     managed_loop, contract = candidate_contract(candidate)
     safety = candidate.get("safety") if isinstance(candidate.get("safety"), dict) else {}
@@ -166,6 +197,7 @@ def render_goal(candidate: dict, level: str) -> str:
     max_items = managed_loop.get("max_items_per_cycle", 3)
     max_iterations = managed_loop.get("max_iterations_per_run", 8)
     mode = level_to_mode(level)
+    reasons = rationale(candidate, managed_loop, level)
     return f"""# {candidate.get("name", candidate_id)} Run Packet
 
 Use this after the user starts `{candidate_id}` as `{mode}`.
@@ -173,6 +205,12 @@ Use this after the user starts `{candidate_id}` as `{mode}`.
 ## Objective
 
 {managed_loop.get("objective") or candidate.get("summary", "Run the loop.")}
+
+## Why This Loop
+
+- Why this loop: {reasons["why_this_loop"]}
+- Why not smaller: {reasons["why_not_smaller"]}
+- Why not more autonomous: {reasons["why_not_more_autonomous"]}
 
 ## Start Mode
 
@@ -259,6 +297,7 @@ def render_handoff(candidate: dict, level: str, artifact_dir: Path) -> str:
     exits = exit_contract(candidate)
     candidate_id = str(candidate.get("id"))
     mode = level_to_mode(level)
+    reasons = rationale(candidate, managed_loop, level)
     return f"""# {candidate.get("name", candidate_id)} Run Handoff
 
 This packet was generated after starting `{candidate_id}` as `{mode}`.
@@ -269,7 +308,9 @@ Paste or attach `GOAL.md` as the delegated goal. Keep `STATE.json` beside it and
 
 ## Why This Exists
 
-{candidate.get("summary", "No summary recorded.")}
+- Why this loop: {reasons["why_this_loop"]}
+- Why not smaller: {reasons["why_not_smaller"]}
+- Why not more autonomous: {reasons["why_not_more_autonomous"]}
 
 ## Trigger
 

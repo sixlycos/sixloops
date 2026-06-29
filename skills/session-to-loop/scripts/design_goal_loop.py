@@ -200,13 +200,19 @@ HIGH_IMPACT_GOAL_TERMS = (
 )
 
 
+def has_enough_goal_detail(goal: str) -> bool:
+    ascii_words = re.findall(r"[A-Za-z0-9_]+", goal)
+    cjk_chars = re.findall(r"[\u4e00-\u9fff]", goal)
+    return len(ascii_words) >= 6 or len(cjk_chars) >= 12
+
+
 def resolve_level(goal: str, requested: str) -> str:
     if requested != "auto":
         return requested
     lowered = goal.lower()
     if any(term in lowered for term in HIGH_IMPACT_GOAL_TERMS):
         return "read-only"
-    if len(re.findall(r"\w+", goal)) < 6:
+    if not has_enough_goal_detail(goal):
         return "read-only"
     edit_terms = re.search(r"\b(apply|fix|patch|implement|change)\b", lowered)
     if edit_terms or any(term in lowered for term in ("修", "改", "实现", "尝试修复")):
@@ -375,12 +381,36 @@ def base_profile(domain: str) -> dict:
                 "Act only inside the approved scope.",
                 "Verify, update state, and stop when done, blocked, or budget is reached.",
             ],
-            "verification": ["The agreed success criteria pass or a blocker is recorded."],
+            "verification": ["The requested outcome is produced with required verifier evidence."],
             "approval": ["irreversible changes", "production action", "scope expansion"],
             "team": ["planner", "maker", "verifier", "reviewer", "integrator"],
         },
     }
     return profiles.get(domain, profiles["general"])
+
+
+def build_rationale(goal: str, domain: str, profile: dict, level: str, team_mode: str) -> dict:
+    source_summary = ", ".join(profile["discovery_sources"][:3])
+    trigger_summary = "; ".join(item.rstrip(".") for item in profile["trigger"][:2])
+    mode = level_to_mode(level)
+    return {
+        "why_this_loop": (
+            f"This goal is loop-shaped because each cycle must discover inputs such as {source_summary}; "
+            "then select only a few high-value items, verify the result, update state, and stop at explicit review boundaries."
+        ),
+        "why_not_smaller": (
+            "A checklist can remind an agent what to do, but it cannot preserve item state, verifier evidence, "
+            "failure signatures, and the next cursor across repeated runs."
+        ),
+        "why_not_more_autonomous": (
+            f"Start as {mode} because the trigger is {trigger_summary or 'user delegation'}; higher-impact actions "
+            "still need the recorded human gates before scope expansion, irreversible changes, or production work."
+        ),
+        "fit_summary": (
+            f"Domain `{domain}` with `{team_mode}` team mode and `{level}` internal level; promote only after accepted "
+            "runs produce reliable verifier evidence."
+        ),
+    }
 
 
 def role_prompt(role_id: str, goal: str, domain: str) -> dict:
@@ -450,6 +480,7 @@ def build_design(args: argparse.Namespace) -> dict:
     loop_id = args.loop_id or slug(f"{domain}-{compact(goal, 40)}-{short_hash(goal)}")
     name = args.name or f"{profile['archetype'].replace('-', ' ').title()} Loop"
     level = resolve_level(goal, args.level)
+    rationale = build_rationale(goal, domain, profile, level, team_mode)
     max_items = max(1, args.max_items)
     max_iterations = max(1, args.max_iterations)
     team_roles = [role_prompt(role_id, goal, domain) for role_id in profile["team"]]
@@ -527,6 +558,7 @@ def build_design(args: argparse.Namespace) -> dict:
         "adoption_level": level,
         "team_mode": team_mode,
         "project_root": str(Path(args.project_root)),
+        **rationale,
         "managed_loop": managed_loop,
         "subagent_team": {
             "mode": team_mode,
@@ -606,6 +638,13 @@ Use this as a SixLoops run packet.
 ## Objective
 
 {design["goal"]}
+
+## Why This Loop
+
+- Why this loop: {design["why_this_loop"]}
+- Why not smaller: {design["why_not_smaller"]}
+- Why not more autonomous: {design["why_not_more_autonomous"]}
+- Fit summary: {design["fit_summary"]}
 
 ## Loop Shape
 
@@ -730,6 +769,13 @@ def render_handoff(design: dict, artifact_dir: Path) -> str:
     return f"""# {design["name"]} Handoff
 
 This folder contains a goal-ready SixLoops design generated from a user objective.
+
+## Why This Loop
+
+- Why this loop: {design["why_this_loop"]}
+- Why not smaller: {design["why_not_smaller"]}
+- Why not more autonomous: {design["why_not_more_autonomous"]}
+- Fit summary: {design["fit_summary"]}
 
 ## Start Here
 

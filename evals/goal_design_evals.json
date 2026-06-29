@@ -90,6 +90,23 @@
     }
   },
   {
+    "id": "chinese-loop-discovery",
+    "goal": "分析副业对象里面可以 loop 的东西，找出可以持续自动化推进的事项，并给出第一轮可执行计划。",
+    "expected": {
+      "domain": "general",
+      "team_mode": "phased",
+      "adoption_level": "goal-loop",
+      "roles": ["planner", "maker", "verifier", "reviewer", "integrator"],
+      "approval_for": ["scope expansion", "irreversible changes"],
+      "require_exit_contract": true,
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "require_rationale": true,
+      "forbid_done_blocker": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+    }
+  },
+  {
     "id": "vague-goal-defaults-readonly",
     "goal": "Make it better.",
     "expected": {

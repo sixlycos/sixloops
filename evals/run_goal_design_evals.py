@@ -133,6 +133,20 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
             if "Learning Check" not in text and "First Run Retro" not in text:
                 failures.append(f"{label} missing learning check or first run retro")
 
+    if expected.get("require_rationale"):
+        for key in ("why_this_loop", "why_not_smaller", "why_not_more_autonomous", "fit_summary"):
+            if not design.get(key):
+                failures.append(f"missing rationale field {key}")
+        goal = (design_dir / "GOAL.md").read_text(encoding="utf-8", errors="ignore")
+        for marker in ("## Why This Loop", "Why this loop:", "Why not smaller:", "Why not more autonomous:"):
+            if marker not in goal:
+                failures.append(f"GOAL.md missing rationale marker {marker!r}")
+
+    if expected.get("forbid_done_blocker"):
+        done_text = " ".join(design.get("managed_loop", {}).get("loop_exit_contract", {}).get("done_when", [])).lower()
+        if "or a blocker" in done_text or "blocker is recorded" in done_text:
+            failures.append("DONE contract treats blocker recording as success")
+
     rendered = all_text(design_dir)
     if "{{" in rendered or "}}" in rendered:
         failures.append("unrendered template placeholder found in goal-design artifacts")
