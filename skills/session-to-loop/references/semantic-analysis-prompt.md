@@ -52,6 +52,9 @@ For each candidate, decide:
   `approval-gate`, or no automation.
 - Whether loop eligibility is justified: trigger or cadence, observable state, prioritization,
   repeatable actions, verification, state persistence, resume policy, stop conditions, and safety gate.
+- Whether the fast loop check passes: recurring cadence, objective rejection gate, reproducible
+  environment, hard budget/iteration/time stop, and human review before merge, deploy, dependency,
+  credential, schema, data, payment, or production-impacting action.
 - Which heartbeat is cheapest and sufficient: `session`, `goal`, `scheduled`, or `event`.
 - Which adoption level should be recommended first: `read-only`, `goal-loop`,
   `isolated-draft`, `verified-pr-draft`, `scheduled-readonly`, or `scheduled-draft`.
@@ -73,6 +76,10 @@ verification, stop condition, budget cap, or human checkpoint, recommend `skill`
 instead of `loop`.
 
 If a candidate cannot say when to continue and when to return to the human, recommend a smaller mechanism. A loop is a controlled state machine, not a long prompt.
+
+If the work does not repeat, cannot be rejected by objective evidence, cannot be reproduced by the
+agent, lacks a hard stop, or depends on high-impact action without a human gate, do not recommend
+a managed loop.
 
 If the work is process-shaped and has no meaningful agent decision, recommend a script, hook, or
 traditional automation instead of a loop. If the work is tool-assisted but still needs frequent human

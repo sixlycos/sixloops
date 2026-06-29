@@ -54,6 +54,35 @@ Classify the work before recommending a loop:
 
 Do not recommend a managed loop just because a task repeats. Recommend it when the repeated work needs an agent to observe, decide, act, verify, and resume.
 
+## 30-Second Loop Check
+
+Before proposing a `loop`, verify the candidate passes all five checks:
+
+- Recurrence: it happens at least weekly, or multiple times inside a bounded workflow that will keep recurring.
+- Objective rejection: tests, type checks, builds, lint, screenshots, logs, assertions, or a tight rubric can reject bad output.
+- Reproduction environment: the agent can run the changed code, inspect failures, and get fresh evidence.
+- Hard stop: iteration, time, token, item, or cost cap is explicit.
+- Human review gate: merge, deploy, dependency, credential, schema, data, payment, and production-impacting actions return to a person.
+
+If one check fails, keep the recommendation as a prompt, rule, skill, hook, checklist, or approval gate.
+
+Good first loops:
+
+- CI failure triage.
+- Dependency update PR drafts.
+- Lint-and-fix passes.
+- Flaky test reproduction.
+- Issue-to-PR drafts when the test suite is strong.
+- Frontend browser/route audits when screenshots or scripted checks can reject regressions.
+
+Bad first loops:
+
+- Architecture rewrites.
+- Auth, payments, credentials, or security-sensitive flows.
+- Production deploys or migrations.
+- Vague product, strategy, or design judgment.
+- Work where "done" is mostly a human taste or approval call.
+
 ## Heartbeat Options
 
 Every loop needs a heartbeat. Pick the cheapest heartbeat that fits the risk:
@@ -64,6 +93,24 @@ Every loop needs a heartbeat. Pick the cheapest heartbeat that fits the risk:
 - Event: run when CI fails, a PR opens, a changelog changes, or an issue arrives. Good when the trigger is specific and observable.
 
 Frequency is the main cost driver. Lower frequency often saves more than shorter prompts.
+
+## Minimum Viable Loop
+
+Build the smallest loop that can prove value:
+
+- One automation or trigger: session, goal, scheduled, or event.
+- One skill or checklist: reusable project knowledge the agent rereads.
+- One state file: durable record of what was tried, what changed, what failed, and what is next.
+- One gate: objective verifier that can fail the work.
+
+Order matters:
+
+1. Make one manual run reliable.
+2. Save the reusable instructions as a skill or checklist.
+3. Add loop mechanics: state, verifier, hard cap, and human gate.
+4. Schedule only after reviewed outputs are consistently accepted.
+
+Use accepted change rate as the product metric. If fewer than half of outputs survive review, shrink the scope, improve the gate, or demote the loop.
 
 ## Adoption Ladder
 
@@ -154,10 +201,13 @@ If any item is missing, start lower on the adoption ladder.
 ## Common Loop Failures
 
 - Nodding loop: verification is skipped and the maker approves its own work.
+- Early-success loop: the agent declares done before the verifier proves it.
 - Amnesiac loop: persistence is skipped and every run starts from zero.
 - Manual loop: scheduling is skipped and the human still has to remember to run it.
 - Blind loop: discovery is skipped and the human still chooses every task.
 - Tangled loop: handoff or isolation is skipped and parallel agents collide.
+- Drift loop: long runs lose standing constraints unless they reread the goal, state, and project rules.
+- Permission-creep loop: a read-only loop gains write or production permissions without a new approval gate.
 
 Use these names when rejecting or downgrading a candidate. They are clearer than vague warnings like "needs more safety."
 

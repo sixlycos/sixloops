@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "loop_id": "ci-babysitter",
+  "name": "CI Babysitter Loop",
+  "status": "pending",
+  "adoption_level": "goal-loop",
+  "created_at": "2026-06-29T02:42:10.665897+00:00",
+  "objective_hash": "aa0ed75a9bfeb253",
+  "objective": "Keep CI failures moving toward a verified fix without guessing.",
+  "heartbeat": "goal",
+  "state_schema": {
+    "items": "Tracked work items with status: inbox, active, blocked, done.",
+    "attempts": "Attempt log with action, verification result, and timestamp.",
+    "failures": "Failure signatures, repeat count, and blocker reason.",
+    "next_cursor": "Where the next run should resume.",
+    "human_decisions": "Approvals, rejections, or decisions that changed the loop boundary."
+  },
+  "success_criteria": [
+    "Relevant local test passes.",
+    "CI becomes green or is clearly blocked."
+  ],
+  "reject_conditions": [
+    "Same failure repeats twice.",
+    "Push or merge required."
+  ],
+  "loop_exit_contract": {
+    "continue_only_if": [
+      "Objective is unchanged.",
+      "Next action stays inside approved scope.",
+      "A verifier can reject bad output.",
+      "New evidence changed or is likely from the next verifier.",
+      "Fewer than 3 item(s) are active in this cycle.",
+      "Fewer than 8 iteration(s) have run."
+    ],
+    "done_when": [
+      "Relevant local test passes.",
+      "CI becomes green or is clearly blocked."
+    ],
+    "needs_human_when": [
+      "push is required.",
+      "merge is required."
+    ],
+    "blocked_when": [
+      "Same failure repeats twice.",
+      "Verifier is unavailable or ambiguous."
+    ],
+    "budget_stopped_when": [
+      "More than 3 item(s) would be required in one cycle.",
+      "8 iteration(s) are reached."
+    ],
+    "status_protocol": {
+      "CONTINUE": "Only when another cycle can increase verified certainty.",
+      "DONE": "Success criteria passed with required pass evidence; return for acceptance.",
+      "NEEDS_HUMAN": "Human judgment or explicit approval is required.",
+      "BLOCKED": "Reliable progress is not possible with current evidence or verifier.",
+      "BUDGET_STOPPED": "Item, iteration, time, token, or cost cap was reached."
+    }
+  },
+  "approval_boundary": [
+    "push",
+    "merge"
+  ],
+  "budget_caps": [],
+  "items": [],
+  "attempts": [],
+  "failure_signatures": [],
+  "progress_metrics": [],
+  "human_queue": [],
+  "next_cursor": null,
+  "last_status": null,
+  "last_exit_status": null,
+  "status_history": [],
+  "baseline_friction": null,
+  "post_run_result": null,
+  "saved_corrections": [],
+  "false_positive": [],
+  "human_acceptance": null,
+  "next_adjustment": null,
+  "demotion_recommendation": null,
+  "artifact_dir": ".session-to-loop\\tmp\\examples\\ci-babysitter\\adopted\\ci-babysitter"
+}

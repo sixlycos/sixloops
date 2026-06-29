@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "analysis_model": "ai-semantic-with-deterministic-guardrails-v1",
+  "scope_policy": {
+    "approved": true,
+    "allowed_roles": [
+      "user",
+      "tool"
+    ],
+    "allow_redacted_snippets": true,
+    "output_visibility": "private"
+  },
+  "source": {
+    "transcript_files": 1,
+    "records": 5,
+    "providers": {
+      "generic": 4
+    },
+    "source_types": {
+      "generic-jsonl": 4
+    }
+  },
+  "redaction": {
+    "enabled": true,
+    "redactions": 0
+  },
+  "artifact_visibility": "local-shareable-after-review",
+  "private_candidates": ".session-to-loop/private/candidates.json",
+  "candidates": [
+    {
+      "id": "ci-babysitter",
+      "name": "CI Babysitter Loop",
+      "summary": "Repeated user requests to inspect CI logs before patching and to avoid pushing before verification.",
+      "decision": "draft",
+      "mechanisms": [
+        "loop",
+        "skill"
+      ],
+      "confidence": "high",
+      "can_delegate": "yes",
+      "confirmation_options": [
+        "adopt ci-babysitter as read-only",
+        "adopt ci-babysitter as goal-loop",
+        "shrink ci-babysitter to skill",
+        "reject ci-babysitter"
+      ],
+      "control": {
+        "will_do": [
+          "Read the previous state file if it exists.",
+          "Inspect CI status, failed logs, and current git diff.",
+          "Pick at most 1-3 actionable failures by impact and confidence.",
+          "Attempt only low-risk local fixes with direct evidence.",
+          "Run focused verification and record the result."
+        ],
+        "must_ask_before": [
+          "push",
+          "merge"
+        ],
+        "verifies_with": [
+          "Run the focused project checks listed in verification."
+        ],
+        "stops_when": [
+          "Same failure repeats twice.",
+          "Push or merge required."
+        ]
+      },
+      "source_limitations": [
+        "The packet set may omit current project state or newer failures."
+      ]
+    }
+  ],
+  "artifact_safety": {
+    "scanner": "stdlib-context-entropy-plus-optional-tools",
+    "blocked": false,
+    "stdlib_findings": 0,
+    "optional_scanners": {
+      "available": {
+        "gitleaks": false,
+        "trufflehog": false
+      },
+      "executed": [],
+      "findings": 0,
+      "errors": 0
+    }
+  }
+}

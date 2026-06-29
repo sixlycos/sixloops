@@ -18,6 +18,7 @@ The user-facing product is a small set of project-specific loop proposals that t
 - When the user starts from a current goal instead of transcripts, design the goal loop directly; do not force transcript discovery.
 - Choose the smallest mechanism that would actually reduce repeated friction.
 - Reserve `loop` for managed goal loops that a user can delegate after one explicit approval.
+- Before recommending `loop`, run the fast loop check: repeated cadence, objective rejection gate, reproducible environment, hard stop, and human gate for high-impact actions.
 - Use subagent/team decomposition only when it improves planning, implementation, review, or verification; otherwise run the roles sequentially in the current agent.
 - Recommend no automation when a pattern is rare, unverifiable, unsafe, or mostly a human judgment call.
 - Ask once for analysis scope, then continue. Ask again only before expanding scope, exporting shareable snippets, or modifying project files.
@@ -118,6 +119,7 @@ Use `--rule-fallback` only for offline synthetic evals, fixture development, or 
 - Use a hook when the finding must run deterministically at a lifecycle point.
 - Use a loop when the finding can become a managed goal loop: objective, trigger or cadence, input discovery, prioritization, bounded actions, verification, state file, resume policy, and stop conditions.
 - Use a team loop when the goal benefits from separate planner, maker, checker, verifier, and integrator roles. Prefer subagents for independent review/verification when the host runtime supports them; otherwise run the same roles sequentially.
+- Start with one reliable manual run, then skill/checklist, then state/verifier/cap/gate, and only then scheduled or event automation.
 - Include a hard iteration cap for every loop. Without an iteration cap, recommend a skill or checklist instead.
 - Use a checklist when the finding is useful but not safe or deterministic enough to automate.
 - Use an approval gate when the finding involves deployment, deletion, schema migration, permissions, payments, or other high-impact actions.
@@ -140,4 +142,5 @@ Use `--rule-fallback` only for offline synthetic evals, fixture development, or 
 - For every `loop` candidate, include a goal-ready `managed_loop` spec that a future agent could run without repeated user prompting after initial approval.
 - For every goal-ready loop, include a `loop_exit_contract` that defines `CONTINUE`, `DONE`, `NEEDS_HUMAN`, `BLOCKED`, and `BUDGET_STOPPED` boundaries.
 - For every team loop, include a `TEAM.md`-style plan with role prompts, modification boundaries, required outputs, and integrator status protocol.
+- For every loop or team loop, include how success will be judged after adoption: accepted output rate, false positives, saved human corrections, and demotion trigger when review acceptance stays low.
 - Mark every candidate as `commit`, `draft`, `checklist-only`, `rule-only`, `needs-human`, or `reject`.

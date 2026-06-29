@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "loop_id": "frontend-after-frontend-route-or-i18n-changes-351d3f2380",
+  "name": "Frontend Verification Loop",
+  "status": "pending",
+  "adoption_level": "isolated-draft",
+  "created_at": "2026-06-29T02:43:48.913892+00:00",
+  "objective_hash": "9dd6b0c9c4",
+  "objective": "After frontend route or i18n changes, verify browser screenshots, fix low-risk UI regressions, and stop when product or visual judgment is needed.",
+  "domain": "frontend",
+  "team_mode": "phased",
+  "state_schema": {
+    "status": "pending, discovering, active, verifying, done, blocked, needs_human, budget_stopped",
+    "objective_hash": "Stable hash of objective and success criteria.",
+    "items": "Tracked work items with id, status, evidence, owner_role, verifier, and risk.",
+    "attempts": "Attempt log with role, action, changed evidence, verification result, and timestamp.",
+    "failure_signatures": "Repeated failure signatures and repeat counts.",
+    "progress_metrics": "Evidence that changed, passed, failed, or stayed unchanged.",
+    "human_queue": "Decisions, approvals, or missing context that require a human.",
+    "next_cursor": "Where the next run should resume."
+  },
+  "success_criteria": [
+    "Target routes render without blocking errors.",
+    "Desktop/mobile screenshots or snapshots confirm the main path.",
+    "Console and network checks show no blocking errors.",
+    "i18n/copy output shows no missing key, raw key, or unintended fallback locale."
+  ],
+  "reject_conditions": [
+    "Same visible failure repeats twice.",
+    "No new screenshot, console, network, or i18n evidence appears across two iterations.",
+    "The browser verifier or dev server is unavailable.",
+    "A product copy, translation tone, visual direction, route behavior, or scope-expansion decision is required."
+  ],
+  "loop_exit_contract": {
+    "continue_only_if": [
+      "Objective is unchanged.",
+      "Next action stays inside approved scope.",
+      "A verifier can reject bad output.",
+      "New evidence changed or is likely from the next verifier.",
+      "Risk stays below the approval boundary.",
+      "The last cycle changed evidence, narrowed scope, reduced failures, or clarified the blocker.",
+      "Fewer than 3 item(s) are active in this cycle.",
+      "Fewer than 8 iteration(s) have run."
+    ],
+    "done_when": [
+      "Target routes render without blocking errors.",
+      "Desktop/mobile screenshots or snapshots confirm the main path.",
+      "Console and network checks show no blocking errors.",
+      "i18n/copy output shows no missing key, raw key, or unintended fallback locale."
+    ],
+    "needs_human_when": [
+      "visual direction changes is required.",
+      "product copy decisions is required.",
+      "translation tone or terminology decisions is required.",
+      "route behavior changes is required.",
+      "auth or data fixture changes is required.",
+      "scope expansion is required.",
+      "irreversible changes is required."
+    ],
+    "blocked_when": [
+      "Same visible failure repeats twice.",
+      "No new screenshot, console, network, or i18n evidence appears across two iterations.",
+      "The browser verifier or dev server is unavailable.",
+      "A product copy, translation tone, visual direction, route behavior, or scope-expansion decision is required."
+    ],
+    "budget_stopped_when": [
+      "More than 3 item(s) would be required in one cycle.",
+      "8 iteration(s) are reached.",
+      "Token, time, cost, or tool budget is reached."
+    ],
+    "status_protocol": {
+      "CONTINUE": "Only when another cycle can increase verified certainty.",
+      "DONE": "Success criteria passed with required pass evidence; return for acceptance.",
+      "NEEDS_HUMAN": "Human judgment or explicit approval is required.",
+      "BLOCKED": "Reliable progress is not possible with current evidence or verifier.",
+      "BUDGET_STOPPED": "Item, iteration, time, token, or cost cap was reached."
+    }
+  },
+  "approval_boundary": [
+    "visual direction changes",
+    "product copy decisions",
+    "translation tone or terminology decisions",
+    "route behavior changes",
+    "auth or data fixture changes",
+    "scope expansion",
+    "irreversible changes"
+  ],
+  "items": [],
+  "attempts": [],
+  "failure_signatures": [],
+  "progress_metrics": [],
+  "human_queue": [],
+  "next_cursor": null,
+  "last_status": null,
+  "last_exit_status": null,
+  "status_history": [],
+  "baseline_friction": null,
+  "post_run_result": null,
+  "saved_corrections": [],
+  "false_positive": [],
+  "human_acceptance": null,
+  "next_adjustment": null,
+  "demotion_recommendation": null
+}

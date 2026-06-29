@@ -1,193 +1,163 @@
 # SixLoops
 
-Stop reteaching your coding agent.
+**Turn repeated AI coding mistakes into reusable agent loops.**
 
-Turn yesterday's AI coding friction into tomorrow's reusable agent loops.
+SixLoops is an open-source Agent Skill that looks at local Codex / Claude Code session logs, project evidence, or a direct development goal, then proposes the **rules, skills, hooks, checklists, approval gates, or managed loops** your repo should have.
 
-SixLoops is an open-source Agent Skill for mining local AI coding session logs and project evidence, then proposing the rules, skills, hooks, checklists, approval gates, or managed loops that would make the next agent run better.
+It is not a chat summarizer. It is a **loop engineering assistant** for software teams and solo developers who keep correcting the same agent behavior.
 
-It is not a chat summarizer. It is a loop engineering assistant for software teams and solo developers who keep correcting the same AI behaviors.
+![Let's loop meme](assets/readme/lets-loop-meme.png)
 
-Think of session logs as friction telemetry: user corrections, tool failures, repeated verification habits, and risk boundaries that reveal which mechanism your repo is missing.
+## Before / After
 
-SixLoops also has a goal-first mode: give it a current objective and it can design a goal-ready loop, including state, verifier, stop conditions, human gates, and an optional subagent/team plan.
+| Before | After |
+| --- | --- |
+| "CI is red again. Read the logs before guessing." | **CI Babysitter Loop** with state, verifier, iteration cap, and push/merge human gate. |
+| "Don't use npm in this repo." | **Package-manager rule** or checklist, not a full loop. |
+| "After UI changes, open the route and screenshot it." | **Browser Audit Loop** with route discovery, screenshot evidence, and visual/product stop gates. |
+| "Deploy only after I approve." | **Approval gate**, not autonomous deployment. |
 
-The installed Codex skill is currently named `$session-to-loop` for compatibility. The product name is SixLoops.
+See complete examples:
 
-## Why The Name
+- [CI Babysitter](examples/ci-babysitter/README.md)
+- [Frontend Browser Audit](examples/frontend-browser-audit/README.md)
 
-A serious loop needs six parts: automation, isolation, skill, connector, evaluator, and memory.
+## What It Does
 
-SixLoops helps you find which of those parts your project is missing, then turns repeated AI-coding friction into a concrete loop proposal.
+SixLoops helps you answer one practical question:
 
-## What Is A Session Log?
+**What should my agent remember, check, automate, or stop doing next time?**
 
-A session log is the saved JSONL record of an AI coding conversation: user messages, tool calls, command output, status events, and sometimes assistant messages.
-
-Some tools and docs call these files "transcripts." In this project, read "transcript" as "AI session log." It is not a movie subtitle file and it is not meant to be read manually.
-
-## Why This Exists
-
-Good developers repeatedly teach coding agents the same lessons:
+It can turn repeated patterns like these:
 
 - "Read the CI log before guessing."
 - "Use pnpm here, not npm."
 - "Do not deploy without approval."
 - "After UI changes, run the browser check and screenshot the route."
-- "This provider can return HTTP 200 while still failing semantic assertions."
+- "HTTP 200 is not enough; run the semantic assertion too."
 
-Those lessons should not live only in one chat. SixLoops turns them into durable mechanisms the next agent can actually use.
+Into concrete artifacts:
 
-## What You Get
+- **Loop Cards**: 1-3 confirmable proposals, not an evidence dump.
+- **Goal loops**: `GOAL.md`, `STATE.json`, `HANDOFF.md`, and optional `TEAM.md`.
+- **Rules / skills / hooks / checklists**: smaller mechanisms when a full loop is too much.
+- **Approval gates**: hard boundaries for deploys, migrations, credentials, schema changes, and other high-impact work.
+- **Eval cases**: fixtures that check whether generated workflows behave better over time.
 
-The first screen is a small set of proposals, not an evidence dump.
+## Why It Is Useful
 
-Each proposal is a Loop Card. It says:
+Asking an agent to "notice patterns in my history" is expensive and unreliable. Raw session logs are noisy, long, and easy to misuse.
 
-- Confirm this loop: exact reply strings such as `adopt ci-babysitter as goal-loop`, `shrink ci-babysitter to skill`, or `reject ci-babysitter`.
-- First run packet: the starter goal prompt, success criteria, state file, stop rule, and human gate.
-- Decision card: can use now, can confirm, can delegate, and next action.
-- Goal: what gets better.
-- Mechanism decision: why this should be a loop, why not a smaller mechanism, and why not scheduled automation yet.
-- Heartbeat: whether it should start as a session loop, goal loop, scheduled run, or event trigger.
-- Starting level: read-only report, goal loop, isolated draft, PR draft, or scheduled draft.
-- Trigger: when the loop starts.
-- Cycle: what the agent observes, decides, does, and verifies.
-- Verifier: primary check, checker role, PASS evidence, and status protocol.
-- Stop conditions: when the agent must stop.
-- Iteration cap: the maximum number of rounds before it reports a blocker.
-- Acceptance contract: success criteria, verifier, pass evidence, reject conditions, and no-progress policy.
-- Approval boundary: what still needs a human.
-- Why this loop: the reason plus the evidence basis.
+SixLoops makes the job smaller:
 
-Example:
+1. **Local scripts** discover, normalize, redact, select compact packets, and apply deterministic guardrails.
+2. **The host AI** reads the compact packets and performs semantic judgment.
+3. **The renderer** returns user-confirmable Loop Cards with stop conditions, verifier, state, and human gates.
 
-```text
-Browser Audit Loop
+![SixLoops semantic analysis turns noisy packets into loop cards](assets/readme/semantic-kitchen.png)
 
-Confirm: `adopt browser-audit as goal-loop`
-Goal: Catch frontend route, copy, and i18n regressions before handoff.
-Trigger: After frontend, routing, copy, auth UI, or i18n changes.
-Cycle: identify changed routes, run checks, open the route in a browser,
-capture screenshots, fix at most 1-3 confirmed regressions, record state.
-Verification: target routes render, screenshots confirm the main path, i18n passes.
-Acceptance contract: DONE only when checks and screenshots pass; BLOCKED on auth/data/design judgment.
-Stop: auth/data blocks verification, visual direction needs approval, or routes pass.
-Iteration cap: 8 rounds.
-Approval boundary: product copy, visual direction, auth/data fixture changes.
-```
+This is more useful than a long prompt because SixLoops:
 
-SixLoops should feel like a mechanism router, not a loop salesman. Weak, rare, unverifiable, or high-risk patterns should become a rule, skill, checklist, approval gate, or reject.
-
-For goal-first loop design, you get a ready-to-run folder:
-
-- `GOAL.md`: the delegated goal loop.
-- `TEAM.md`: planner, maker, checker, verifier, and integrator roles when a team helps.
-- `STATE.json`: the resume ledger.
-- `HANDOFF.md`: how to run or resume.
-- `AGENTS-snippet.md`: draft project instruction, not auto-installed.
-
-## When A Loop Is Worth It
-
-A loop is not just a prompt that repeats. A useful loop needs four things:
-
-- Repetition: the task happens often enough to repay setup cost.
-- Rejection: bad output can be rejected by tests, type checks, lint, screenshots, logs, assertions, or a rubric.
-- Completion: the agent can carry the work far enough without handing most of it back to you.
-- Objectivity: "done" can be checked by observable criteria.
-
-If those are missing, SixLoops should recommend a prompt, rule, skill, checklist, approval gate, or reject instead.
-
-The most important part is the exit contract. A loop is not a long prompt; it is a controlled state machine. Every cycle must end with exactly one status:
-
-- `CONTINUE`: another cycle can increase verified certainty.
-- `DONE`: success criteria passed; return to the human for acceptance.
-- `NEEDS_HUMAN`: product, design, release, data, security, cost, architecture, or approval judgment is required.
-- `BLOCKED`: the same failure repeated, evidence stopped changing, or the verifier is unavailable or ambiguous.
-- `BUDGET_STOPPED`: the iteration, item, time, token, or cost cap was reached.
-
-Continue only when the next round can add verifiable information. Stop when it would only add effort.
-
-A real loop also needs five moves: discovery, handoff, verification, persistence, and scheduling. If one is missing, the loop usually becomes one of five failures: blind, tangled, nodding, amnesiac, or manual.
-
-The safest build order is:
-
-1. Prove one manual run works.
-2. Save the reusable instructions as a skill or checklist.
-3. Add loop mechanics: verifier, state file, iteration cap, and stop conditions.
-4. Only then add scheduled or lifecycle automation.
-
-SixLoops should recommend the lowest useful level first. A good proposal may start as a read-only report or goal loop before it earns isolated edits, PR drafts, or scheduled execution.
-
-Before any unattended or draft-producing loop, require the minimum safety checklist:
-
-- Success criteria that a verifier can actually check.
-- Hard caps for iterations, time, or budget.
-- Isolated branch or worktree for edits.
-- Read-only checker or deterministic verifier.
-- State file that is read first and updated before stopping.
-- Human gate for risky, irreversible, product, release, or data decisions.
-- Logs or notifications so failures are visible.
-
-## Why Not Just Ask Codex To Notice Patterns?
-
-You can ask an agent to "look at my past work and improve itself." The problem is that raw context is noisy, expensive, and easy to misuse.
-
-SixLoops is more effective because it separates the job into two parts:
-
-- Deterministic scripts do discovery, source classification, redaction, packet building, hard gates, and rendering.
-- The host AI does the part it is good at: semantic grouping and judgment.
-
-That gives you better behavior than a one-off prompt:
-
-- It does not load entire session logs into context.
-- It keeps user messages as primary evidence and tool events as supporting evidence.
-- It distinguishes Codex logs, Claude Code logs, generic JSONL logs, and project auxiliary evidence.
-- It asks once for analysis scope, then avoids approval theater.
-- It turns findings into concrete mechanisms, not vague advice.
-- It rejects one-off noise instead of overfitting a rule from a single incident.
-
-## What Makes It Different
-
-Most useful skills win because they have a sharp behavior:
-
-- `grill-me` wins by changing the conversation: one question at a time until the plan is clear.
-- `ponytail` wins by changing the default engineering reflex: find the smallest correct solution.
-- `superpowers` wins by changing the development lifecycle: plan, implement, review, verify.
-
-SixLoops' job is different: it learns which of those behaviors your project actually needs.
-
-It does not try to replace planning, review, frontend QA, CI triage, or deployment gates. It proposes which of those should become a durable loop for this repository, based on evidence from your own agent sessions and project records.
-
-## Inputs
-
-Supported now:
-
-- Direct user goals for goal-ready loop design.
-- Codex JSONL session logs.
-- Claude Code JSONL session logs.
-- Generic JSONL logs with `user`, `assistant`, or `tool` records.
-- Project auxiliary evidence such as browser audits, soak tests, CI logs, eval outputs, and result JSONL files.
-
-Planned or partial:
-
-- Project context packets such as `AGENTS.md`, `CLAUDE.md`, package scripts, and recent git history.
-- Richer generated hooks and ready-to-install project skills.
-
-## Outputs
-
-- Loop Engineering Playbook.
-- Loop Cards.
-- Draft managed loop prompts that can be delegated like a goal after approval.
-- Goal-first loop designs with `GOAL.md`, `TEAM.md`, `STATE.json`, and `HANDOFF.md`.
-- Draft Agent Skills.
-- Draft `AGENTS.md` or `CLAUDE.md` rules.
-- Approval gate and checklist drafts.
-- Eval cases for checking whether the generated workflow improves future sessions.
+- Keeps user messages as primary evidence and tool events as supporting evidence.
+- Avoids loading whole session logs into context.
+- Separates semantic judgment from deterministic safety checks.
+- Rejects one-off noise instead of creating fake rules.
+- Produces a mechanism you can actually adopt, shrink, or reject.
 
 ## Quick Start
 
-Design from a goal, without session logs:
+### 1. Install For Codex
+
+From this repo:
+
+```powershell
+.\scripts\install.ps1 -Target codex
+```
+
+One-line install from GitHub:
+
+```powershell
+git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target codex
+```
+
+Then start a new Codex thread and ask:
+
+```text
+Use $session-to-loop to find the first loop in this repo worth trying.
+Return 1-3 Loop Cards with verifier, state, stop condition, and human gate.
+Reject weak patterns.
+```
+
+Manual Codex install:
+
+```powershell
+$dest = "$env:USERPROFILE\.agents\skills\session-to-loop"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+Copy-Item -Path .\skills\session-to-loop\* -Destination $dest -Recurse -Force
+```
+
+### 2. Install For Claude Code
+
+User-level install:
+
+```powershell
+.\scripts\install.ps1 -Target claude -Scope user
+```
+
+One-line user install from GitHub:
+
+```powershell
+git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target claude -Scope user
+```
+
+Project-level install for a repo:
+
+```powershell
+.\scripts\install.ps1 -Target claude -Scope project -ProjectPath E:\path\to\your-project
+```
+
+Manual Claude Code install:
+
+```powershell
+$dest = "$env:USERPROFILE\.claude\skills\session-to-loop"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+Copy-Item -Path .\skills\session-to-loop\* -Destination $dest -Recurse -Force
+```
+
+Then invoke the skill in Claude Code by name:
+
+```text
+Use session-to-loop to design a loop for this project.
+```
+
+### 3. Try It Without Private Logs
+
+Run the synthetic fixture demo:
+
+```bash
+python skills/session-to-loop/scripts/session_to_loop.py \
+  --input evals/fixtures/repeated-ci-failure.jsonl \
+  --out-root .session-to-loop/tmp/repeated-ci \
+  --approve \
+  --rule-fallback
+```
+
+Open:
+
+```text
+.session-to-loop/tmp/repeated-ci/public/loop-playbook.md
+```
+
+You should see actions like:
+
+- `adopt ci-babysitter as read-only`
+- `adopt ci-babysitter as goal-loop`
+- `shrink ci-babysitter to skill`
+- `reject ci-babysitter`
+
+### 4. Design A Loop From A Goal
+
+You do not need session logs to start:
 
 ```bash
 python skills/session-to-loop/scripts/design_goal_loop.py \
@@ -199,49 +169,33 @@ python skills/session-to-loop/scripts/design_goal_loop.py \
   --overwrite
 ```
 
-Open the generated `GOAL.md` and `TEAM.md` under `.session-to-loop/tmp/frontend-goal/`.
+The output folder contains:
 
-Try SixLoops without private logs first. This offline fixture uses the deterministic fallback so the demo runs without a host AI semantic pass:
+- `GOAL.md`
+- `TEAM.md`
+- `STATE.json`
+- `HANDOFF.md`
+- `AGENTS-snippet.md`
 
-```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
-  --input evals/fixtures/repeated-ci-failure.jsonl \
-  --out-root .session-to-loop/tmp/repeated-ci \
-  --approve \
-  --rule-fallback
-```
+![SixLoops can design a small agent team around one controlled loop](assets/readme/subagent-loop-table.png)
 
-Open `.session-to-loop/tmp/repeated-ci/public/loop-playbook.md` to see the generated Loop Card.
-The first useful actions should look like `adopt ci-babysitter as read-only`,
-`adopt ci-babysitter as goal-loop`, `shrink ci-babysitter to skill`, or
-`reject ci-babysitter`.
+## Real Session Log Workflow
 
-After choosing one proposal, generate the concrete adoption packet:
-
-```bash
-python skills/session-to-loop/scripts/adopt_candidate.py \
-  --candidates .session-to-loop/tmp/repeated-ci/private/candidates.json \
-  --candidate-id ci-babysitter \
-  --level goal-loop \
-  --out-dir .session-to-loop/tmp/repeated-ci/adopted
-```
-
-That creates `GOAL.md`, `STATE.json`, `HANDOFF.md`, and a draft `AGENTS-snippet.md`.
-The packet is ready to paste into a delegated goal, but it is not installed into the target project automatically.
-
-For real local logs:
+Run against an explicit file or narrow directory:
 
 ```bash
 python skills/session-to-loop/scripts/session_to_loop.py --input <session-log-file-or-dir>
 ```
 
-For real local logs, the pipeline stops after creating an analysis scope. Review the listed files, then approve the same narrow scope:
+For real logs, SixLoops first creates an analysis scope. Review the files and approve the same narrow scope:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py --input <session-log-file-or-dir> --approve
+python skills/session-to-loop/scripts/session_to_loop.py \
+  --input <session-log-file-or-dir> \
+  --approve
 ```
 
-For large approved log sets, cap semantic review cost:
+For larger approved sets, cap the semantic review cost:
 
 ```bash
 python skills/session-to-loop/scripts/session_to_loop.py \
@@ -253,7 +207,15 @@ python skills/session-to-loop/scripts/session_to_loop.py \
   --role-quota tool=40
 ```
 
-The command creates compact packets plus `.session-to-loop/private/analysis-run.json`. The skill reads that run state and points the host AI to:
+This creates:
+
+```text
+.session-to-loop/private/analysis-packets.jsonl
+.session-to-loop/private/analysis-packets-index.json
+.session-to-loop/private/analysis-run.json
+```
+
+The host AI reads:
 
 ```text
 skills/session-to-loop/references/semantic-analysis-prompt.md
@@ -261,7 +223,13 @@ skills/session-to-loop/schemas/semantic-candidates.schema.json
 .session-to-loop/private/analysis-packets.jsonl
 ```
 
-The host AI then writes `.session-to-loop/private/semantic-candidates.json` from semantic judgment over the packets. Continue with the command stored in `analysis-run.json`, or run:
+Then it writes:
+
+```text
+.session-to-loop/private/semantic-candidates.json
+```
+
+Continue with the command stored in `analysis-run.json`, or run:
 
 ```bash
 python skills/session-to-loop/scripts/session_to_loop.py \
@@ -270,65 +238,202 @@ python skills/session-to-loop/scripts/session_to_loop.py \
   --semantic-candidates .session-to-loop/private/semantic-candidates.json
 ```
 
-`--rule-fallback` is only for offline fixtures, synthetic evals, or when the host AI is unavailable. It is not the main product path.
+`--rule-fallback` exists for offline fixtures, synthetic evals, and host-AI-unavailable mode. It is not the main product path.
 
-## Install For Codex
+## Package A Release Zip
 
-Copy or link the skill folder into your Codex skills directory:
+Create a portable skill archive:
 
-```powershell
-$dest = "$env:USERPROFILE\.codex\skills\session-to-loop"
-New-Item -ItemType Directory -Force -Path $dest | Out-Null
-Copy-Item -Path .\skills\session-to-loop\* -Destination $dest -Recurse -Force
+```bash
+python scripts/package_skill.py
 ```
 
-Then start a new Codex thread and invoke:
+This writes:
 
 ```text
-Use $session-to-loop (SixLoops) to find the first loop in this repo worth trying. Reject weak patterns, stay read-only, and return 1-3 Loop Cards with verifier, state, stop condition, and human gate.
+dist/session-to-loop-skill.zip
 ```
 
-## Interaction Model
+Unzip it into one of these directories:
 
-The skill should feel like this:
+- Codex user skills: `~/.agents/skills/`
+- Claude Code user skills: `~/.claude/skills/`
+- Project skills: `<repo>/.agents/skills/` or `<repo>/.claude/skills/`
 
-1. Discover likely local inputs from the explicit path you gave it.
-2. Ask one scope question if reading real logs needs confirmation.
-3. Build compact, redacted analysis packets.
-4. Let the host AI infer repeated semantic patterns and write `semantic-candidates.json`.
-5. Present 1-3 loop proposals first.
-6. Ask which proposal to adopt with a run level, shrink, or reject.
-7. Generate concrete loop cards, skills, hooks, checklists, approval gates, or adoption packets only after confirmation.
+## What The User Sees
 
-For goal-first mode, it should feel like this:
+The first useful screen should be **1-3 Loop Cards**.
 
-1. Classify the goal surface: frontend, backend, full-stack, architecture, review, delivery, maintenance, or general.
-2. Produce a goal loop with verifier, state, stop condition, and human gate.
-3. Add a subagent/team plan only when it improves planning, review, or verification.
-4. Generate the artifacts locally without modifying the target project.
+Each card says:
 
-It should not feel like this:
+- **What this loop will do**
+- **What it will not do**
+- **When it must ask you**
+- **How it verifies**
+- **When it stops**
+- **Why it is worth existing**
+- **How to confirm, shrink, or reject it**
 
-- "I found some files. Please approve every internal step."
-- "Here is a pile of evidence."
-- "Privacy is the main product."
-- "Everything should become a loop."
+Example:
 
-## Mechanism Selection
+```text
+Browser Audit Loop
 
-| Pattern | Mechanism |
-| --- | --- |
-| Stable project fact | `AGENTS.md` or `CLAUDE.md` rule |
-| Person-specific preference | Memory or local rule |
-| Repeatable on-demand workflow | Agent Skill |
-| Deterministic lifecycle check | Hook or script |
-| Repeated observe-decide-act-verify cycle with state, verification, resume policy, and stop conditions | Loop |
-| High-risk human decision | Approval gate or checklist |
-| One-off event | Reject |
+Confirm: adopt browser-audit as goal-loop
+Goal: Catch frontend route, copy, and i18n regressions before handoff.
+Trigger: After frontend, routing, copy, auth UI, or i18n changes.
+Cycle: identify changed routes, run checks, open the route in a browser,
+capture screenshots, fix at most 1-3 confirmed regressions, record state.
+Verifier: target routes render, screenshots confirm the main path, i18n passes.
+Stop: auth/data blocks verification, visual direction needs approval, or routes pass.
+Approval boundary: product copy, visual direction, auth/data fixture changes.
+```
+
+## When A Loop Is Worth It
+
+A loop is not a long prompt. It is a controlled state machine that finds work, hands it to an agent, checks the result, writes state, and decides the next move.
+
+Use a loop only when the work passes the fast loop check:
+
+- **Repeats often enough**: usually weekly or more. One-off work should stay a prompt.
+- **Has an objective gate**: tests, type checks, builds, lint, screenshots, logs, assertions, or a tight rubric can reject bad output.
+- **Can be reproduced by the agent**: the agent can run the code, inspect the failure, and see whether it improved.
+- **Has a hard stop**: iteration, time, token, item, or cost cap.
+- **Keeps a human gate**: merge, deploy, dependency, credential, schema, data, payment, and production-impacting actions return to a person.
+
+Good first loops are small, recurring, and machine-checkable:
+
+- CI failure triage.
+- Dependency update PR drafts.
+- Lint-and-fix passes.
+- Flaky test reproduction.
+- Issue-to-PR drafts on codebases with strong tests.
+- Frontend route/browser audit after UI changes.
+
+Bad first loops should be rejected or downgraded:
+
+- Architecture rewrites.
+- Auth, payments, credentials, or security-sensitive flows.
+- Production deploys and migrations.
+- Vague product or design judgment.
+- Anything where "done" is mostly taste, politics, or strategy.
+
+The minimum viable loop is deliberately boring:
+
+1. Make one manual run reliable.
+2. Save the repeatable knowledge as a skill or checklist.
+3. Add one state file, one verifier, one hard cap, and one human gate.
+4. Only then add a schedule or event trigger.
+
+The most important part is the exit contract:
+
+![SixLoops exit gates: continue, done, or ask the human](assets/readme/exit-gates.png)
+
+- `CONTINUE`: another cycle can increase verified certainty.
+- `DONE`: success criteria passed; return to the human for acceptance.
+- `NEEDS_HUMAN`: product, design, release, data, security, cost, architecture, or approval judgment is required.
+- `BLOCKED`: the same failure repeated, evidence stopped changing, or the verifier is unavailable or ambiguous.
+- `BUDGET_STOPPED`: the iteration, item, time, token, or cost cap was reached.
+
+If the pattern is weak, rare, risky, or mostly human judgment, SixLoops should recommend a smaller mechanism: rule, skill, hook, checklist, approval gate, or reject.
+
+The metric that matters is **cost per accepted change**. If fewer than half of loop outputs survive review, the loop is not saving work yet; shrink the scope, improve the gate, or demote it to a skill/checklist.
+
+SixLoops should explicitly guard against common money pits:
+
+- **Early-success loops**: the agent declares done before the verifier proves it.
+- **Self-grading loops**: the maker is the only checker.
+- **Amnesiac loops**: no state file, so every run restarts from zero.
+- **Goal drift**: long runs forget constraints unless they reread the standing goal/spec.
+- **Comprehension debt**: code changes faster than humans read and understand it.
+- **Permission creep**: a read-only loop quietly becomes write-capable without a fresh gate.
+
+## Supported Inputs
+
+- **Direct user goals** for goal-ready loop design.
+- **Codex JSONL session logs**.
+- **Claude Code JSONL session logs**.
+- **Generic JSONL logs** with `user`, `assistant`, or `tool` records.
+- **Project auxiliary evidence** such as browser audits, soak tests, CI logs, eval outputs, and result JSONL files.
+
+## Outputs
+
+- `loop-playbook.md`
+- Loop Cards
+- Draft managed loop prompts
+- Goal-first loop designs with `GOAL.md`, `TEAM.md`, `STATE.json`, and `HANDOFF.md`
+- Draft Agent Skills
+- Draft `AGENTS.md` / `CLAUDE.md` snippets
+- Approval gate and checklist drafts
+- Eval cases
+
+## Install Modes
+
+### Codex
+
+| Mode | Best For | Command |
+| --- | --- | --- |
+| User install | Personal daily use | `.\scripts\install.ps1 -Target codex` |
+| One-line GitHub install | Quick local tryout | `git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target codex` |
+| Release zip | Offline or pinned version install | Unzip `session-to-loop-skill.zip` into `%USERPROFILE%\.agents\skills` |
+| Manual install | Environments without PowerShell script execution | Copy `skills/session-to-loop` to `%USERPROFILE%\.agents\skills\session-to-loop` |
+| Direct path invocation | Testing without installing | Reference `skills/session-to-loop/SKILL.md` directly in a Codex prompt |
+
+### Claude Code
+
+| Mode | Best For | Command |
+| --- | --- | --- |
+| User install | Personal use across projects | `.\scripts\install.ps1 -Target claude -Scope user` |
+| Project install | Team-shared repo workflow | `.\scripts\install.ps1 -Target claude -Scope project -ProjectPath <repo>` |
+| One-line GitHub install | Quick local tryout | `git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target claude -Scope user` |
+| Release zip | Offline or pinned version install | Unzip `session-to-loop-skill.zip` into `%USERPROFILE%\.claude\skills` |
+| Manual install | Environments without script execution | Copy to `~/.claude/skills/session-to-loop` or `<repo>/.claude/skills/session-to-loop` |
+
+### macOS / Linux
+
+```bash
+chmod +x scripts/install.sh
+./scripts/install.sh codex user
+./scripts/install.sh claude user
+./scripts/install.sh claude project /path/to/your-project
+```
+
+### Claude.ai
+
+SixLoops is designed for local coding agents because it needs filesystem access to session logs and project evidence. Claude.ai custom-skill upload can carry the instructions, but the local pipeline is most useful in Claude Code.
+
+## How It Works
+
+```text
+explicit input path
+  -> discover sessions
+  -> ask one scope question
+  -> redact + normalize
+  -> build compact analysis packets
+  -> host AI semantic analysis
+  -> deterministic guardrails
+  -> Loop Cards / playbook / adoption packet
+```
+
+The host AI decides:
+
+- What the user repeatedly corrects.
+- What tool use reveals about failure paths.
+- Which verification actions are habits.
+- Which boundaries must return to the human.
+- Whether the mechanism should be rule, skill, hook, loop, checklist, approval gate, or reject.
+
+The scripts decide:
+
+- Which files are in scope.
+- What packet budget is passed to the AI.
+- Whether output structure is valid.
+- Whether a candidate can be delegated.
+- Whether public artifacts contain obvious sensitive data.
 
 ## Default Boundaries
 
-Local-first behavior is a guardrail, not the product pitch. The product goal is better loop engineering; these defaults make the analysis safe to run on local project evidence.
+Local-first behavior is a guardrail, not the main product pitch.
 
 - No network access is needed by the pipeline.
 - No whole-disk or broad home-directory scan is performed by default.
@@ -344,19 +449,23 @@ skills/session-to-loop/
   SKILL.md
   agents/openai.yaml
   references/
+  schemas/
   assets/templates/
   scripts/
+
+assets/readme/
+  *.png
 
 evals/
   evals.json
   fixtures/
+  semantic-candidates/
+
+scripts/
+  install.ps1
+  install.sh
+  package_skill.py
 ```
-
-## Current Status
-
-Experimental but usable.
-
-SixLoops works today for synthetic fixtures, Codex JSONL logs, Claude Code JSONL logs, generic JSONL logs, and explicit project evidence JSONL. The next milestone is to make generated artifacts easier to install directly into a target repository.
 
 ## Development
 
@@ -366,7 +475,7 @@ Validate the skill:
 python C:/Users/Administrator/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/session-to-loop
 ```
 
-Run all synthetic evals:
+Run transcript evals:
 
 ```bash
 python evals/run_evals.py --keep-going
@@ -387,3 +496,17 @@ python skills/session-to-loop/scripts/session_to_loop.py \
   --approve \
   --rule-fallback
 ```
+
+## Design References
+
+SixLoops follows the common skill pattern used by modern agent platforms: keep the skill folder self-contained, put the trigger and workflow in `SKILL.md`, keep heavy references/scripts bundled, and make installation copyable.
+
+Useful references:
+
+- [OpenAI Codex Skills](https://developers.openai.com/codex/skills)
+- [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills)
+- [Anthropic public skills](https://github.com/anthropics/skills)
+- [Claude Cookbooks skills guide](https://github.com/anthropics/claude-cookbooks/blob/main/skills/README.md)
+- [Dimillian Skills](https://github.com/Dimillian/Skills)
+- [onmyway133 Super Skills](https://github.com/onmyway133/skills)
+- [awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills)

@@ -27,6 +27,7 @@ For each proposal, include:
 - Exit contract: when to return `CONTINUE`, `DONE`, `NEEDS_HUMAN`, `BLOCKED`, or `BUDGET_STOPPED`.
 - Approval boundary: what still needs human approval.
 - Why this loop: the product reason plus the evidence basis.
+- Adoption economics: expected trigger frequency, review load, accepted-output target, and when to demote the loop.
 
 ## Confirmation Shape
 
@@ -60,6 +61,10 @@ Match the user's language in the final response. Use English for internal JSON f
 ## Evidence Placement
 
 Put evidence after the proposal. Evidence should answer "why this loop" instead of becoming the product itself.
+
+For weak or risky candidates, explain the rejection in product language: not recurring enough, no
+objective gate, agent cannot reproduce the failure, no hard stop, review load is too high, or human
+judgment is the real bottleneck.
 
 When source quality is limited, say it plainly:
 

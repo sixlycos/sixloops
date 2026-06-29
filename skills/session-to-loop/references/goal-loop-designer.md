@@ -34,6 +34,16 @@ Every goal loop must include:
 
 If the goal is vague, design a read-only or planning loop first. Do not invent edit authority.
 
+Before designing a managed loop, run the same fit test used for transcript-derived candidates:
+
+- The goal is likely to recur or continue across multiple cycles.
+- Objective checks can reject bad output.
+- The agent can inspect or run the changed system.
+- The loop has explicit item, iteration, time, token, or cost caps.
+- High-impact actions return to the human before merge, deploy, dependency, credential, schema, data, payment, or production changes.
+
+If the fit test fails, return a read-only loop, skill, checklist, approval gate, or rejection instead of a delegated loop.
+
 ## Subagent Team Policy
 
 When the host runtime exposes subagent or multi-agent tools, use a team only when it improves the loop:

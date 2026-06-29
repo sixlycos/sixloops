@@ -1,6 +1,7 @@
 .session-to-loop/private/
 .session-to-loop/raw/
 .session-to-loop/tmp/
+dist/
 
 __pycache__/
 *.py[cod]
