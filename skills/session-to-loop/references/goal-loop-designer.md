@@ -71,7 +71,7 @@ python skills/session-to-loop/scripts/design_goal_loop.py \
   --goal "<user goal>" \
   --domain auto \
   --team-mode auto \
-  --level goal-loop \
+  --level auto \
   --out-dir .session-to-loop/goal-design
 ```
 

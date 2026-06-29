@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import math
 import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -62,6 +65,16 @@ def first(items: list[str], default: str = "None.") -> str:
     return items[0] if items else default
 
 
+def snippets_visible(scope: dict) -> bool:
+    return bool(scope.get("allow_redacted_snippets")) and scope.get("output_visibility") == "public"
+
+
+def evidence_text(first_evidence: dict, scope: dict) -> str:
+    if snippets_visible(scope):
+        return first_evidence.get("snippet", "No quote needed.")
+    return "[snippet hidden; see private candidates.json]"
+
+
 def loop_exit_contract(candidate: dict, managed_loop: dict, contract: dict) -> dict:
     safety = candidate.get("safety") if isinstance(candidate.get("safety"), dict) else {}
     return normalize_exit_contract(
@@ -92,7 +105,7 @@ def bool_label(value: bool) -> str:
 
 def next_rung(current: str) -> str:
     ladder = [
-        "read-only-report",
+        "read-only",
         "goal-loop",
         "isolated-draft",
         "verified-pr-draft",
@@ -137,7 +150,7 @@ def first_run_defaults(candidate: dict, managed_loop: dict, contract: dict) -> d
     else:
         success_text = bullet_block(contract.get("success_criteria", candidate.get("verification", [])))
     maturity = managed_loop.get("recommended_maturity", "goal-loop")
-    default_action = "adopt as read-only" if maturity == "read-only-report" else "adopt as goal-loop"
+    default_action = "adopt as read-only" if maturity == "read-only" else "adopt as goal-loop"
     return {
         "recommended_action": str(packet.get(
             "recommended_action",
@@ -177,11 +190,12 @@ def mechanism_decision(candidate: dict, managed_loop: dict) -> dict[str, str]:
         smaller = "A smaller mechanism is recommended first."
     maturity = managed_loop.get("recommended_maturity", candidate.get("safety", {}).get("autonomy_level", "draft-only"))
     return {
-        "why_this_mechanism": decision.get("why_this_mechanism", why),
-        "why_not_smaller": decision.get("why_not_smaller", smaller),
+        "why_this_mechanism": candidate.get("why_this_loop") or decision.get("why_this_mechanism", why),
+        "why_not_smaller": candidate.get("why_not_smaller") or decision.get("why_not_smaller", smaller),
         "why_not_more_autonomous": decision.get(
             "why_not_more_autonomous",
-            f"Start at `{maturity}` until verifier evidence and accepted outputs justify promotion.",
+            candidate.get("why_not_more_autonomous")
+            or f"Start at `{maturity}` until verifier evidence and accepted outputs justify promotion.",
         ),
     }
 
@@ -225,6 +239,29 @@ def approval_boundary(candidate: dict) -> str:
     if approvals:
         return "; ".join(approvals)
     return "No extra approval boundary recorded beyond normal repo review."
+
+
+def control_will_not(candidate: dict, managed_loop: dict) -> list[str]:
+    items = []
+    approvals = candidate.get("safety", {}).get("requires_approval_for", [])
+    if approvals:
+        items.append(f"Perform approval-boundary actions without asking first: {', '.join(str(item) for item in approvals)}.")
+    change_policy = managed_loop.get("change_policy")
+    if change_policy:
+        items.append(str(change_policy))
+    return items or ["Expand scope, take irreversible action, or act without verifier evidence."]
+
+
+def where_wrong(candidate: dict) -> list[str]:
+    raw = candidate.get("where_this_may_be_wrong")
+    items = as_list(raw)
+    if items:
+        return items
+    trace = candidate.get("decision_trace", {})
+    source_type_counts = trace.get("source_type_counts", {})
+    if source_type_counts:
+        return [f"Source mix may limit confidence: {source_type_counts}."]
+    return ["The packet set may omit current project state or newer failures."]
 
 
 def decision_card(candidate: dict) -> dict:
@@ -397,7 +434,156 @@ def source_limitations(data: dict) -> str:
     return "; ".join(str(part) for part in parts)
 
 
-def candidate_card(candidate: dict) -> str:
+SECRET_ASSIGNMENT = re.compile(
+    r"\b(?:api[_-]?key|token|secret|password|passwd|pwd|credential)\s*[:=]\s*[^\s'\"`]+",
+    re.IGNORECASE,
+)
+BEARER_TOKEN = re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{8,}", re.IGNORECASE)
+EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+WINDOWS_PRIVATE_PATH = re.compile(r"\b[A-Za-z]:\\(?:Users|WorkFILE|Documents and Settings)\\[^\s'\"`<>|]+", re.IGNORECASE)
+POSIX_PRIVATE_PATH = re.compile(r"(?<!\w)/(?:Users|home)/[^\s'\"`<>|]+")
+HIGH_ENTROPY = re.compile(r"(?<![A-Za-z0-9])[A-Za-z0-9_+/=-]{40,}(?![A-Za-z0-9])")
+
+
+def entropy(value: str) -> float:
+    if not value:
+        return 0.0
+    frequencies = {char: value.count(char) / len(value) for char in set(value)}
+    return -sum(freq * math.log2(freq) for freq in frequencies.values())
+
+
+def looks_like_secret(value: str) -> bool:
+    return any(char.isalpha() for char in value) and any(char.isdigit() for char in value) and entropy(value) >= 4.3
+
+
+def scan_public_text(text: str) -> list[dict]:
+    findings: list[dict] = []
+    checks = [
+        ("secret-assignment", SECRET_ASSIGNMENT),
+        ("bearer-token", BEARER_TOKEN),
+        ("email", EMAIL),
+        ("private-windows-path", WINDOWS_PRIVATE_PATH),
+        ("private-posix-path", POSIX_PRIVATE_PATH),
+    ]
+    for kind, pattern in checks:
+        for match in pattern.finditer(text):
+            findings.append({"kind": kind, "match": match.group(0)[:120]})
+    for match in HIGH_ENTROPY.finditer(text):
+        token = match.group(0)
+        if looks_like_secret(token):
+            findings.append({"kind": "high-entropy-token", "match": token[:120]})
+    return findings
+
+
+def run_optional_secret_scanner(out_dir: Path) -> dict:
+    scanners = {"gitleaks": shutil.which("gitleaks"), "trufflehog": shutil.which("trufflehog")}
+    result = {"available": {key: bool(value) for key, value in scanners.items()}, "executed": [], "findings": [], "errors": []}
+    if scanners["gitleaks"]:
+        try:
+            completed = subprocess.run(
+                [
+                    scanners["gitleaks"],
+                    "detect",
+                    "--no-git",
+                    "--source",
+                    str(out_dir),
+                    "--redact",
+                    "--exit-code",
+                    "1",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            result["executed"].append("gitleaks")
+            if completed.returncode == 1:
+                result["findings"].append({"tool": "gitleaks", "summary": (completed.stdout + completed.stderr)[-1000:]})
+            elif completed.returncode not in {0}:
+                result["errors"].append({"tool": "gitleaks", "summary": (completed.stdout + completed.stderr)[-1000:]})
+        except (OSError, subprocess.SubprocessError) as exc:
+            result["errors"].append({"tool": "gitleaks", "error": str(exc)})
+    if scanners["trufflehog"]:
+        try:
+            completed = subprocess.run(
+                [scanners["trufflehog"], "filesystem", "--json", str(out_dir)],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            result["executed"].append("trufflehog")
+            if completed.stdout.strip():
+                result["findings"].append({"tool": "trufflehog", "summary": completed.stdout[-1000:]})
+            elif completed.returncode not in {0}:
+                result["errors"].append({"tool": "trufflehog", "summary": completed.stderr[-1000:]})
+        except (OSError, subprocess.SubprocessError) as exc:
+            result["errors"].append({"tool": "trufflehog", "error": str(exc)})
+    return result
+
+
+def scan_public_artifacts(out_dir: Path) -> dict:
+    stdlib_findings: list[dict] = []
+    for path in out_dir.rglob("*"):
+        if not path.is_file():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for finding in scan_public_text(text):
+            stdlib_findings.append({"path": path.as_posix(), **finding})
+    optional = run_optional_secret_scanner(out_dir)
+    return {
+        "version": 1,
+        "scanner": "stdlib-context-entropy-plus-optional-tools",
+        "stdlib_findings": stdlib_findings,
+        "optional_scanners": optional,
+        "blocked": bool(stdlib_findings or optional.get("findings")),
+    }
+
+
+def safe_candidate_summary(candidate: dict) -> dict:
+    card = decision_card(candidate)
+    managed_loop = candidate.get("managed_loop", {}) if isinstance(candidate.get("managed_loop"), dict) else {}
+    contract = managed_loop.get("completion_contract", {}) if isinstance(managed_loop.get("completion_contract"), dict) else {}
+    return {
+        "id": candidate.get("id"),
+        "name": candidate.get("name"),
+        "summary": candidate.get("summary"),
+        "decision": candidate.get("decision"),
+        "mechanisms": candidate.get("mechanisms", []),
+        "confidence": candidate.get("confidence"),
+        "can_delegate": card.get("can_delegate"),
+        "confirmation_options": confirmation_options(candidate),
+        "control": {
+            "will_do": as_list(managed_loop.get("cycle_steps", candidate.get("actions", [])))[:5],
+            "must_ask_before": candidate.get("safety", {}).get("requires_approval_for", []),
+            "verifies_with": contract.get("verifier_commands", candidate.get("verification", [])),
+            "stops_when": contract.get("reject_conditions", candidate.get("stop_conditions", [])),
+        },
+        "source_limitations": where_wrong(candidate),
+    }
+
+
+def safe_scope_policy(scope: dict) -> dict:
+    return {
+        "approved": bool(scope.get("approved")),
+        "allowed_roles": scope.get("allowed_roles", []),
+        "allow_redacted_snippets": bool(scope.get("allow_redacted_snippets")),
+        "output_visibility": scope.get("output_visibility", "private"),
+    }
+
+
+def safe_source_summary(source: dict) -> dict:
+    return {
+        "transcript_files": source.get("transcript_files", 0),
+        "records": source.get("records", 0),
+        "providers": source.get("providers", {}),
+        "source_types": source.get("source_types", {}),
+    }
+
+
+def candidate_card(candidate: dict, scope: dict | None = None) -> str:
+    scope = scope or {}
     evidence = candidate.get("evidence", [{}])
     first_evidence = evidence[0] if evidence else {}
     managed_loop = candidate.get("managed_loop", {})
@@ -463,7 +649,22 @@ def candidate_card(candidate: dict) -> str:
             f"{first_evidence.get('provider', 'unknown')} / {first_evidence.get('source_type', 'unknown')} / "
             f"{first_evidence.get('intent', 'unknown')}"
         ),
-        "snippet": first_evidence.get("snippet", "No quote needed."),
+        "snippet": evidence_text(first_evidence, scope),
+        "control_will_do": bullet_block(as_list(managed_loop.get("cycle_steps", candidate.get("actions", [])))[:5]),
+        "control_will_not": bullet_block(control_will_not(candidate, managed_loop)),
+        "control_must_ask": bullet_block(
+            candidate.get("safety", {}).get("requires_approval_for", [])
+            or candidate.get("safety", {}).get("human_checkpoint", [])
+            or ["scope expansion, irreversible action, or human judgment"]
+        ),
+        "control_verify": bullet_block(contract.get("verifier_commands", candidate.get("verification", []))),
+        "control_stop": bullet_block(
+            as_list(contract.get("reject_conditions", []))
+            or as_list(candidate.get("stop_conditions", []))
+            or [first_run["first_run_stop_after"]]
+        ),
+        "control_why": mechanism["why_this_mechanism"],
+        "where_this_may_be_wrong": bullet_block(where_wrong(candidate)),
         "trigger": bullet(candidate.get("trigger", [])),
         "artifact": bullet(candidate.get("artifacts", [])),
         "goal": candidate["summary"],
@@ -659,6 +860,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     data = json.loads(Path(args.candidates).read_text(encoding="utf-8"))
+    scope_policy = data.get("scope_policy") or {}
     out_dir = Path(args.out_dir)
     cards_dir = out_dir / "cards"
     loops_dir = out_dir / "claude-loops"
@@ -669,7 +871,7 @@ def main() -> int:
     rendered_paths: list[str] = []
     for candidate in data.get("candidates", []):
         card_path = cards_dir / f"{candidate['id']}.md"
-        card_path.write_text(candidate_card(candidate), encoding="utf-8")
+        card_path.write_text(candidate_card(candidate, scope_policy), encoding="utf-8")
         rendered_paths.append(card_path.as_posix())
         if "loop" in candidate.get("mechanisms", []):
             loop_path = loops_dir / f"{candidate['id']}.md"
@@ -684,10 +886,12 @@ def main() -> int:
     public_summary = {
         "version": data.get("version"),
         "analysis_model": data.get("analysis_model"),
-        "scope_policy": data.get("scope_policy"),
-        "source": data.get("source"),
+        "scope_policy": safe_scope_policy(scope_policy),
+        "source": safe_source_summary(data.get("source", {})),
         "redaction": data.get("redaction"),
-        "candidates": data.get("candidates", []),
+        "artifact_visibility": "local-shareable-after-review",
+        "private_candidates": ".session-to-loop/private/candidates.json",
+        "candidates": [safe_candidate_summary(candidate) for candidate in data.get("candidates", [])],
     }
     summary_path.write_text(json.dumps(public_summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     rendered_paths.append(summary_path.as_posix())
@@ -695,6 +899,24 @@ def main() -> int:
     playbook_path = out_dir / "loop-playbook.md"
     playbook_path.write_text(playbook(data, out_dir, rendered_paths), encoding="utf-8")
     rendered_paths.append(playbook_path.as_posix())
+    scan_result = scan_public_artifacts(out_dir)
+    scan_path = out_dir / "artifact-safety.json"
+    scan_path.write_text(json.dumps(scan_result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    rendered_paths.append(scan_path.as_posix())
+    public_summary["artifact_safety"] = {
+        "scanner": scan_result.get("scanner"),
+        "blocked": scan_result.get("blocked", False),
+        "stdlib_findings": len(scan_result.get("stdlib_findings", [])),
+        "optional_scanners": {
+            "available": scan_result.get("optional_scanners", {}).get("available", {}),
+            "executed": scan_result.get("optional_scanners", {}).get("executed", []),
+            "findings": len(scan_result.get("optional_scanners", {}).get("findings", [])),
+            "errors": len(scan_result.get("optional_scanners", {}).get("errors", [])),
+        },
+    }
+    summary_path.write_text(json.dumps(public_summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if scan_result["blocked"]:
+        raise ValueError(f"Public artifact safety scan found possible leaks: {scan_path}")
     print(f"Rendered {len(rendered_paths)} artifact(s): {out_dir}")
     return 0
 

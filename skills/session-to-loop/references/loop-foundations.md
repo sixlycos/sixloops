@@ -69,7 +69,7 @@ Frequency is the main cost driver. Lower frequency often saves more than shorter
 
 Recommend the lowest adoption level that would be useful:
 
-- `read-only-report`: inspect and summarize only.
+- `read-only`: inspect and summarize only.
 - `goal-loop`: run in the current session until the success criteria pass or the cap is hit.
 - `isolated-draft`: use an isolated branch or worktree for low-risk fixes, then stop for review.
 - `verified-pr-draft`: verify, prepare a PR draft, and leave merge to the human.

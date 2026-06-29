@@ -29,7 +29,7 @@ The user-facing product is a small set of project-specific loop proposals that t
 ## Workflow
 
 0. Choose the entrypoint.
-   - If the user gives a direct objective and asks for a loop, goal, team, or subagent workflow, read `references/goal-loop-designer.md` and run `scripts/design_goal_loop.py`.
+   - If the user gives a direct objective and asks for a loop, goal, team, or subagent workflow, read `references/goal-loop-designer.md`, semantically assess risk/verifiability/autonomy, then run `scripts/design_goal_loop.py`.
    - If the user asks to mine past sessions, analyze transcripts, or extract repeated patterns, use the transcript pipeline below.
    - If both are available, design the loop from the goal first, then use transcript evidence to refine or downgrade it.
    - If the user explicitly asks to start or delegate a generated team loop and subagent tools are available, use the generated `TEAM.md` role prompts to spawn only the needed roles for the current cycle.
@@ -46,7 +46,7 @@ The user-facing product is a small set of project-specific loop proposals that t
    - Normalize Codex, Claude Code, and generic JSONL with `scripts/transcript_adapters.py`.
    - Build `analysis-packets.jsonl` for semantic review instead of asking the AI to read raw transcripts.
 
-3. Analyze packets semantically.
+3. Analyze packets semantically with the host AI.
    - Read `references/semantic-analysis-prompt.md`.
    - Read `references/token-budget-policy.md` before broad analysis or large transcript sets.
    - Treat user messages as primary evidence for corrections, verification requests, risk boundaries, approvals, and context repair.
@@ -55,7 +55,7 @@ The user-facing product is a small set of project-specific loop proposals that t
    - Treat tool events as supporting evidence for repeated commands, failed statuses, polling, and verification habits.
    - Treat `auxiliary-evidence` records as project-context support for draft loop proposals when no full transcript is available.
    - Treat assistant messages as weak context, not primary recommendation evidence.
-   - Group packets into semantic candidates and write `semantic-candidates.json`.
+   - Group packets into semantic candidates and write `semantic-candidates.json` conforming to `schemas/semantic-candidates.schema.json`.
 
 4. Apply deterministic hard gates.
    - Read `references/signal-taxonomy.md` when categorizing repeated prompts, failures, verifications, context repairs, polling loops, risk gates, and one-off events.
@@ -81,15 +81,15 @@ Recommended unified entry:
 
 1. Run `scripts/session_to_loop.py --input <file-or-dir>`.
 2. If it stops with a pending scope, ask the user to confirm files, roles, snippet policy, and output visibility.
-3. Rerun with `--approve` or `--scope <approved-scope.json>` to produce `analysis-packets.jsonl`.
-4. Read `references/semantic-analysis-prompt.md` and analyze the packets with the host AI.
-5. Save AI output as `semantic-candidates.json`.
-6. Rerun `scripts/session_to_loop.py --input <file-or-dir> --scope <approved-scope.json> --semantic-candidates <semantic-candidates.json>`.
-7. After the user confirms a proposal, run `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --level <level> --out-dir <adoption-dir>` to create the goal, state, handoff, and project-rule snippet.
+3. Rerun with `--approve` or `--scope <approved-scope.json>` to produce `analysis-packets.jsonl`, `analysis-packets-index.json`, and `analysis-run.json`.
+4. Read `analysis-run.json`, `references/semantic-analysis-prompt.md`, `schemas/semantic-candidates.schema.json`, and the selected packets.
+5. Use host AI semantic judgment to write `semantic-candidates.json`; do not use regex matching as the primary product path.
+6. Continue with the `analysis-run.json` `continue_command`, or rerun `scripts/session_to_loop.py --input <file-or-dir> --scope <approved-scope.json> --semantic-candidates <semantic-candidates.json>`.
+7. Present 1-3 Loop Cards from rendered artifacts. After the user confirms a proposal, run `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --level <level> --out-dir <adoption-dir>` to create the goal, state, handoff, and project-rule snippet.
 
 Low-level deterministic scripts remain available:
 
-0. `scripts/design_goal_loop.py --goal "<user goal>" --domain auto --team-mode auto --level goal-loop --out-dir <artifact-dir>`
+0. `scripts/design_goal_loop.py --goal "<user goal>" --domain auto --team-mode auto --level auto --out-dir <artifact-dir>`
 1. `scripts/discover_claude_sessions.py --input <file-or-dir> --out <manifest.json>`
 2. `scripts/prepare_analysis_scope.py --manifest <manifest.json> --approve --roles user tool --out <scope.json>`
 3. `scripts/redact_transcripts.py --manifest <manifest.json> --scope <scope.json> --out-dir <redacted-dir> --index <redacted-index.json>`
@@ -108,7 +108,7 @@ files into memory for normal analysis.
 For broad transcript sets, pass `--max-packets`, `--target-token-budget`, and optional
 `--role-quota role=count` so semantic review sees the highest-value user/tool packets first.
 
-Use `--rule-fallback` only for offline synthetic evals or when the host AI is unavailable.
+Use `--rule-fallback` only for offline synthetic evals, fixture development, or when the host AI is unavailable. It is not the main product path.
 
 ## Mechanism Selection
 

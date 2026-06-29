@@ -18,6 +18,51 @@ DEFAULT_SEMANTIC = Path(".session-to-loop/private/semantic-candidates.json")
 DEFAULT_PACKET_INDEX = Path(".session-to-loop/private/analysis-packets-index.json")
 DEFAULT_OUT = Path(".session-to-loop/private/candidates.json")
 VALID_DECISIONS = {"commit", "draft", "checklist-only", "rule-only", "needs-human", "reject"}
+REQUIRED_SEMANTIC_TOP_LEVEL = {"version", "analysis_model", "evidence_basis", "candidates"}
+REQUIRED_SEMANTIC_CANDIDATE = {
+    "id",
+    "name",
+    "decision",
+    "confidence",
+    "mechanisms",
+    "summary",
+    "user_semantics",
+    "tool_patterns",
+    "failure_paths",
+    "verifier_habits",
+    "approval_boundaries",
+    "evidence",
+}
+HIGH_IMPACT_TERMS = (
+    "push",
+    "merge",
+    "deploy",
+    "deployment",
+    "production",
+    "prod",
+    "migration",
+    "schema",
+    "credential",
+    "credentials",
+    "api key",
+    "apikey",
+    "secret",
+    "billing",
+    "provider routing",
+    "permission",
+    "customer data",
+    "delete",
+    "destructive",
+    "release",
+    "上线",
+    "生产",
+    "部署",
+    "迁移",
+    "密钥",
+    "凭证",
+    "权限",
+    "删除",
+)
 
 
 def now_iso() -> str:
@@ -58,6 +103,103 @@ def integer(value: Any, default: int) -> int:
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def text_blob(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, dict):
+        return " ".join(text_blob(item) for item in value.values())
+    if isinstance(value, list):
+        return " ".join(text_blob(item) for item in value)
+    return str(value)
+
+
+def has_high_impact_action(value: Any) -> bool:
+    lowered = text_blob(value).lower()
+    return any(term in lowered for term in HIGH_IMPACT_TERMS)
+
+
+def has_stale_or_conflicting_evidence(value: Any) -> bool:
+    lowered = text_blob(
+        {
+            "evidence_quality": value.get("evidence_quality") if isinstance(value, dict) else None,
+            "uncertainty": value.get("uncertainty") if isinstance(value, dict) else None,
+            "where_this_may_be_wrong": value.get("where_this_may_be_wrong") if isinstance(value, dict) else None,
+            "why_not_loop": value.get("why_not_loop") if isinstance(value, dict) else None,
+        }
+    ).lower()
+    return any(term in lowered for term in ("stale", "outdated", "conflict", "conflicting", "contradict"))
+
+
+def raw_managed_loop(raw: dict) -> dict:
+    return raw.get("managed_loop") if isinstance(raw.get("managed_loop"), dict) else {}
+
+
+def raw_safety(raw: dict) -> dict:
+    return raw.get("safety") if isinstance(raw.get("safety"), dict) else {}
+
+
+def raw_completion_contract(raw: dict) -> dict:
+    managed_loop = raw_managed_loop(raw)
+    return managed_loop.get("completion_contract") if isinstance(managed_loop.get("completion_contract"), dict) else {}
+
+
+def normalize_render_fields(raw: dict, normalized: dict) -> dict:
+    source = raw_managed_loop(raw)
+    return {
+        "defaulted_for_rendering_only": True,
+        "raw_had_managed_loop": bool(source),
+        "raw_had_completion_contract": bool(raw_completion_contract(raw)),
+        "raw_had_loop_exit_contract": isinstance(source.get("loop_exit_contract"), dict),
+        "raw_had_state": bool(source.get("state_file") or source.get("state_schema")),
+        "raw_had_budget": bool(source.get("max_items_per_cycle") or source.get("max_iterations_per_run") or raw_safety(raw).get("budget_caps")),
+        "rendered_managed_loop": normalized.get("managed_loop", {}),
+    }
+
+
+def delegation_gate(raw: dict, normalized: dict) -> dict:
+    mechanisms = [str(item) for item in as_list(raw.get("mechanisms") or raw.get("mechanism")) if str(item)]
+    managed_loop = raw_managed_loop(raw)
+    completion_contract = raw_completion_contract(raw)
+    safety = raw_safety(raw)
+    raw_exit_contract = managed_loop.get("loop_exit_contract")
+    exit_validation = validate_exit_contract(raw_exit_contract)
+    high_impact = has_high_impact_action(raw)
+    stale_or_conflicting = has_stale_or_conflicting_evidence(raw)
+    has_human_gate = bool(strings(safety.get("requires_approval_for")) or strings(safety.get("human_checkpoint")))
+    criteria = {
+        "requested_loop_mechanism": "loop" in mechanisms,
+        "has_success_criteria": bool(strings(completion_contract.get("success_criteria")) or strings(raw.get("verification"))),
+        "has_verifier": bool(strings(completion_contract.get("verifier_commands")) or strings(raw.get("verification"))),
+        "has_state_or_resume_policy": bool(
+            (managed_loop.get("state_file") and managed_loop.get("state_schema"))
+            or managed_loop.get("resume_policy")
+        ),
+        "has_stop_or_reject_conditions": bool(
+            strings(raw.get("stop_conditions")) or strings(completion_contract.get("reject_conditions"))
+        ),
+        "has_budget_cap": bool(
+            managed_loop.get("max_items_per_cycle")
+            or managed_loop.get("max_iterations_per_run")
+            or strings(safety.get("budget_caps"))
+        ),
+        "has_human_gate": has_human_gate,
+        "has_loop_exit_contract": exit_validation["valid"],
+        "high_impact_has_approval": (not high_impact) or has_human_gate,
+        "evidence_not_stale_or_conflicting": not stale_or_conflicting,
+    }
+    required = list(criteria)
+    missing = [key for key in required if not criteria[key]]
+    return {
+        "eligible": not missing,
+        "criteria": criteria,
+        "missing": missing,
+        "high_impact_action": high_impact,
+        "stale_or_conflicting_evidence": stale_or_conflicting,
+        "exit_contract_validation": exit_validation,
+        "basis": "raw-ai-claims-only",
+    }
 
 
 def normalize_state_schema(value: Any) -> dict:
@@ -239,7 +381,7 @@ def normalize_candidate(raw: dict) -> dict:
     actions = strings(raw.get("actions"))
     verification = strings(raw.get("verification"))
     stop_conditions = strings(raw.get("stop_conditions"))
-    return {
+    normalized = {
         "id": candidate_id,
         "name": name,
         "decision": decision,
@@ -252,6 +394,7 @@ def normalize_candidate(raw: dict) -> dict:
         "loop_archetype": str(raw.get("loop_archetype") or ("engineering-maintenance" if "loop" in mechanisms else "none")),
         "summary": summary,
         "evidence": evidence,
+        "raw_ai_claims": raw,
         "trigger": trigger,
         "inputs": inputs,
         "actions": actions,
@@ -278,6 +421,8 @@ def normalize_candidate(raw: dict) -> dict:
         "artifacts": [str(item) for item in as_list(raw.get("artifacts"))],
         "downgrade_notes": str(raw.get("downgrade_notes", "")),
     }
+    normalized["normalized_render_fields"] = normalize_render_fields(raw, normalized)
+    return normalized
 
 
 def loop_eligibility(candidate: dict) -> dict:
@@ -342,7 +487,7 @@ def loop_eligibility(candidate: dict) -> dict:
     return {"eligible": not missing, "criteria": criteria, "missing": missing}
 
 
-def decision_card(candidate: dict, mechanisms: list[str], loop_gate: dict) -> dict:
+def decision_card(candidate: dict, mechanisms: list[str], loop_gate: dict, delegate_gate: dict) -> dict:
     decision = candidate.get("decision", "draft")
     verification = candidate.get("verification", [])
     if decision == "reject":
@@ -357,25 +502,50 @@ def decision_card(candidate: dict, mechanisms: list[str], loop_gate: dict) -> di
     return {
         "can_use_now": can_use_now,
         "can_confirm": "yes" if verification else "no",
-        "can_delegate": "yes" if "loop" in mechanisms and loop_gate.get("eligible") else "no",
-        "missing_before_delegate": loop_gate.get("missing", []),
+        "can_delegate": "yes" if "loop" in mechanisms and delegate_gate.get("eligible") else "no",
+        "missing_before_delegate": delegate_gate.get("missing", []) or loop_gate.get("missing", []),
         "next_action": next_action,
     }
+
+
+def remove_loop_or_downgrade(mechanisms: list[str]) -> list[str]:
+    remaining = [item for item in mechanisms if item != "loop"]
+    return remaining or ["checklist"]
 
 
 def apply_gates(candidate: dict) -> dict:
     downgrades = []
     loop_gate = loop_eligibility(candidate)
+    delegate_gate = delegation_gate(candidate.get("raw_ai_claims", {}), candidate)
     mechanisms = list(candidate.get("mechanisms", []))
     project_context_count = project_context_event_count(candidate.get("evidence", []))
 
     if "loop" in mechanisms and candidate.get("work_shape") == "process-shaped":
-        mechanisms = [item for item in mechanisms if item != "loop"]
+        mechanisms = remove_loop_or_downgrade(mechanisms)
         downgrades.append("Removed loop mechanism because process-shaped work should use a script or hook before a managed loop.")
 
-    if "loop" in mechanisms and not loop_gate["eligible"]:
+    if (
+        candidate.get("decision") != "reject"
+        and mechanisms
+        and delegate_gate.get("high_impact_action")
+        and not delegate_gate.get("criteria", {}).get("has_human_gate")
+    ):
         mechanisms = [item for item in mechanisms if item != "loop"]
-        downgrades.append("Removed loop mechanism because the managed loop acceptance contract was incomplete.")
+        for fallback in ("checklist", "approval-gate"):
+            if fallback not in mechanisms:
+                mechanisms.append(fallback)
+        candidate["decision"] = "needs-human"
+        downgrades.append("Changed to needs-human because high-impact actions require an explicit approval boundary.")
+
+    if delegate_gate.get("stale_or_conflicting_evidence"):
+        if candidate.get("decision") == "commit":
+            candidate["decision"] = "draft"
+        candidate["confidence"] = "medium" if candidate.get("confidence") == "high" else candidate.get("confidence", "medium")
+        downgrades.append("Kept below delegated loop because the AI marked evidence as stale, conflicting, or contradictory.")
+
+    if "loop" in mechanisms and not delegate_gate["eligible"]:
+        mechanisms = remove_loop_or_downgrade(mechanisms)
+        downgrades.append("Removed loop mechanism because raw AI claims did not justify delegated loop eligibility.")
 
     if (
         session_count(candidate.get("evidence", [])) < 2
@@ -402,7 +572,8 @@ def apply_gates(candidate: dict) -> dict:
     candidate["mechanisms"] = mechanisms
     candidate["mechanism"] = mechanisms[0] if mechanisms else "none"
     candidate["loop_eligibility"] = loop_gate
-    candidate["decision_card"] = decision_card(candidate, mechanisms, loop_gate)
+    candidate["delegation_gate"] = delegate_gate
+    candidate["decision_card"] = decision_card(candidate, mechanisms, loop_gate, delegate_gate)
     candidate["decision_trace"] = {
         "analysis_basis": "AI semantic candidate with deterministic scope, recurrence, loop, and safety gates applied.",
         "primary_role": "user" if role_counts(candidate.get("evidence", [])).get("user", 0) else "unknown",
@@ -412,6 +583,7 @@ def apply_gates(candidate: dict) -> dict:
         "event_count": len(candidate.get("evidence", [])),
         "intents": sorted({item.get("intent", "semantic_inference") for item in candidate.get("evidence", [])}),
         "selected_mechanisms": mechanisms,
+        "delegation_gate": delegate_gate,
         "downgrades": downgrades,
     }
     if downgrades:
@@ -420,11 +592,22 @@ def apply_gates(candidate: dict) -> dict:
 
 
 def semantic_candidates(data: dict) -> list[dict]:
+    missing_top = sorted(REQUIRED_SEMANTIC_TOP_LEVEL - set(data))
+    if missing_top:
+        raise ValueError(f"Semantic candidates JSON missing required top-level fields: {missing_top}")
     if isinstance(data.get("candidates"), list):
-        return data["candidates"]
+        candidates = data["candidates"]
     if isinstance(data.get("top_findings"), list):
-        return data["top_findings"]
-    raise ValueError("Semantic candidates JSON must contain a candidates array.")
+        candidates = data["top_findings"]
+    if not isinstance(data.get("candidates"), list) and not isinstance(data.get("top_findings"), list):
+        raise ValueError("Semantic candidates JSON must contain a candidates array.")
+    for index, candidate in enumerate(candidates):
+        if not isinstance(candidate, dict):
+            raise ValueError(f"Semantic candidate at index {index} must be an object.")
+        missing = sorted(REQUIRED_SEMANTIC_CANDIDATE - set(candidate))
+        if missing:
+            raise ValueError(f"Semantic candidate {candidate.get('id', index)!r} missing required fields: {missing}")
+    return candidates
 
 
 def parse_args() -> argparse.Namespace:

@@ -8,8 +8,12 @@ Use these structures when producing machine-readable artifacts. Markdown reports
 - `loop_archetype`: short label such as `engineering-maintenance`, `frontend-verification`, `monitoring-research`, `document-batch`, or `delivery-governance`.
 - `team_mode`: `none`, `phased`, or `subagent-team`.
 - `managed_loop.heartbeat`: `session`, `goal`, `scheduled`, or `event`.
-- `managed_loop.recommended_maturity`: `read-only-report`, `goal-loop`, `isolated-draft`, `verified-pr-draft`, `scheduled-readonly`, or `scheduled-draft`.
+- `managed_loop.recommended_maturity`: `read-only`, `goal-loop`, `isolated-draft`, `verified-pr-draft`, `scheduled-readonly`, or `scheduled-draft`.
 - `decision_card`: user-facing readiness summary: `can_use_now`, `can_confirm`, `can_delegate`, `missing_before_delegate`, `next_action`, and `confirmation_options`.
+- `schemas/semantic-candidates.schema.json`: host AI output contract. Scripts consume this schema after packet selection; they do not use regex fallback as the primary loop-value judge.
+- `raw_ai_claims`: private copy of the host AI candidate before deterministic guardrails normalize render fields.
+- `normalized_render_fields`: fields defaulted only so draft artifacts can render; defaults do not make a loop delegable.
+- `delegation_gate`: raw-AI-claims-only eligibility check for `can_delegate=yes`.
 - `first_run_packet`: the confirmable starter contract: `recommended_action`, `reply_to_confirm`, `starter_goal_prompt`, `first_run_mode`, `state_file`, `observe`, `decide`, `act`, `verify`, `stop_after`, and `human_gate`.
 - `managed_loop.completion_contract`: mandatory for real loops; defines success criteria, verifier commands, evaluator, pass evidence, reject conditions, and no-progress policy.
 - `managed_loop.loop_exit_contract`: mandatory for goal-ready loops; defines when to continue, return done, ask a human, block, or stop by budget.

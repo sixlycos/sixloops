@@ -194,14 +194,14 @@ python skills/session-to-loop/scripts/design_goal_loop.py \
   --goal "After frontend changes, verify changed routes with browser screenshots, fix low-risk regressions, and stop when review or product judgment is needed." \
   --domain frontend \
   --team-mode auto \
-  --level goal-loop \
+  --level auto \
   --out-dir .session-to-loop/tmp/frontend-goal \
   --overwrite
 ```
 
 Open the generated `GOAL.md` and `TEAM.md` under `.session-to-loop/tmp/frontend-goal/`.
 
-Try SixLoops without private logs first:
+Try SixLoops without private logs first. This offline fixture uses the deterministic fallback so the demo runs without a host AI semantic pass:
 
 ```bash
 python skills/session-to-loop/scripts/session_to_loop.py \
@@ -253,13 +253,15 @@ python skills/session-to-loop/scripts/session_to_loop.py \
   --role-quota tool=40
 ```
 
-The command creates compact packets and points the host AI to:
+The command creates compact packets plus `.session-to-loop/private/analysis-run.json`. The skill reads that run state and points the host AI to:
 
 ```text
 skills/session-to-loop/references/semantic-analysis-prompt.md
+skills/session-to-loop/schemas/semantic-candidates.schema.json
+.session-to-loop/private/analysis-packets.jsonl
 ```
 
-After the host AI writes `semantic-candidates.json`, render the guarded artifacts:
+The host AI then writes `.session-to-loop/private/semantic-candidates.json` from semantic judgment over the packets. Continue with the command stored in `analysis-run.json`, or run:
 
 ```bash
 python skills/session-to-loop/scripts/session_to_loop.py \
@@ -267,6 +269,8 @@ python skills/session-to-loop/scripts/session_to_loop.py \
   --scope .session-to-loop/private/analysis-scope.json \
   --semantic-candidates .session-to-loop/private/semantic-candidates.json
 ```
+
+`--rule-fallback` is only for offline fixtures, synthetic evals, or when the host AI is unavailable. It is not the main product path.
 
 ## Install For Codex
 
@@ -291,7 +295,7 @@ The skill should feel like this:
 1. Discover likely local inputs from the explicit path you gave it.
 2. Ask one scope question if reading real logs needs confirmation.
 3. Build compact, redacted analysis packets.
-4. Let the host AI infer repeated semantic patterns.
+4. Let the host AI infer repeated semantic patterns and write `semantic-candidates.json`.
 5. Present 1-3 loop proposals first.
 6. Ask which proposal to adopt with a run level, shrink, or reject.
 7. Generate concrete loop cards, skills, hooks, checklists, approval gates, or adoption packets only after confirmation.

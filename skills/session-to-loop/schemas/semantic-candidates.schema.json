@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sixloops.local/schemas/semantic-candidates.schema.json",
+  "title": "SixLoops AI Semantic Candidates",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["version", "analysis_model", "evidence_basis", "candidates"],
+  "properties": {
+    "version": { "type": "integer" },
+    "analysis_model": { "type": "string", "minLength": 1 },
+    "evidence_basis": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "name",
+          "decision",
+          "confidence",
+          "mechanisms",
+          "summary",
+          "user_semantics",
+          "tool_patterns",
+          "failure_paths",
+          "verifier_habits",
+          "approval_boundaries",
+          "evidence"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "decision": {
+            "type": "string",
+            "enum": ["commit", "draft", "checklist-only", "rule-only", "needs-human", "reject"]
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "mechanisms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["rule", "memory", "skill", "hook", "loop", "checklist", "approval-gate"]
+            }
+          },
+          "summary": { "type": "string", "minLength": 1 },
+          "user_semantics": { "type": "array", "items": { "type": "string" } },
+          "tool_patterns": { "type": "array", "items": { "type": "string" } },
+          "failure_paths": { "type": "array", "items": { "type": "string" } },
+          "verifier_habits": { "type": "array", "items": { "type": "string" } },
+          "approval_boundaries": { "type": "array", "items": { "type": "string" } },
+          "why_this_loop": { "type": "string" },
+          "why_not_smaller": { "type": "string" },
+          "why_not_more_autonomous": { "type": "string" },
+          "where_this_may_be_wrong": { "type": "array", "items": { "type": "string" } },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": ["source", "role"],
+              "properties": {
+                "source": { "type": "string", "minLength": 1 },
+                "kind": { "type": "string" },
+                "role": { "type": "string" },
+                "provider": { "type": "string" },
+                "event_kind": { "type": "string" },
+                "source_type": { "type": "string" },
+                "intent": { "type": "string" },
+                "snippet": { "type": "string" }
+              }
+            }
+          },
+          "managed_loop": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "safety": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}

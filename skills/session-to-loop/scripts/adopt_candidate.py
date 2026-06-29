@@ -144,6 +144,13 @@ def build_state(candidate: dict, level: str, artifact_dir: Path) -> dict:
         "last_status": None,
         "last_exit_status": None,
         "status_history": [],
+        "baseline_friction": None,
+        "post_run_result": None,
+        "saved_corrections": [],
+        "false_positive": [],
+        "human_acceptance": None,
+        "next_adjustment": None,
+        "demotion_recommendation": None,
         "artifact_dir": str(artifact_dir),
     }
 
@@ -242,6 +249,12 @@ Return one status at the end:
 - `BLOCKED`: repeated failure, no progress, missing input, or uncertain verifier.
 - `NEEDS_HUMAN`: approval or human judgment is required.
 - `BUDGET_STOPPED`: item, iteration, time, or token cap was reached.
+
+## First Run Retro
+
+Before the next run, update `STATE.json` with whether this loop reduced repeated human correction,
+created false positives, required too much human judgment, should be downgraded to a skill/checklist,
+or has enough accepted output to keep its current autonomy level.
 """
 
 
@@ -286,6 +299,11 @@ Return `BLOCKED` when:
 Return `BUDGET_STOPPED` when:
 
 {bullet(exits["budget_stopped_when"])}
+
+## Learning Check
+
+After the first run, record saved corrections, false positives, human acceptance, next adjustment,
+and any demotion recommendation in `STATE.json`.
 
 ## Files
 

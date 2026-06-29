@@ -69,6 +69,18 @@ def all_public_text(public_dir: Path) -> str:
     return "\n".join(chunks)
 
 
+def collect_json_keys(value: object) -> set[str]:
+    keys: set[str] = set()
+    if isinstance(value, dict):
+        for key, item in value.items():
+            keys.add(str(key))
+            keys.update(collect_json_keys(item))
+    elif isinstance(value, list):
+        for item in value:
+            keys.update(collect_json_keys(item))
+    return keys
+
+
 def candidate_mechanisms(candidates: list[dict]) -> set[str]:
     mechanisms: set[str] = set()
     for candidate in candidates:
@@ -86,6 +98,14 @@ def candidate_approvals(candidates: list[dict]) -> set[str]:
 
 def loop_candidates(candidates: list[dict]) -> list[dict]:
     return [candidate for candidate in candidates if "loop" in candidate.get("mechanisms", [])]
+
+
+def cards_by_id(candidates: list[dict]) -> dict[str, dict]:
+    return {
+        str(candidate.get("id")): candidate.get("decision_card", {})
+        for candidate in candidates
+        if isinstance(candidate.get("decision_card"), dict)
+    }
 
 
 def validate_loop_exit_contract(candidate: dict, expected_statuses: list[str]) -> list[str]:
@@ -131,6 +151,7 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
     candidates_path = private / "candidates.json"
     packet_index_path = private / "analysis-packets-index.json"
     packets_path = private / "analysis-packets.jsonl"
+    analysis_run_path = private / "analysis-run.json"
 
     if not candidates_path.exists():
         return [f"missing candidates output: {candidates_path}"]
@@ -150,6 +171,7 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
     session_ids = {str(packet.get("session_id")) for packet in packets}
     provider_counts = packet_index.get("provider_counts", {}) or packet_index.get("source", {}).get("providers", {})
     source_types = packet_index.get("source", {}).get("source_types", {})
+    decision_cards = cards_by_id(candidates)
 
     for candidate_id in expected.get("include_candidates", []):
         if candidate_id not in ids:
@@ -191,6 +213,30 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
         if approval not in approvals:
             failures.append(f"expected approval boundary {approval!r}, got {sorted(approvals)}")
 
+    if expected.get("require_analysis_run"):
+        if not analysis_run_path.exists():
+            failures.append(f"missing analysis-run output: {analysis_run_path}")
+        else:
+            analysis_run = load_json(analysis_run_path)
+            if analysis_run.get("status") != "needs_semantic_analysis":
+                failures.append(f"expected analysis-run status needs_semantic_analysis, got {analysis_run.get('status')!r}")
+            for key in ("prompt_path", "schema_path", "packets_path", "packet_index_path", "semantic_candidates_path"):
+                if not analysis_run.get(key):
+                    failures.append(f"analysis-run missing {key}")
+            command = analysis_run.get("continue_command", [])
+            if "--semantic-candidates" not in command:
+                failures.append("analysis-run continue_command must include --semantic-candidates")
+
+    for candidate_id, expected_value in expected.get("require_can_delegate", {}).items():
+        actual = decision_cards.get(candidate_id, {}).get("can_delegate")
+        if actual != expected_value:
+            failures.append(f"expected {candidate_id}.can_delegate {expected_value!r}, got {actual!r}")
+
+    for candidate_id in expected.get("forbid_can_delegate", []):
+        actual = decision_cards.get(candidate_id, {}).get("can_delegate")
+        if actual == "yes":
+            failures.append(f"expected {candidate_id}.can_delegate not to be yes")
+
     if expected.get("require_loop_exit_contract"):
         if not loop_items:
             failures.append("expected at least one loop candidate with loop_exit_contract")
@@ -202,6 +248,9 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
         for candidate in loop_items:
             if not has_budget_stop_number(candidate):
                 failures.append(f"{candidate.get('id')}: budget stop must include concrete numeric caps")
+
+    if expected.get("require_private_evidence") and not any(candidate.get("evidence") for candidate in candidates):
+        failures.append("expected private candidates to retain evidence")
 
     if expected.get("redaction_required") and not packet_index.get("redaction", {}).get("enabled"):
         failures.append("expected redaction to be enabled")
@@ -219,13 +268,40 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
             if status not in public_text:
                 failures.append(f"expected rendered artifacts to include exit status {status!r}")
 
+    if expected.get("require_public_safe_summary"):
+        summary_path = public / "summary.json"
+        if not summary_path.exists():
+            failures.append(f"missing public summary: {summary_path}")
+        else:
+            summary = load_json(summary_path)
+            summary_keys = collect_json_keys(summary)
+            forbidden_keys = {"evidence", "raw_ai_claims", "snippet"}
+            leaked_keys = sorted(forbidden_keys & summary_keys)
+            if leaked_keys:
+                failures.append(f"public summary leaked private keys: {leaked_keys}")
+            for candidate in summary.get("candidates", []) if isinstance(summary, dict) else []:
+                if "source_limitations" not in candidate:
+                    failures.append("public summary candidate missing source_limitations")
+
     return failures
+
+
+def run_pipeline(cmd: list[str], keep_going: bool) -> tuple[bool, list[str]]:
+    result = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True, text=True)
+    if result.returncode == 0:
+        return True, []
+    details = [f"pipeline exited {result.returncode}"]
+    if result.stdout.strip():
+        details.append(result.stdout.strip())
+    if result.stderr.strip():
+        details.append(result.stderr.strip())
+    return False, details
 
 
 def run_case(case: dict, out_root: Path, keep_going: bool) -> tuple[bool, list[str]]:
     case_dir = out_root / str(case["id"])
     clean_case_dir(case_dir, out_root)
-    cmd = [
+    base_cmd = [
         sys.executable,
         str(PIPELINE),
         "--input",
@@ -233,17 +309,23 @@ def run_case(case: dict, out_root: Path, keep_going: bool) -> tuple[bool, list[s
         "--out-root",
         str(case_dir),
         "--approve",
-        "--rule-fallback",
     ]
-    result = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True, text=True)
-    if result.returncode != 0:
-        details = [f"pipeline exited {result.returncode}"]
-        if result.stdout.strip():
-            details.append(result.stdout.strip())
-        if result.stderr.strip():
-            details.append(result.stderr.strip())
-        if not keep_going:
+
+    semantic_path = case.get("semantic_candidates")
+    if semantic_path:
+        ok, details = run_pipeline(base_cmd, keep_going)
+        if not ok:
             return False, details
+        cmd = [
+            *base_cmd,
+            "--semantic-candidates",
+            str(REPO_ROOT / semantic_path),
+        ]
+    else:
+        cmd = [*base_cmd, "--rule-fallback"]
+
+    ok, details = run_pipeline(cmd, keep_going)
+    if not ok:
         return False, details
 
     failures = assert_case(case, case_dir)

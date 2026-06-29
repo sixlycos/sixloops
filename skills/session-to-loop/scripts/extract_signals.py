@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract user-centered loop-engineering signals from redacted transcript JSONL."""
+"""Offline fallback extractor for synthetic evals or when host AI semantic analysis is unavailable."""
 
 from __future__ import annotations
 
@@ -350,7 +350,7 @@ def extract(index: dict) -> dict:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Extract recurring workflow signals from redacted transcripts.")
+    parser = argparse.ArgumentParser(description="Offline fallback: extract recurring workflow signals for evals or no-host-AI runs.")
     parser.add_argument(
         "--redacted-index",
         default=str(DEFAULT_INDEX),

@@ -1,5 +1,42 @@
 # {{name}}
 
+## Control Card
+
+This loop will:
+
+{{control_will_do}}
+
+This loop will not:
+
+{{control_will_not}}
+
+It must ask you before:
+
+{{control_must_ask}}
+
+It verifies with:
+
+{{control_verify}}
+
+It stops when:
+
+{{control_stop}}
+
+Why this loop should exist:
+
+{{control_why}}
+
+Where this may be wrong:
+
+{{where_this_may_be_wrong}}
+
+Reply with one:
+
+- `{{confirm_as_read_only}}`
+- `{{confirm_as_goal_loop}}`
+- `{{shrink_to_smaller_mechanism}}`
+- `{{reject_candidate}}`
+
 ```yaml
 id: "{{id}}"
 decision: "{{decision}}"
@@ -285,8 +322,10 @@ Budget caps:
 
 {{downgrade_notes}}
 
-## Evidence
+## Evidence Appendix
 
-| Source | Signal | Redacted evidence |
+Evidence snippets are hidden by default in public artifacts. Use private `candidates.json` for full redacted evidence.
+
+| Source | Signal | Evidence pointer |
 | --- | --- | --- |
 | {{source}} | {{signal_kind}} | {{snippet}} |

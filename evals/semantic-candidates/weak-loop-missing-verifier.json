@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "analysis_model": "ai-semantic-v1",
+  "evidence_basis": {
+    "packet_count_considered": 1,
+    "primary_roles": ["user"],
+    "supporting_roles": [],
+    "source_limitations": ["Synthetic weak candidate with missing verifier."]
+  },
+  "candidates": [
+    {
+      "id": "weak-loop",
+      "name": "Weak Loop",
+      "decision": "draft",
+      "confidence": "medium",
+      "mechanisms": ["loop"],
+      "summary": "A vague repeated coding friction was mentioned, but verifier details are missing.",
+      "user_semantics": ["The user expressed repeated friction."],
+      "tool_patterns": [],
+      "failure_paths": ["The exact failure path is unclear."],
+      "verifier_habits": [],
+      "approval_boundaries": [],
+      "evidence": [
+        {
+          "source": "session:synthetic-ci-1#event-1",
+          "kind": "semantic-observation",
+          "role": "user",
+          "snippet": "Please make this better like last time."
+        }
+      ],
+      "trigger": ["Repeated coding friction appears."],
+      "inputs": ["project context"],
+      "actions": ["Try to improve it."],
+      "managed_loop": {
+        "objective": "Improve the vague repeated friction."
+      },
+      "safety": {
+        "autonomy_level": "draft-only"
+      },
+      "artifacts": ["loop-card"]
+    }
+  ]
+}

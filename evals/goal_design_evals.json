@@ -4,11 +4,14 @@
     "goal": "After frontend route or i18n changes, verify browser screenshots and fix low-risk UI regressions.",
     "expected": {
       "domain": "frontend",
-      "team_mode": "subagent-team",
+      "team_mode": "phased",
+      "adoption_level": "isolated-draft",
       "roles": ["planner", "frontend-maker", "browser-verifier", "reviewer", "integrator"],
       "approval_for": ["visual direction changes", "product copy decisions"],
       "require_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json"]
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
     }
   },
   {
@@ -16,11 +19,89 @@
     "goal": "每天早上检查我的项目，读取最近错误日志、CI失败、TODO和用户反馈，只挑1-3个高价值问题，能低风险修就尝试修复并验证。",
     "expected": {
       "domain": "maintenance",
-      "team_mode": "subagent-team",
+      "team_mode": "phased",
+      "adoption_level": "isolated-draft",
       "roles": ["triage-planner", "issue-investigator", "fixer", "verifier", "integrator"],
       "approval_for": ["broad scan", "production action"],
       "require_exit_contract": true,
-      "must_include": ["GOAL.md", "TEAM.md", "STATE.json"]
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+    }
+  },
+  {
+    "id": "backend-contract-triage",
+    "goal": "Triage backend API contract failures, apply the safest fixes, and run focused verifier checks.",
+    "expected": {
+      "domain": "backend",
+      "team_mode": "phased",
+      "adoption_level": "isolated-draft",
+      "roles": ["planner", "backend-maker", "contract-verifier", "reviewer", "integrator"],
+      "approval_for": ["database migration", "credential changes"],
+      "require_exit_contract": true,
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+    }
+  },
+  {
+    "id": "fullstack-architecture-split",
+    "goal": "Design a fullstack architecture split for frontend and backend contract alignment, including delivery and verification stages.",
+    "expected": {
+      "domain": "fullstack",
+      "team_mode": "subagent-team",
+      "adoption_level": "goal-loop",
+      "roles": ["architect", "frontend-maker", "backend-maker", "integration-verifier", "integrator"],
+      "approval_for": ["schema migration", "release decision"],
+      "require_exit_contract": true,
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+    }
+  },
+  {
+    "id": "review-loop",
+    "goal": "Review my implementation before handoff, find the highest risk regressions, and verify only the focused checks.",
+    "expected": {
+      "domain": "review",
+      "team_mode": "phased",
+      "adoption_level": "goal-loop",
+      "roles": ["maker-summarizer", "checker", "verifier", "risk-reviewer", "integrator"],
+      "approval_for": ["merge", "release"],
+      "require_exit_contract": true,
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+    }
+  },
+  {
+    "id": "delivery-readiness",
+    "goal": "Prepare release readiness for a PR: inspect CI, build output, verifier evidence, and handoff risks, but do not deploy.",
+    "expected": {
+      "domain": "delivery",
+      "team_mode": "subagent-team",
+      "adoption_level": "read-only",
+      "roles": ["release-planner", "ci-fixer", "verifier", "handoff-writer", "integrator"],
+      "approval_for": ["push", "merge", "production deploy", "release approval"],
+      "require_exit_contract": true,
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
+    }
+  },
+  {
+    "id": "vague-goal-defaults-readonly",
+    "goal": "Make it better.",
+    "expected": {
+      "domain": "general",
+      "team_mode": "phased",
+      "adoption_level": "read-only",
+      "roles": ["planner", "maker", "verifier", "reviewer", "integrator"],
+      "approval_for": ["scope expansion", "irreversible changes"],
+      "require_exit_contract": true,
+      "require_learning_fields": true,
+      "require_handoff_exit_contract": true,
+      "must_include": ["GOAL.md", "TEAM.md", "STATE.json", "HANDOFF.md"]
     }
   }
 ]

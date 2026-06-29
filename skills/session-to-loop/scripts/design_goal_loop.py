@@ -27,6 +27,7 @@ DOMAINS = {
     "maintenance",
 }
 LEVELS = {
+    "auto",
     "read-only",
     "goal-loop",
     "isolated-draft",
@@ -178,10 +179,47 @@ def infer_domain(goal: str, requested: str) -> str:
     return best_domain if best_score > 0 else "general"
 
 
-def resolve_team_mode(domain: str, requested: str) -> str:
+HIGH_IMPACT_GOAL_TERMS = (
+    "deploy",
+    "production",
+    "prod",
+    "migration",
+    "schema",
+    "credential",
+    "secret",
+    "permission",
+    "billing",
+    "release",
+    "上线",
+    "生产",
+    "部署",
+    "迁移",
+    "密钥",
+    "权限",
+)
+
+
+def resolve_level(goal: str, requested: str) -> str:
     if requested != "auto":
         return requested
-    if domain in {"frontend", "backend", "fullstack", "architecture", "review", "delivery", "maintenance"}:
+    lowered = goal.lower()
+    if any(term in lowered for term in HIGH_IMPACT_GOAL_TERMS):
+        return "read-only"
+    if len(re.findall(r"\w+", goal)) < 6:
+        return "read-only"
+    edit_terms = re.search(r"\b(apply|fix|patch|implement|change)\b", lowered)
+    if edit_terms or any(term in lowered for term in ("修", "改", "实现", "尝试修复")):
+        return "isolated-draft"
+    return "goal-loop"
+
+
+def resolve_team_mode(domain: str, requested: str, goal: str) -> str:
+    if requested != "auto":
+        return requested
+    lowered = goal.lower()
+    if any(term in lowered for term in ("subagent", "team", "parallel", "multi-agent", "子代理", "团队", "并行")):
+        return "subagent-team"
+    if domain in {"fullstack", "architecture", "delivery"}:
         return "subagent-team"
     return "phased"
 
@@ -407,10 +445,10 @@ def build_design(args: argparse.Namespace) -> dict:
     goal = read_goal(args)
     domain = infer_domain(goal, args.domain)
     profile = base_profile(domain)
-    team_mode = resolve_team_mode(domain, args.team_mode)
+    team_mode = resolve_team_mode(domain, args.team_mode, goal)
     loop_id = args.loop_id or slug(f"{domain}-{compact(goal, 40)}-{short_hash(goal)}")
     name = args.name or f"{profile['archetype'].replace('-', ' ').title()} Loop"
-    level = args.level
+    level = resolve_level(goal, args.level)
     max_items = max(1, args.max_items)
     max_iterations = max(1, args.max_iterations)
     team_roles = [role_prompt(role_id, goal, domain) for role_id in profile["team"]]
@@ -545,6 +583,13 @@ def build_state(design: dict) -> dict:
         "last_status": None,
         "last_exit_status": None,
         "status_history": [],
+        "baseline_friction": None,
+        "post_run_result": None,
+        "saved_corrections": [],
+        "false_positive": [],
+        "human_acceptance": None,
+        "next_adjustment": None,
+        "demotion_recommendation": None,
     }
 
 
@@ -628,6 +673,12 @@ Return `BUDGET_STOPPED` when:
 ## Final Status
 
 Return exactly one: `DONE`, `CONTINUE`, `BLOCKED`, `NEEDS_HUMAN`, or `BUDGET_STOPPED`.
+
+## First Run Retro
+
+Before the next run, update `STATE.json` with whether this loop reduced repeated human correction,
+created false positives, required too much human judgment, should be downgraded to a skill/checklist,
+or has enough accepted output to keep its current autonomy level.
 """
 
 
@@ -671,6 +722,7 @@ def render_team(design: dict) -> str:
 
 
 def render_handoff(design: dict, artifact_dir: Path) -> str:
+    exits = design["managed_loop"]["loop_exit_contract"]
     return f"""# {design["name"]} Handoff
 
 This folder contains a goal-ready SixLoops design generated from a user objective.
@@ -680,6 +732,33 @@ This folder contains a goal-ready SixLoops design generated from a user objectiv
 1. Read `GOAL.md`.
 2. If team tools are available and team mode is `subagent-team`, use `TEAM.md` to split planner, maker, checker, verifier, and integrator roles.
 3. Keep `STATE.json` beside the run and update it before stopping.
+
+## Exit Contract
+
+Continue only if:
+
+{bullet(exits["continue_only_if"])}
+
+Return `DONE` when:
+
+{bullet(exits["done_when"])}
+
+Return `NEEDS_HUMAN` when:
+
+{bullet(exits["needs_human_when"])}
+
+Return `BLOCKED` when:
+
+{bullet(exits["blocked_when"])}
+
+Return `BUDGET_STOPPED` when:
+
+{bullet(exits["budget_stopped_when"])}
+
+## Learning Check
+
+After each run, record baseline friction, post-run result, saved corrections, false positives,
+human acceptance, next adjustment, and demotion recommendation in `STATE.json`.
 
 ## Files
 
@@ -757,7 +836,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--name", default=None, help="Human-readable loop name.")
     parser.add_argument("--loop-id", default=None, help="Stable loop id. Defaults to a slug from domain and goal hash.")
     parser.add_argument("--domain", choices=sorted(DOMAINS), default="auto", help="Task domain. Default: auto.")
-    parser.add_argument("--level", choices=sorted(LEVELS), default="goal-loop", help="Starting adoption level. Default: goal-loop.")
+    parser.add_argument("--level", choices=sorted(LEVELS), default="auto", help="Starting adoption level. Default: auto.")
     parser.add_argument("--team-mode", choices=sorted(TEAM_MODES), default="auto", help="Team design mode. Default: auto.")
     parser.add_argument("--project-root", default=".", help="Project root for metadata only. Default: current directory.")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR), help=f"Output root. Default: {DEFAULT_OUT_DIR}")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score extracted signals and select minimal loop-engineering mechanisms."""
+"""Offline fallback scorer for synthetic evals or when host AI semantic analysis is unavailable."""
 
 from __future__ import annotations
 
@@ -595,7 +595,7 @@ def score_signal(signal: dict) -> dict:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Score loop-engineering candidates from extracted signals.")
+    parser = argparse.ArgumentParser(description="Offline fallback: score loop-engineering candidates from extracted signals.")
     parser.add_argument("--signals", default=str(DEFAULT_SIGNALS), help=f"Signals JSON path. Default: {DEFAULT_SIGNALS}")
     parser.add_argument("--out", default=str(DEFAULT_OUT), help=f"Candidates output path. Default: {DEFAULT_OUT}")
     return parser.parse_args()

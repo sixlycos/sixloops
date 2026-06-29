@@ -1,6 +1,12 @@
 {
   "version": 1,
   "analysis_model": "ai-semantic-v1",
+  "evidence_basis": {
+    "packet_count_considered": 4,
+    "primary_roles": ["user"],
+    "supporting_roles": ["tool"],
+    "source_limitations": ["Synthetic fixture."]
+  },
   "candidates": [
     {
       "id": "ci-babysitter",
@@ -10,6 +16,15 @@
       "mechanisms": ["loop", "skill"],
       "score": 90,
       "summary": "Repeated user requests to inspect CI logs before patching and to avoid pushing before verification.",
+      "user_semantics": ["The user repeatedly asks the agent to inspect CI logs before patching."],
+      "tool_patterns": ["CI failure status supports a repeatable observe-verify cycle."],
+      "failure_paths": ["Guessing before reading failed logs causes repeated CI triage churn."],
+      "verifier_habits": ["Run local verification before push or merge."],
+      "approval_boundaries": ["push", "merge"],
+      "why_this_loop": "CI triage has observable state, bounded actions, verifier evidence, and approval boundaries.",
+      "why_not_smaller": "A rule can remind the agent to read logs, but it cannot preserve CI failure state across attempts.",
+      "why_not_more_autonomous": "Push and merge require human approval.",
+      "where_this_may_be_wrong": ["Synthetic packets may omit the current CI provider configuration."],
       "evidence": [
         {
           "source": "session:synthetic-ci-1#event-1",
@@ -58,6 +73,36 @@
         ],
         "selection_policy": ["Prefer failures blocking merge.", "Ignore flakes without new evidence."],
         "max_items_per_cycle": 3,
+        "max_iterations_per_run": 8,
+        "completion_contract": {
+          "success_criteria": ["Relevant local test passes.", "CI becomes green or is clearly blocked."],
+          "verifier_commands": ["Run the focused project checks listed in verification."],
+          "evaluator_agent": "Use deterministic checks first; use a read-only checker when commands cannot decide.",
+          "pass_evidence_required": ["Command output, CI status, or explicit verifier note."],
+          "reject_conditions": ["Same failure repeats twice.", "Push or merge required."],
+          "no_progress_policy": "Stop when the same failure repeats twice or no evidence changes across two iterations."
+        },
+        "loop_exit_contract": {
+          "continue_only_if": [
+            "Objective is unchanged.",
+            "Next action stays inside approved scope.",
+            "A verifier can reject bad output.",
+            "New evidence changed or is likely from the next verifier.",
+            "Fewer than 3 item(s) are active in this cycle.",
+            "Fewer than 8 iteration(s) have run."
+          ],
+          "done_when": ["Relevant local test passes.", "CI becomes green or is clearly blocked."],
+          "needs_human_when": ["push is required.", "merge is required."],
+          "blocked_when": ["Same failure repeats twice.", "Verifier is unavailable or ambiguous."],
+          "budget_stopped_when": ["More than 3 item(s) would be required in one cycle.", "8 iteration(s) are reached."],
+          "status_protocol": {
+            "CONTINUE": "Only when another cycle can increase verified certainty.",
+            "DONE": "Success criteria passed with required pass evidence; return for acceptance.",
+            "NEEDS_HUMAN": "Human judgment or explicit approval is required.",
+            "BLOCKED": "Reliable progress is not possible with current evidence or verifier.",
+            "BUDGET_STOPPED": "Item, iteration, time, token, or cost cap was reached."
+          }
+        },
         "change_policy": "If a fix is low risk and directly evidenced, use an isolated branch or worktree when available. Do not push or merge without approval.",
         "deliverables": ["Status summary", "Patch or branch/PR draft when verification passes", "Updated state file"],
         "resume_policy": "On the next run, read the state file and continue unresolved failures before new ones.",

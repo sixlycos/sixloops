@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "analysis_model": "ai-semantic-v1",
+  "evidence_basis": {
+    "packet_count_considered": 1,
+    "primary_roles": ["user"],
+    "supporting_roles": ["tool"],
+    "source_limitations": ["Synthetic high-impact candidate intentionally missing human gate."]
+  },
+  "candidates": [
+    {
+      "id": "deploy-autopilot",
+      "name": "Deploy Autopilot Loop",
+      "decision": "commit",
+      "confidence": "high",
+      "mechanisms": ["loop"],
+      "summary": "Automatically deploy production after CI passes.",
+      "user_semantics": ["The user mentioned deploy readiness."],
+      "tool_patterns": ["CI can report pass/fail."],
+      "failure_paths": ["Release can be blocked by production deploy risk."],
+      "verifier_habits": ["CI must pass."],
+      "approval_boundaries": [],
+      "evidence": [
+        {
+          "source": "session:risky-deploy-1#event-1",
+          "kind": "release-risk",
+          "role": "user",
+          "snippet": "Deploy this to production after CI."
+        }
+      ],
+      "trigger": ["CI passes before production deploy."],
+      "inputs": ["CI status", "deployment target"],
+      "actions": ["Deploy production automatically."],
+      "verification": ["CI passes."],
+      "stop_conditions": ["Deployment succeeds."],
+      "managed_loop": {
+        "objective": "Deploy production after CI passes.",
+        "state_file": ".session-to-loop/state/deploy-autopilot.json",
+        "state_schema": {"status": "deployment readiness"},
+        "max_items_per_cycle": 1,
+        "max_iterations_per_run": 1,
+        "completion_contract": {
+          "success_criteria": ["Production deploy succeeds."],
+          "verifier_commands": ["Check CI status."],
+          "evaluator_agent": "Use deterministic checks.",
+          "pass_evidence_required": ["CI status."],
+          "reject_conditions": ["CI fails."],
+          "no_progress_policy": "Stop after one failed deploy attempt."
+        },
+        "loop_exit_contract": {
+          "continue_only_if": ["CI status changed and scope is unchanged."],
+          "done_when": ["Production deploy succeeds."],
+          "needs_human_when": ["No human boundary was supplied."],
+          "blocked_when": ["CI fails."],
+          "budget_stopped_when": ["1 iteration is reached."],
+          "status_protocol": {
+            "CONTINUE": "Only when another cycle can increase verified certainty.",
+            "DONE": "Success criteria passed with required pass evidence; return for acceptance.",
+            "NEEDS_HUMAN": "Human judgment or explicit approval is required.",
+            "BLOCKED": "Reliable progress is not possible with current evidence or verifier.",
+            "BUDGET_STOPPED": "Item, iteration, time, token, or cost cap was reached."
+          }
+        }
+      },
+      "safety": {
+        "autonomy_level": "draft-only"
+      },
+      "artifacts": ["loop-card"]
+    }
+  ]
+}

@@ -66,6 +66,8 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
         failures.append(f"expected domain {expected.get('domain')!r}, got {design.get('domain')!r}")
     if design.get("team_mode") != expected.get("team_mode"):
         failures.append(f"expected team_mode {expected.get('team_mode')!r}, got {design.get('team_mode')!r}")
+    if expected.get("adoption_level") and design.get("adoption_level") != expected.get("adoption_level"):
+        failures.append(f"expected adoption_level {expected.get('adoption_level')!r}, got {design.get('adoption_level')!r}")
 
     role_ids = {role.get("id") for role in design.get("subagent_team", {}).get("roles", [])}
     for role in expected.get("roles", []):
@@ -99,9 +101,37 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
             if not exit_contract.get(list_key):
                 failures.append(f"empty exit contract list: {list_key}")
 
+    if expected.get("require_learning_fields"):
+        state_path = design_dir / "STATE.json"
+        if not state_path.exists():
+            failures.append("missing STATE.json for learning-field check")
+        else:
+            state = load_json(state_path)
+            required_learning = {
+                "baseline_friction",
+                "post_run_result",
+                "saved_corrections",
+                "false_positive",
+                "human_acceptance",
+                "next_adjustment",
+                "demotion_recommendation",
+            }
+            missing_learning = sorted(required_learning - set(state))
+            if missing_learning:
+                failures.append(f"missing post-adoption learning fields: {missing_learning}")
+
     for filename in expected.get("must_include", []):
         if not (design_dir / filename).exists():
             failures.append(f"missing artifact {filename}")
+
+    if expected.get("require_handoff_exit_contract"):
+        handoff = (design_dir / "HANDOFF.md").read_text(encoding="utf-8", errors="ignore")
+        goal = (design_dir / "GOAL.md").read_text(encoding="utf-8", errors="ignore")
+        for label, text in (("HANDOFF.md", handoff), ("GOAL.md", goal)):
+            if "## Exit Contract" not in text:
+                failures.append(f"{label} missing ## Exit Contract")
+            if "Learning Check" not in text and "First Run Retro" not in text:
+                failures.append(f"{label} missing learning check or first run retro")
 
     rendered = all_text(design_dir)
     if "{{" in rendered or "}}" in rendered:
@@ -128,7 +158,7 @@ def run_case(case: dict, out_root: Path, keep_going: bool) -> tuple[bool, list[s
         "--team-mode",
         "auto",
         "--level",
-        "goal-loop",
+        "auto",
         "--out-dir",
         str(case_dir),
         "--overwrite",
