@@ -14,7 +14,7 @@ The repository is named `sixloops`. The installed skill folder remains
 `session-to-loop` for Codex and Claude compatibility, so invoke it as
 `$session-to-loop` in Codex or `session-to-loop` in Claude Code.
 
-![SixLoops semantic analysis turns noisy packets into loop cards](assets/readme/semantic-kitchen.png)
+![Let's loop meme](assets/readme/lets-loop-meme.png)
 
 ## The Core Idea
 
@@ -27,6 +27,8 @@ Repeated agent mistakes usually need one of three responses:
   human gate, and adoption feedback.
 
 SixLoops helps decide which response is actually worth adding.
+
+![SixLoops semantic analysis turns noisy packets into loop cards](assets/readme/semantic-kitchen.png)
 
 | Repeated correction | Better artifact |
 | --- | --- |
