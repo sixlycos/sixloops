@@ -11,7 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = REPO_ROOT / "skills" / "session-to-loop"
-DEFAULT_OUT = REPO_ROOT / "dist" / "session-to-loop-skill.zip"
+DEFAULT_OUT = REPO_ROOT / "dist" / "sixloops-skill.zip"
 
 
 def should_skip(path: Path) -> bool:

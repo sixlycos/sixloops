@@ -6,6 +6,10 @@ SixLoops is an open-source Agent Skill that looks at local Codex / Claude Code s
 
 It is not a chat summarizer. It is a **loop engineering assistant** for software teams and solo developers who keep correcting the same agent behavior.
 
+The **six** in SixLoops is the control surface every useful coding loop needs: **scope, state, verifier, budget, human gate, and adoption feedback**. This is why SixLoops does not just make prompts longer; it decides whether a repeated behavior deserves a loop at all.
+
+The repository is named `sixloops`. The installed skill folder remains `session-to-loop` for Codex / Claude compatibility, so invoke it as `$session-to-loop` in Codex or `session-to-loop` in Claude Code.
+
 ![Let's loop meme](assets/readme/lets-loop-meme.png)
 
 ## Before / After
@@ -66,6 +70,8 @@ This is more useful than a long prompt because SixLoops:
 
 ## Quick Start
 
+Pasting the GitHub URL into Codex or Claude does not automatically install the skill. Run an install command, or copy the `skills/session-to-loop` folder into your local skills directory.
+
 ### 1. Install For Codex
 
 From this repo:
@@ -77,7 +83,7 @@ From this repo:
 One-line install from GitHub:
 
 ```powershell
-git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target codex
+git clone https://github.com/sixlycos/sixloops.git; cd sixloops; .\scripts\install.ps1 -Target codex
 ```
 
 Then start a new Codex thread and ask:
@@ -107,7 +113,7 @@ User-level install:
 One-line user install from GitHub:
 
 ```powershell
-git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target claude -Scope user
+git clone https://github.com/sixlycos/sixloops.git; cd sixloops; .\scripts\install.ps1 -Target claude -Scope user
 ```
 
 Project-level install for a repo:
@@ -251,7 +257,7 @@ python scripts/package_skill.py
 This writes:
 
 ```text
-dist/session-to-loop-skill.zip
+dist/sixloops-skill.zip
 ```
 
 Unzip it into one of these directories:
@@ -374,8 +380,8 @@ SixLoops should explicitly guard against common money pits:
 | Mode | Best For | Command |
 | --- | --- | --- |
 | User install | Personal daily use | `.\scripts\install.ps1 -Target codex` |
-| One-line GitHub install | Quick local tryout | `git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target codex` |
-| Release zip | Offline or pinned version install | Unzip `session-to-loop-skill.zip` into `%USERPROFILE%\.agents\skills` |
+| One-line GitHub install | Quick local tryout | `git clone https://github.com/sixlycos/sixloops.git; cd sixloops; .\scripts\install.ps1 -Target codex` |
+| Release zip | Offline or pinned version install | Unzip `sixloops-skill.zip` into `%USERPROFILE%\.agents\skills` |
 | Manual install | Environments without PowerShell script execution | Copy `skills/session-to-loop` to `%USERPROFILE%\.agents\skills\session-to-loop` |
 | Direct path invocation | Testing without installing | Reference `skills/session-to-loop/SKILL.md` directly in a Codex prompt |
 
@@ -385,8 +391,8 @@ SixLoops should explicitly guard against common money pits:
 | --- | --- | --- |
 | User install | Personal use across projects | `.\scripts\install.ps1 -Target claude -Scope user` |
 | Project install | Team-shared repo workflow | `.\scripts\install.ps1 -Target claude -Scope project -ProjectPath <repo>` |
-| One-line GitHub install | Quick local tryout | `git clone https://github.com/sixlycos/session-to-loop.git; cd session-to-loop; .\scripts\install.ps1 -Target claude -Scope user` |
-| Release zip | Offline or pinned version install | Unzip `session-to-loop-skill.zip` into `%USERPROFILE%\.claude\skills` |
+| One-line GitHub install | Quick local tryout | `git clone https://github.com/sixlycos/sixloops.git; cd sixloops; .\scripts\install.ps1 -Target claude -Scope user` |
+| Release zip | Offline or pinned version install | Unzip `sixloops-skill.zip` into `%USERPROFILE%\.claude\skills` |
 | Manual install | Environments without script execution | Copy to `~/.claude/skills/session-to-loop` or `<repo>/.claude/skills/session-to-loop` |
 
 ### macOS / Linux
