@@ -2,6 +2,10 @@
 
 {{summary}}
 
+## Easiest Next Step
+
+{{default_next_step}}
+
 ## Start Here
 
 {{proposal_overview}}

@@ -22,6 +22,10 @@ Use this as a managed agent goal after the user approves the loop.
 
 {{recommended_maturity}}
 
+## Autopilot Rule
+
+{{autopilot_contract}}
+
 ## State
 
 Read this file first. Create or update it before stopping:

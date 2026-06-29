@@ -10,6 +10,10 @@ Goal:
 
 {{first_run_goal}}
 
+## Autopilot
+
+{{autopilot_contract}}
+
 Reply in this chat with one line:
 
 {{start_options}}

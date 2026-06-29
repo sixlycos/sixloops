@@ -1,6 +1,10 @@
-# SixLoops 启动建议
+# SixLoops 可执行建议
 
 {{summary}}
+
+## 最省事的下一步
+
+{{default_next_step}}
 
 ## 先看这里
 
@@ -10,27 +14,27 @@
 
 {{confirmation_prompt}}
 
-## 第一轮运行卡
+## 六段计划
 
 {{loop_proposals}}
 
-## 详情和较小机制
+## 如果不启动
 
-如果你拒绝或降级上面的 Loop 方案，这些机制才是更合适的选择。
+如果你拒绝或降级上面的方案，这些更小做法才有用。
 
-### 规则和记忆候选
+### 固定规则
 
 {{rules_and_memory}}
 
-### 技能候选
+### 可复用步骤
 
 {{skill_candidates}}
 
-### Hook 候选
+### 自动触发
 
 {{hook_candidates}}
 
-### 清单或审批门候选
+### 检查清单或审批门
 
 {{approval_gates}}
 
@@ -38,13 +42,13 @@
 
 {{rejected_candidates}}
 
-## 判断索引
+## 简要判断
 
-| 候选项 | 机制 | 判断 | 置信度 |
+| 候选项 | 做法 | 建议 | 置信度 |
 | --- | --- | --- | --- |
 {{decision_index}}
 
-Loop 候选：
+可持续运行候选：
 
 {{loop_candidates}}
 
