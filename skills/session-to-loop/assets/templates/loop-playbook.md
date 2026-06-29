@@ -2,13 +2,17 @@
 
 {{summary}}
 
+## Action Overview
+
+{{proposal_overview}}
+
+## How To Start
+
+{{confirmation_prompt}}
+
 ## Recommended Start Plans
 
 {{loop_proposals}}
-
-## Start, Shrink, Or Reject
-
-{{confirmation_prompt}}
 
 ## Smaller Mechanisms
 
@@ -38,7 +42,7 @@ These are useful only if you reject or downgrade the loop proposals.
 
 | Candidate | Mechanism | Decision | Confidence |
 | --- | --- | --- | --- |
-| {{candidate}} | {{mechanism}} | {{decision}} | {{confidence}} |
+{{decision_index}}
 
 Loop candidates:
 

@@ -34,7 +34,7 @@ Where this may be wrong:
 
 {{where_this_may_be_wrong}}
 
-Reply with one:
+Reply in this chat with one of these lines. Do not run it in a terminal or copy the whole card unless you are handing it to another agent:
 
 {{start_options}}
 
@@ -47,11 +47,11 @@ work_shape: "{{work_shape}}"
 loop_archetype: "{{loop_archetype}}"
 ```
 
-## Start Options
+## How To Start
 
 Start from the weakest useful mode. Move up only when the verifier and review results justify it.
 
-Reply with one:
+Reply in this chat with one:
 
 {{start_options}}
 

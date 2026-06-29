@@ -145,15 +145,16 @@ Only show edit, PR, or scheduled start options when the rendered candidate can a
 ## Output Requirements
 
 - Default close is a Start Plan, not an execution diary. Lead with what the user should start, shrink, reject, or run next.
-- Lead with 1-3 concrete Start Plans, not with evidence inventory.
+- Lead with an action overview table and 1-3 concrete Start Plans, not with evidence inventory.
 - Do not open with pipeline steps, record counts, redaction counts, file inventories, or "I processed..." unless source quality blocks any recommendation.
 - For each proposal, show start options, first-cycle packet, run card, mechanism decision, objective, heartbeat, recommended mode, trigger, cycle, verifier box, stop conditions, review boundary, and why this loop should exist.
 - Use exact confirmation strings from the rendered Start Plan, such as `start <candidate-id> as read-only`, `start <candidate-id> as low-risk edit`, `start <candidate-id> as worktree draft`, `start <candidate-id> as PR draft`, `start <candidate-id> as scheduled read-only`, `start <candidate-id> as scheduled draft`, `shrink <candidate-id> to skill`, or `reject <candidate-id>`. Do not invent stronger options that are absent from the card.
 - Only render goal-ready loop artifacts when the candidate has an acceptance contract: success criteria, verifier, state schema, resume policy, stop policy, budget cap, and human checkpoint.
 - For unattended or draft-producing loops, include the minimum safety checklist: success criteria, hard caps, isolation, read-only checker or deterministic verifier, state file, human gate, and visible logs or notifications.
 - Ask the user to choose which proposal to start, convert to a smaller mechanism, or reject.
+- Make clear that `start <candidate-id> as <mode>` is a reply in the current chat, not a terminal command, and that the user does not need to copy the whole card unless handing it to another agent.
 - After start confirmation, generate an adoption packet with `GOAL.md`, `STATE.json`, `HANDOFF.md`, and a draft `AGENTS-snippet.md` when stateful reuse is needed; do not silently install it into the target project.
-- Match the user's language in the final response. Keep internal schemas and deterministic script fields in English.
+- Match the user's language in the final response and user-facing artifact labels, headings, explanations, and review text. Keep internal schemas, exact confirmation strings, status codes, file paths, and deterministic script fields in English.
 - Separate private raw evidence from shareable summaries.
 - Quote only short redacted snippets when necessary.
 - Put evidence strength and source limitations after the proposals unless the source quality blocks recommendation.

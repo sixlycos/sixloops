@@ -18,6 +18,7 @@ Do not start with:
 
 Start with:
 
+- A compact action overview table before detailed cards.
 - Recommended start: `start <candidate-id> as <mode>`, `shrink <candidate-id> to skill`, or `reject <candidate-id>`.
 - What the loop will do.
 - What it will not do.
@@ -30,6 +31,7 @@ For demand-driven goal design, lead with the generated start plan: objective, fi
 
 For each proposal, include:
 
+- Action overview row: priority, candidate, recommendation, why it is worth a loop, and the exact next reply.
 - Start options: one recommended mode and exact reply strings such as `start ci-babysitter as low-risk edit`, `start ci-babysitter as worktree draft`, `shrink ci-babysitter to skill`, or `reject ci-babysitter`.
 - First cycle packet: a compact run packet with objective, acceptance checks, observe-decide-act-verify steps, state file, stop rule, and review boundary.
 - Name: short and action-oriented.
@@ -52,6 +54,8 @@ For each proposal, include:
 ## Confirmation Shape
 
 End the proposal section by asking the user to choose one of the actions rendered for that candidate. Do not show stronger modes that are not present in the card.
+
+Make the execution surface explicit: `start <candidate-id> as <mode>` is a reply the user sends in the current chat, not a terminal command. The user does not need to copy the whole card unless they are handing the plan to another agent.
 
 - `start <candidate-id> as read-only`
 - `start <candidate-id> as low-risk edit`
@@ -92,7 +96,11 @@ only when the chosen mode includes edit scope.
 
 ## Language
 
-Match the user's language in the final response. Use English for internal JSON fields, script names, and artifact identifiers.
+Match the user's language in the final response and in user-facing artifact headings, labels, explanations, and review text. Do not mix English section headings into a Chinese output or Chinese section headings into an English output.
+
+Use English only for internal JSON fields, script names, file paths, artifact identifiers, status codes, and exact confirmation strings such as `start <candidate-id> as read-only`.
+
+When the input is multilingual, choose the dominant language of the user's instruction and preserve exact code/status/command tokens as code spans. If the user writes in Chinese, the readable product surface should be Chinese first; do not force the user to parse English review labels.
 
 ## Evidence Placement
 

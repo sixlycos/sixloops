@@ -116,6 +116,8 @@ For each candidate include:
 - `why_this_loop`, `why_not_smaller`, `why_not_more_autonomous`, and `where_this_may_be_wrong`.
 - `managed_loop` only when the AI can specify objective, state, cycle, verifier, budget, stop/reject conditions, resume policy, review boundary, start mode, and exit contract.
 
+Use the dominant language of the user's instructions for user-facing candidate text such as `name`, `summary`, `user_semantics`, `why_this_loop`, `why_not_smaller`, `why_not_more_autonomous`, `where_this_may_be_wrong`, managed-loop objectives, cycle descriptions, acceptance criteria, and review explanations. Keep schema keys, ids, status codes, file paths, and exact confirmation strings in English.
+
 Do not rely on keyword or regex matches to decide loop value. The deterministic scripts may use
 regex for redaction or fallback evals, but your job is semantic judgment.
 
