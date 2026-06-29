@@ -18,38 +18,27 @@ Do not start with:
 
 Start with:
 
-- A compact action overview table before detailed cards.
+- A compact decision table before detailed cards. Its job is to help the user choose, not to document the runbook.
+- The table columns should make value obvious: rank, plan, judgment, why it is ranked there, cost/risk, and the exact reply.
 - Recommended start: `start <candidate-id> as <mode>`, `shrink <candidate-id> to skill`, or `reject <candidate-id>`.
-- What the loop will do.
-- What it will not do.
-- When it returns to the user for review.
-- How it verifies.
-- When it stops.
-- Why this loop exists instead of a smaller or more autonomous mechanism.
+- A short explanation of the top recommendation: why this one first, and why the others are not first.
+- A compact candidate summary: what it does, how it verifies, when it stops or returns for review.
+
+Do not expand Observe / Decide / Act / Verify / State for every candidate on the first screen. Put that execution protocol in the individual card or adoption packet after the user chooses a plan.
 
 For demand-driven goal design, lead with the generated start plan: objective, first cycle, team shape, verifier, stop condition, review boundary, and artifact paths. Make clear that the source is the user's current objective rather than historical transcript evidence.
 
-For each proposal, include:
+For each proposal in the first screen, include only:
 
-- Action overview row: priority, candidate, recommendation, why it is worth a loop, and the exact next reply.
+- Action overview row: rank, plan, judgment, why it is ranked there, cost/risk, and the exact next reply.
 - Start options: one recommended mode and exact reply strings such as `start ci-babysitter as low-risk edit`, `start ci-babysitter as worktree draft`, `shrink ci-babysitter to skill`, or `reject ci-babysitter`.
-- First cycle packet: a compact run packet with objective, acceptance checks, observe-decide-act-verify steps, state file, stop rule, and review boundary.
 - Name: short and action-oriented.
 - Run card: can start now, can confirm, can delegate, and next action.
 - Objective: what the loop improves for this project.
-- Mechanism decision: why this deserves a loop, why not a smaller mechanism, and why not a more autonomous scheduled loop yet.
-- Heartbeat: session, goal, scheduled, or event.
 - Recommended mode: read-only, low-risk edit, worktree draft, PR draft, scheduled read-only, or scheduled draft.
-- Trigger: when the user or agent should run it.
-- Cycle: the observe-decide-act-verify steps.
-- Verifier box: primary verifier, checker, required PASS evidence, and status protocol.
-- Stop conditions: when the agent must stop.
-- Iteration cap: the maximum number of rounds before it reports a blocker.
-- Acceptance contract: success criteria, verifier, pass evidence, reject conditions, and no-progress policy.
-- Exit contract: when to return `CONTINUE`, `DONE`, review-needed, `BLOCKED`, or `BUDGET_STOPPED`.
-- Review boundary: what needs a stronger mode, explicit approval, or human review.
-- Why this loop: the product reason plus the evidence basis.
-- Loop economics: expected trigger frequency, review load, accepted-output target, and when to demote the loop.
+- Verifier, stop or review boundary, and the path to the full card.
+
+Put the full first-cycle packet, mechanism decision, heartbeat, trigger, cycle steps, verifier box, iteration cap, acceptance contract, exit contract, review boundary, and loop economics in the individual card or adoption packet. Do not make the user read those before choosing.
 
 ## Confirmation Shape
 
@@ -102,6 +91,8 @@ Match the user's language in the final response and in user-facing artifact head
 Use English only for internal JSON fields, script names, file paths, artifact identifiers, status codes, and exact confirmation strings such as `start <candidate-id> as read-only`.
 
 When the input is multilingual, choose the dominant language of the user's instruction and preserve exact code/status/command tokens as code spans. If the user writes in Chinese, the readable product surface should be Chinese first; do not force the user to parse English review labels.
+
+For Chinese output, translate product labels such as "candidate", "recommendation", "review boundary", "first cycle", "verification", and "state" into Chinese. Keep only stable protocol tokens in English: candidate ids, file paths, commands, mode strings, status codes, and exact replies.
 
 ## Evidence Placement
 

@@ -2,19 +2,15 @@
 
 {{summary}}
 
-## Easiest Next Step
-
-{{default_next_step}}
-
 ## Start Here
 
 {{proposal_overview}}
 
-## Reply With One Line
+## Default Reply
 
-{{confirmation_prompt}}
+{{default_next_step}}
 
-## First Run Cards
+## Candidate Summaries
 
 {{loop_proposals}}
 

@@ -37,14 +37,26 @@ UI = {
         "summary": "Recommended {count} startable loop plan(s). Choose a mode, shrink the idea, reject it, or rerun with narrower evidence.",
         "no_proposal": "No loop proposal is ready. The useful outcome is to keep the rejected findings as context and gather better session evidence.",
         "no_proposal_next": "Recommended next step: run a narrower transcript analysis or keep these as rejected context.",
-        "overview_header": "| Priority | Candidate | Recommendation | Why worth a loop | Recommended next reply |\n| --- | --- | --- | --- | --- |",
-        "overview_empty": "| - | No startable candidate | Rerun or reject | Current evidence does not justify a loop | `rerun with narrower evidence` |",
-        "start_reply_note": "Reply in this chat with one of the lines below. Do not run it in a terminal or copy the whole card unless you want to hand it to another agent.",
-        "recommended_default": "Recommended default:",
-        "other_options": "Other options:",
-        "choose_from": "Choose which proposal to start, shrink, or reject from {names}.",
-        "chosen_mode_effect": "If the chosen mode allows edits, the agent runs the first controlled cycle in that mode; otherwise it generates the run packet and state convention.",
+        "overview_header": "| Rank | Plan | Judgment | Why ranked here | Cost/Risk | Direct reply |\n| --- | --- | --- | --- | --- | --- |",
+        "overview_empty": "| - | No startable candidate | Rerun or reject | Current evidence does not justify a loop | - | `rerun with narrower evidence` |",
         "proposal_title": "### {index}. {name}",
+        "top_judgment": "best first start",
+        "conditional_judgment": "worth trying, with conditions",
+        "hold_judgment": "useful, but not first",
+        "shrink_judgment": "shrink before starting",
+        "reject_judgment": "reject",
+        "evidence_user": "repeated user evidence",
+        "evidence_auxiliary": "draft project evidence",
+        "evidence_tool": "tool evidence",
+        "evidence_available": "available evidence",
+        "verifier_clear": "clear verifier",
+        "verifier_weak": "verifier is weak",
+        "cost_read_only": "low, read-only",
+        "cost_edit": "medium, local edits",
+        "cost_draft": "medium, review needed",
+        "cost_scheduled": "high, needs automation setup",
+        "cost_human": "high, human gate",
+        "cost_gate_suffix": "human gate for high-impact actions",
         "recommended_start": "Recommended start",
         "decision_line": "Decision: `{decision}` | Mechanism: `{mechanisms}` | Confidence: `{confidence}`",
         "run_card_line": "Can start now: `{can_use_now}` | Can confirm: `{can_confirm}` | Can delegate: `{can_delegate}`",
@@ -79,10 +91,6 @@ UI = {
         "basis_tool": "tool-use evidence",
         "basis_available": "available local evidence",
         "basis_prefix": "Basis",
-        "start_recommendation": "Start as `{mode}`",
-        "shrink_recommendation": "Shrink to `{mechanism}`",
-        "reject_recommendation": "Reject",
-        "rerun_recommendation": "Rerun with narrower evidence",
         "not_startable": "not startable",
         "scope_heading": "## Analysis Scope",
         "approved": "Approved",
@@ -106,14 +114,26 @@ UI = {
         "summary": "建议 {count} 个可启动方案。你可以直接启动、收缩成更小做法、拒绝，或缩小证据范围后重跑。",
         "no_proposal": "当前没有足够成熟的方案。更有用的下一步是保留拒绝项作为上下文，或收集更窄、更强的会话证据。",
         "no_proposal_next": "建议下一步：缩小证据范围后重跑分析，或把这些结论保留为已拒绝上下文。",
-        "overview_header": "| 优先级 | 候选项 | 建议 | 为什么值得交给 agent | 推荐下一步 |\n| --- | --- | --- | --- | --- |",
-        "overview_empty": "| - | 无可启动候选 | 重跑或拒绝 | 当前证据不足以支撑自动运行 | `rerun with narrower evidence` |",
-        "start_reply_note": "只需要在当前对话回复下面某一行。不要在终端执行，也不用复制整张卡片；只有要转交给另一个 agent 时才复制卡片。",
-        "recommended_default": "默认直接回这句：",
-        "other_options": "其他可选回复：",
-        "choose_from": "请从 {names} 中选择要启动、收缩或拒绝的方案。",
-        "chosen_mode_effect": "如果选择允许改文件的模式，agent 会直接跑第一轮；否则只做只读检查和交接。",
+        "overview_header": "| 推荐 | 计划 | 判断 | 为什么排这里 | 成本/风险 | 直接回复 |\n| --- | --- | --- | --- | --- | --- |",
+        "overview_empty": "| - | 无可启动候选 | 重跑或拒绝 | 当前证据不足以支撑自动运行 | - | `rerun with narrower evidence` |",
         "proposal_title": "### {index}. {name}",
+        "top_judgment": "最值得先做",
+        "conditional_judgment": "值得做，但有条件",
+        "hold_judgment": "有价值，先保留",
+        "shrink_judgment": "先收缩再说",
+        "reject_judgment": "拒绝",
+        "evidence_user": "用户反复提到",
+        "evidence_auxiliary": "项目辅助证据，结论偏草案",
+        "evidence_tool": "有工具证据",
+        "evidence_available": "有可用证据",
+        "verifier_clear": "验证路径清楚",
+        "verifier_weak": "验证路径偏弱",
+        "cost_read_only": "低，只读",
+        "cost_edit": "中，本地修改",
+        "cost_draft": "中，需要审查",
+        "cost_scheduled": "高，需要自动化设置",
+        "cost_human": "高，需要人工门禁",
+        "cost_gate_suffix": "高影响动作需人工确认",
         "recommended_start": "推荐启动方式",
         "decision_line": "评估：`{decision}` | 做法：`{mechanisms}` | 置信度：`{confidence}`",
         "run_card_line": "现在可启动：`{can_use_now}` | 可验证：`{can_confirm}` | 可自动跑：`{can_delegate}`",
@@ -148,10 +168,6 @@ UI = {
         "basis_tool": "工具使用证据",
         "basis_available": "可用本地证据",
         "basis_prefix": "依据",
-        "start_recommendation": "以 `{mode}` 模式启动",
-        "shrink_recommendation": "先收缩成 `{mechanism}`",
-        "reject_recommendation": "拒绝",
-        "rerun_recommendation": "缩小证据范围后重跑",
         "not_startable": "不可启动",
         "scope_heading": "## 分析范围",
         "approved": "已批准",
@@ -298,7 +314,7 @@ def localized_items(items: object, language: str, zh_fallback: list[str], en_fal
 def candidate_display_name(candidate: dict, language: str) -> str:
     name = str(candidate.get("name") or candidate.get("id") or "").strip()
     if language == "zh" and needs_localization(name, language):
-        return f"候选 `{candidate.get('id', 'unknown')}`"
+        return f"`{candidate.get('id', 'unknown')}`"
     return name or str(candidate.get("id", "unknown"))
 
 
@@ -310,7 +326,7 @@ def candidate_objective(candidate: dict, managed_loop: dict, language: str) -> s
 
 def candidate_reason(candidate: dict, managed_loop: dict, language: str) -> str:
     raw = candidate.get("why_this_loop") or managed_loop.get("objective") or candidate.get("summary")
-    zh_fallback = "它具备可观察状态、可重复动作、验证方式和停止条件，因此值得交给 agent 试运行。"
+    zh_fallback = "它具备可观察状态、可重复动作、验证方式和停止条件，因此值得交给智能体试运行。"
     return localized_text(raw, language, zh_fallback, "No reason recorded.")
 
 
@@ -400,7 +416,8 @@ def display_mechanism_label(mechanism: str, language: str = "en") -> str:
 
 def display_mechanisms(candidate: dict, language: str = "en") -> str:
     mechanisms = candidate.get("mechanisms") or [candidate.get("mechanism", "none")]
-    return ", ".join(display_mechanism_label(str(item), language) for item in mechanisms)
+    separator = "、" if language == "zh" else ", "
+    return separator.join(display_mechanism_label(str(item), language) for item in mechanisms)
 
 
 def display_decision_label(decision: str, language: str = "en") -> str:
@@ -414,6 +431,13 @@ def display_decision_label(decision: str, language: str = "en") -> str:
         "needs-human": "需要人工确认",
         "reject": "拒绝",
     }.get(str(decision), str(decision))
+
+
+def display_confidence_label(confidence: object, language: str = "en") -> str:
+    text = str(confidence)
+    if language != "zh":
+        return text
+    return {"high": "高", "medium": "中", "low": "低"}.get(text, text)
 
 
 def display_flag(value: object, language: str) -> str:
@@ -578,9 +602,10 @@ def first_run_defaults(
     )
     state_file = managed_loop.get("state_file", f".sixloops/state/{candidate['id']}.json")
     approvals = candidate.get("safety", {}).get("requires_approval_for", [])
+    approval_text = ("、".join(str(item) for item in approvals) if language == "zh" else ", ".join(str(item) for item in approvals))
     human_gate = packet.get("human_gate") or (
-        f"执行 {', '.join(approvals)} 前先询问。" if language == "zh" and approvals
-        else f"Ask before {', '.join(approvals)}." if approvals
+        f"执行 {approval_text} 前先询问。" if language == "zh" and approvals
+        else f"Ask before {approval_text}." if approvals
         else "扩大范围、改变风险边界或执行不可逆操作前先询问。" if language == "zh"
         else "Ask before expanding scope, changing risk boundaries, or making irreversible changes."
     )
@@ -661,7 +686,7 @@ def mechanism_decision(candidate: dict, managed_loop: dict, language: str = "en"
             else "A rule, skill, or checklist alone would not preserve state or drive repeated verification."
         )
     else:
-        why = "这个方向有用，但当前证据还不足以支撑持续交给 agent 跑。" if language == "zh" else "This is useful, but the evidence does not justify a managed loop yet."
+        why = "这个方向有用，但当前证据还不足以支撑持续交给智能体运行。" if language == "zh" else "This is useful, but the evidence does not justify a managed loop yet."
         smaller = "建议先使用更小的机制。" if language == "zh" else "A smaller mechanism is recommended first."
     maturity = managed_loop.get("recommended_maturity", candidate.get("safety", {}).get("autonomy_level", "draft-only"))
     return {
@@ -739,7 +764,7 @@ def render_trace(candidate: dict, language: str = "en") -> str:
 def approval_boundary(candidate: dict, language: str = "en") -> str:
     approvals = candidate.get("safety", {}).get("requires_approval_for", [])
     if approvals:
-        return "; ".join(approvals)
+        return "；".join(approvals) if language == "zh" else "; ".join(approvals)
     return "除常规仓库审查外，没有记录额外审查边界。" if language == "zh" else "No extra review boundary recorded beyond normal repo review."
 
 
@@ -747,10 +772,11 @@ def control_will_not(candidate: dict, managed_loop: dict, language: str = "en") 
     items = []
     approvals = candidate.get("safety", {}).get("requires_approval_for", [])
     if approvals:
+        approval_text = "、".join(str(item) for item in approvals) if language == "zh" else ", ".join(str(item) for item in approvals)
         items.append(
-            f"在没有匹配模式的情况下落地或完成审查边界动作：{', '.join(str(item) for item in approvals)}。"
+            f"在没有匹配模式的情况下落地或完成审查边界动作：{approval_text}。"
             if language == "zh"
-            else f"Land or finalize review-boundary actions without the matching mode: {', '.join(str(item) for item in approvals)}."
+            else f"Land or finalize review-boundary actions without the matching mode: {approval_text}."
         )
     change_policy = managed_loop.get("change_policy")
     if change_policy:
@@ -829,20 +855,69 @@ def why_this_loop(candidate: dict, language: str = "en") -> str:
     return f"{summary} {ui(language, 'basis_prefix')}: {basis}."
 
 
-def recommendation_for(candidate: dict, action: str, language: str) -> str:
-    if action.startswith("start "):
-        mode = action.split(" as ", 1)[1] if " as " in action else "read-only"
-        if language == "zh":
-            return f"启动为「{display_mode_label(mode, language)}」"
-        return ui(language, "start_recommendation").format(mode=mode)
+def plan_label(candidate: dict, language: str = "en") -> str:
+    name = candidate_display_name(candidate, language)
+    candidate_id = str(candidate.get("id", "unknown"))
+    return f"`{candidate_id}`" if name == candidate_id or f"`{candidate_id}`" in name else f"{name} `{candidate_id}`"
+
+
+def evidence_basis(candidate: dict, language: str = "en") -> str:
+    trace = candidate.get("decision_trace", {})
+    role_counts = trace.get("role_counts", {})
+    providers = trace.get("provider_counts", {})
+    if providers.get("auxiliary"):
+        return ui(language, "evidence_auxiliary")
+    if role_counts.get("user", 0):
+        return ui(language, "evidence_user")
+    if role_counts.get("tool", 0):
+        return ui(language, "evidence_tool")
+    return ui(language, "evidence_available")
+
+
+def overview_judgment(candidate: dict, action: str, rank: int, language: str = "en") -> str:
+    if action.startswith("reject ") or candidate.get("decision") == "reject":
+        return ui(language, "reject_judgment")
     if action.startswith("shrink "):
-        mechanism = action.rsplit(" to ", 1)[1] if " to " in action else smaller_mechanism(candidate)
-        if language == "zh":
-            return f"先收缩成「{display_mechanism_label(mechanism, language)}」"
-        return ui(language, "shrink_recommendation").format(mechanism=mechanism)
-    if action.startswith("reject "):
-        return ui(language, "reject_recommendation")
-    return ui(language, "rerun_recommendation")
+        return ui(language, "shrink_judgment")
+    if rank == 1:
+        return ui(language, "top_judgment")
+    if rank == 2:
+        return ui(language, "conditional_judgment")
+    return ui(language, "hold_judgment")
+
+
+def cost_risk_label(candidate: dict, action: str, card: dict, language: str = "en") -> str:
+    approvals = candidate.get("safety", {}).get("requires_approval_for", [])
+    if candidate.get("decision") == "needs-human":
+        return ui(language, "cost_human")
+    if not action.startswith("start "):
+        base = ui(language, "cost_read_only")
+        if approvals:
+            return f"{base}；{ui(language, 'cost_gate_suffix')}" if language == "zh" else f"{base}; {ui(language, 'cost_gate_suffix')}"
+        return base
+    mode = action.split(" as ", 1)[1] if " as " in action else "read-only"
+    if mode == "read-only":
+        base = ui(language, "cost_read_only")
+    elif mode == "low-risk edit":
+        base = ui(language, "cost_edit")
+    elif mode.startswith("scheduled"):
+        base = ui(language, "cost_scheduled")
+    else:
+        base = ui(language, "cost_draft")
+    if mode in {"worktree draft", "PR draft"} or str(card.get("can_delegate", "no")).lower() != "yes":
+        base = ui(language, "cost_draft")
+    if approvals:
+        return f"{base}；{ui(language, 'cost_gate_suffix')}" if language == "zh" else f"{base}; {ui(language, 'cost_gate_suffix')}"
+    return base
+
+
+def rank_reason(candidate: dict, contract: dict, language: str = "en") -> str:
+    raw_verifiers = as_list(contract.get("verifier_commands", candidate.get("verification", [])))
+    verifier = ui(language, "verifier_clear") if raw_verifiers else ui(language, "verifier_weak")
+    reason = candidate_reason(candidate, candidate.get("managed_loop", {}), language)
+    if language == "zh":
+        return f"{evidence_basis(candidate, language)}；{verifier}；{reason}"
+    return f"{evidence_basis(candidate, language)}; {verifier}; {reason}"
 
 
 def recommended_action_for(candidate: dict, language: str = "en") -> str:
@@ -861,7 +936,7 @@ def default_next_step(candidates: list[dict], language: str = "en") -> str:
     if language == "zh":
         return (
             f"`{action}`\n\n"
-            "你只需要回这一行。启动后 agent 会按状态文件继续跑，直到做完、需要你判断、卡住，或达到轮数上限。"
+            "你只需要回这一行。启动后智能体会按状态文件继续跑，直到做完、需要你判断、卡住，或达到轮数上限。"
         )
     return (
         f"`{action}`\n\n"
@@ -926,31 +1001,6 @@ def safe_autopilot_summary(candidate: dict, language: str = "en") -> dict:
     }
 
 
-def six_module_plan(candidate: dict, managed_loop: dict, contract: dict, language: str = "en") -> str:
-    if language != "zh":
-        return ""
-    first_run = first_run_defaults(candidate, managed_loop, contract, decision_card(candidate), language)
-    modules = [
-        ("1. 目标", [first_run["first_run_goal"]]),
-        ("2. 自动运行", autopilot_contract(candidate, managed_loop, contract, language).splitlines()),
-        ("3. 执行范围", cycle_steps(candidate, managed_loop, language)),
-        ("4. 不会做", control_will_not(candidate, managed_loop, language)),
-        ("5. 验收方式", verification_items(candidate, contract, language)),
-        (
-            "6. 停止和交还",
-            [
-                *stop_items(candidate, contract, language),
-                f"需要你判断前会停下：{first_run['first_run_human_gate']}",
-            ],
-        ),
-    ]
-    blocks = []
-    for title, items in modules:
-        clean_items = [str(item).removeprefix("- ").strip() for item in items if str(item).strip()]
-        blocks.extend([f"#### {title}", "", bullet_block(clean_items, language), ""])
-    return "\n".join(blocks).strip()
-
-
 def proposal_overview(candidates: list[dict], language: str = "en") -> str:
     selected = proposal_candidates(candidates)
     if not selected:
@@ -962,10 +1012,11 @@ def proposal_overview(candidates: list[dict], language: str = "en") -> str:
         contract = managed_loop.get("completion_contract", {})
         card = decision_card(candidate)
         action = first_run_defaults(candidate, managed_loop, contract, card, language)["recommended_action"]
-        reason = candidate_reason(candidate, managed_loop, language)
         rows.append(
-            f"| {index} | {table_cell(candidate_display_name(candidate, language))} | "
-            f"{table_cell(recommendation_for(candidate, action, language))} | {table_cell(reason)} | `{action}` |"
+            f"| {index} | {table_cell(plan_label(candidate, language))} | "
+            f"{table_cell(overview_judgment(candidate, action, index, language))} | "
+            f"{table_cell(rank_reason(candidate, contract, language))} | "
+            f"{table_cell(cost_risk_label(candidate, action, card, language))} | `{action}` |"
         )
     return "\n".join(rows)
 
@@ -999,20 +1050,24 @@ def render_loop_proposals(candidates: list[dict], language: str = "en") -> str:
         review_label = "Review boundary" if language == "en" else "审查边界"
         label_sep = ":" if language == "en" else "："
         if language == "zh":
-            first_cycle_lines = [
-                f"1. {clarify_label}：{first_run['first_run_observe']}；{first_run['first_run_decide']}。",
-                f"2. {act_label}：{first_run['first_run_act']}。",
-                f"3. {verify_label}：{first_run['first_run_verify']}",
-                f"4. {deliver_label}：{ui(language, 'state')} `{state_file}`；{ui(language, 'stop_after')} {first_run['first_run_stop_after']}；{review_label}：{first_run['first_run_human_gate']}",
-            ]
             blocks.append(
                 "\n".join(
                     [
                         ui(language, "proposal_title").format(index=index, name=candidate_display_name(candidate, language)),
                         "",
-                        f"{ui(language, 'recommended_start')}{label_sep}`{first_run['recommended_action']}`",
+                        f"判断：{overview_judgment(candidate, first_run['recommended_action'], index, language)}",
                         "",
-                        six_module_plan(candidate, managed_loop, contract, language),
+                        f"为什么排这里：{rank_reason(candidate, contract, language)}",
+                        "",
+                        f"成本/风险：{cost_risk_label(candidate, first_run['recommended_action'], card, language)}",
+                        "",
+                        f"建议回复：`{first_run['recommended_action']}`",
+                        "",
+                        f"会做：{candidate_objective(candidate, managed_loop, language)}",
+                        "",
+                        f"验证：{first_run['first_run_verify']}",
+                        "",
+                        f"停止/交还：{first_run['first_run_stop_after']}；{first_run['first_run_human_gate']}",
                         "",
                         reply_label,
                         "",
@@ -1024,9 +1079,9 @@ def render_loop_proposals(candidates: list[dict], language: str = "en") -> str:
                             can_delegate=display_flag(card["can_delegate"], language),
                         ),
                         "",
-                        f"简要判断：{display_decision_label(candidate['decision'], language)}；做法：{mechanisms}；置信度：`{candidate['confidence']}`",
+                        f"简要判断：{display_decision_label(candidate['decision'], language)}；做法：{mechanisms}；置信度：`{display_confidence_label(candidate['confidence'], language)}`",
                         "",
-                        f"{details_label}: `cards/{candidate['id']}.md`",
+                        f"{details_label}：`cards/{candidate['id']}.md`",
                     ]
                 )
             )
@@ -1072,7 +1127,9 @@ def render_loop_proposals(candidates: list[dict], language: str = "en") -> str:
                     ),
                     "",
                     ui(language, "decision_line").format(
-                        decision=candidate["decision"], mechanisms=mechanisms, confidence=candidate["confidence"]
+                        decision=display_decision_label(candidate["decision"], language),
+                        mechanisms=mechanisms,
+                        confidence=display_confidence_label(candidate["confidence"], language),
                     ),
                     "",
                     ui(language, "work_shape_line").format(work_shape=work_shape, loop_archetype=loop_archetype),
@@ -1086,39 +1143,23 @@ def render_loop_proposals(candidates: list[dict], language: str = "en") -> str:
     return "\n\n".join(blocks)
 
 
-def confirmation_prompt(candidates: list[dict], language: str = "en") -> str:
-    selected = proposal_candidates(candidates)
-    if not selected:
-        return ui(language, "no_proposal_next")
-    names = ", ".join(candidate_display_name(item, language) for item in selected)
-    recommended = recommended_action_for(selected[0], language)
-    options = "\n".join(f"- `{option}`" for item in selected for option in decision_card(item)["confirmation_options"])
-    return (
-        f"{ui(language, 'start_reply_note')}\n\n"
-        f"{ui(language, 'recommended_default')}\n\n"
-        f"`{recommended}`\n\n"
-        f"{ui(language, 'other_options')}\n\n"
-        f"{ui(language, 'choose_from').format(names=names)} "
-        f"{ui(language, 'chosen_mode_effect')}\n\n"
-        f"{options}"
-    )
-
-
 def source_limitations(data: dict, language: str = "en") -> str:
     source = data.get("source", {})
     providers = source.get("providers") or {}
     source_types = source.get("source_types") or {}
-    provider_text = ", ".join(f"{key}={value}" for key, value in providers.items()) if providers else ui(language, "not_recorded")
-    source_type_text = ", ".join(f"{key}={value}" for key, value in source_types.items()) if source_types else ui(language, "not_recorded")
+    item_separator = "，" if language == "zh" else ", "
+    provider_text = item_separator.join(f"{key}={value}" for key, value in providers.items()) if providers else ui(language, "not_recorded")
+    source_type_text = item_separator.join(f"{key}={value}" for key, value in source_types.items()) if source_types else ui(language, "not_recorded")
+    colon = "：" if language == "zh" else ": "
     parts = [
-        f"{ui(language, 'files')}: {source.get('transcript_files', 0)}",
-        f"{ui(language, 'records')}: {source.get('records', 0)}",
-        f"{ui(language, 'providers')}: {provider_text}",
-        f"{ui(language, 'source_types')}: {source_type_text}",
+        f"{ui(language, 'files')}{colon}{source.get('transcript_files', 0)}",
+        f"{ui(language, 'records')}{colon}{source.get('records', 0)}",
+        f"{ui(language, 'providers')}{colon}{provider_text}",
+        f"{ui(language, 'source_types')}{colon}{source_type_text}",
     ]
     if source_types.get("auxiliary-evidence") and not (providers.get("codex") or providers.get("claude")):
         parts.append(ui(language, "auxiliary_limitation"))
-    return "; ".join(str(part) for part in parts)
+    return ("；" if language == "zh" else "; ").join(str(part) for part in parts)
 
 
 SECRET_ASSIGNMENT = re.compile(
@@ -1529,9 +1570,9 @@ def generated_skill(candidate: dict) -> str:
 def decision_index(candidates: list[dict], language: str = "en") -> str:
     return "\n".join(
         f"| {table_cell(candidate_display_name(item, language))} | {table_cell(display_mechanisms(item, language))} | "
-        f"{table_cell(display_decision_label(item['decision'], language))} | {table_cell(item['confidence'])} |"
+        f"{table_cell(display_decision_label(item['decision'], language))} | {table_cell(display_confidence_label(item['confidence'], language))} |"
         for item in candidates
-    ) or ("| 无 | none | reject | low |" if language == "zh" else "| None | none | reject | low |")
+    ) or ("| 无 | 无 | 拒绝 | 低 |" if language == "zh" else "| None | none | reject | low |")
 
 
 def playbook(data: dict, out_dir: Path, rendered_paths: list[str], language: str = "en") -> str:
@@ -1581,7 +1622,6 @@ def playbook(data: dict, out_dir: Path, rendered_paths: list[str], language: str
         "default_next_step": default_next_step(candidates, language),
         "proposal_overview": proposal_overview(candidates, language),
         "loop_proposals": render_loop_proposals(candidates, language),
-        "confirmation_prompt": confirmation_prompt(candidates, language),
         "candidate": selected[0]["id"] if selected else "<candidate-id>",
         "rules_and_memory": "\n".join(by_mechanism["rule"]) or ui(language, "none"),
         "skill_candidates": "\n".join(by_mechanism["skill"]) or ui(language, "none"),
@@ -1596,17 +1636,19 @@ def playbook(data: dict, out_dir: Path, rendered_paths: list[str], language: str
     }
     rendered = fill(template, values)
     scope = data.get("scope_policy") or {}
+    colon = "：" if language == "zh" else ": "
+    role_separator = "、" if language == "zh" else ", "
     scope_lines = [
         "",
         ui(language, "scope_heading"),
         "",
-        f"{ui(language, 'approved')}: `{bool_label(bool(scope.get('approved', False)), language)}`",
+        f"{ui(language, 'approved')}{colon}`{bool_label(bool(scope.get('approved', False)), language)}`",
         "",
-        f"{ui(language, 'allowed_roles')}: `{', '.join(scope.get('allowed_roles', [])) or ui(language, 'not_recorded')}`",
+        f"{ui(language, 'allowed_roles')}{colon}`{role_separator.join(scope.get('allowed_roles', [])) or ui(language, 'not_recorded')}`",
         "",
-        f"{ui(language, 'redacted_snippets')}: `{ui(language, 'enabled') if scope.get('allow_redacted_snippets', True) else ui(language, 'disabled')}`",
+        f"{ui(language, 'redacted_snippets')}{colon}`{ui(language, 'enabled') if scope.get('allow_redacted_snippets', True) else ui(language, 'disabled')}`",
         "",
-        f"{ui(language, 'output_visibility')}: `{scope.get('output_visibility', 'private')}`",
+        f"{ui(language, 'output_visibility')}{colon}`{scope.get('output_visibility', 'private')}`",
         "",
     ]
     return rendered + "\n" + "\n".join(scope_lines)

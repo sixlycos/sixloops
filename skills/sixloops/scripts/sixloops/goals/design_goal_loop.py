@@ -180,12 +180,84 @@ ZH_START_CARD_TEXT = {
     "phased": "分阶段执行",
     "subagent-team": "子代理团队",
     "none": "单代理执行",
-    "Run the focused project verifier identified during the Decide step.": "运行 Decide 阶段确定的聚焦项目验证。",
+    "Run the focused project verifier identified during the Decide step.": "运行决策阶段确定的聚焦项目验证。",
     "The requested outcome is produced with required verifier evidence.": "产出符合目标，并留下可复核的验收证据。",
+    "Acceptance checks pass with required evidence.": "验收标准通过，并留下必要证据。",
     "Same failure repeats twice.": "同一失败重复两次。",
     "No evidence changes across two iterations.": "连续两轮证据没有变化。",
     "A review boundary is reached.": "触达需要人工审查的边界。",
     "The verifier is unavailable or ambiguous.": "验收信号不可用或结论不清。",
+    "Verifier is unavailable or ambiguous.": "验收信号不可用或结论不清。",
+    "Objective is unchanged.": "目标没有变化。",
+    "Next action stays inside approved scope.": "下一步仍在已批准范围内。",
+    "A verifier can reject bad output.": "验收器能够拒绝错误产出。",
+    "New evidence changed or is likely from the next verifier.": "已有新证据变化，或下一轮验收可能产生新证据。",
+    "Risk stays below the approved mode and review boundary.": "风险仍低于当前批准模式和审查边界。",
+    "The last cycle changed evidence, narrowed scope, reduced failures, or clarified the blocker.": "上一轮改变了证据、收窄了范围、减少了失败，或明确了阻塞点。",
+    "Token, time, cost, or tool budget is reached.": "token、时间、成本或工具预算达到上限。",
+    "Review required for human judgment or approval.": "需要人工判断或批准。",
+    "Target routes render without blocking errors.": "目标路由能渲染，且没有阻塞性错误。",
+    "Desktop/mobile screenshots or snapshots confirm the main path.": "桌面端和移动端截图或快照能确认主路径正常。",
+    "Console and network checks show no blocking errors.": "控制台和网络检查没有阻塞性错误。",
+    "i18n/copy output shows no missing key, raw key, or unintended fallback locale.": "i18n/文案没有缺失 key、裸 key 或非预期 fallback 语言。",
+    "Read prior state, current goal, changed UI files, and project instructions.": "读取既有状态、当前目标、变更的 UI 文件和项目规则。",
+    "Identify the smallest route/state/locale set that proves the change, including default locale and one non-default locale when relevant.": "找出能证明变更的最小路由、状态和语言集合；相关时覆盖默认语言和一个非默认语言。",
+    "Choose at most 1-3 visible or user-path regressions by impact, risk, and verifier availability.": "按影响、风险和验收可用性，最多选择 1-3 个可见或用户路径回归。",
+    "Apply only obvious, reversible UI fixes such as missing keys, broken routes, console errors, or text overflow inside the approved scope.": "只在已批准范围内修复明显、可回退的 UI 问题，例如缺失 key、路由损坏、控制台错误或文本溢出。",
+    "Run focused static checks and browser verification, capture desktop/mobile screenshots when useful, inspect console/network/i18n fallback, and update state.": "运行聚焦静态检查和浏览器验证；必要时截取桌面/移动端截图，检查控制台、网络和 i18n fallback，并更新状态。",
+    "Route URL list.": "路由 URL 列表。",
+    "Locale list.": "语言列表。",
+    "Screenshot paths or snapshot summaries.": "截图路径或快照摘要。",
+    "Console/network result.": "控制台/网络检查结果。",
+    "i18n/copy finding summary.": "i18n/文案发现摘要。",
+    "Choose at most 3 item(s) per cycle.": "每轮最多选择 3 个事项。",
+    "Prefer high-impact work with clear verifier evidence.": "优先处理影响高且验证证据清楚的事项。",
+    "Defer work that needs product, release, data, or architecture judgment.": "需要产品、发布、数据或架构判断的事项先延后并返回审查。",
+    "A checklist can remind an agent what to do, but it cannot preserve item state, verifier evidence, failure signatures, and the next cursor across repeated runs.": "清单只能提醒要做什么，不能在多轮运行之间保留事项状态、验收证据、失败签名和下一步位置。",
+    "Execute roles sequentially in the current agent.": "在当前智能体内按顺序执行这些角色。",
+    "Planner defines at most 1-3 items and verifier paths.": "规划者最多定义 1-3 个事项和对应验收路径。",
+    "Maker roles act only inside approved scope.": "执行角色只能在已批准范围内行动。",
+    "Reviewer/checker/verifier roles must be independent from maker output when possible.": "条件允许时，审查、检查和验收角色应独立于执行产出。",
+    "Integrator updates state and returns DONE, CONTINUE, BLOCKED, NEEDS_HUMAN, or BUDGET_STOPPED.": "整合者更新状态，并返回 `DONE`、`CONTINUE`、`BLOCKED`、`NEEDS_HUMAN` 或 `BUDGET_STOPPED`。",
+    "Planner": "规划者",
+    "Architect": "架构师",
+    "Frontend Maker": "前端执行者",
+    "Backend Maker": "后端执行者",
+    "Browser Verifier": "浏览器验收者",
+    "Contract Verifier": "契约验收者",
+    "Integration Verifier": "集成验收者",
+    "Implementation Planner": "实现规划者",
+    "Risk Reviewer": "风险审查者",
+    "Maker Summarizer": "执行摘要者",
+    "Checker": "检查者",
+    "Verifier": "验收者",
+    "Reviewer": "审查者",
+    "Release Planner": "发布规划者",
+    "CI Fixer": "CI 修复者",
+    "Handoff Writer": "交接撰写者",
+    "Triage Planner": "分诊规划者",
+    "Issue Investigator": "问题调查者",
+    "Fixer": "修复者",
+    "Maker": "执行者",
+    "Integrator": "整合者",
+    "Updated STATE.json": "更新后的 `STATE.json`",
+    "final status": "最终状态",
+    "handoff summary": "交接摘要",
+    "commands or checks run": "已运行命令或检查",
+    "pass/fail evidence": "通过/失败证据",
+    "untested risks": "未测试风险",
+    "route list": "路由列表",
+    "screenshot or snapshot evidence": "截图或快照证据",
+    "console/network findings": "控制台/网络发现",
+    "diff risks": "diff 风险",
+    "missing verifier": "缺失的验收器",
+    "approval gate": "审批门禁",
+    "finding summary": "发现摘要",
+    "recommended next action": "建议下一步",
+    "evidence or blocker": "证据或阻塞点",
+    "Merge role outputs into one state update and final status. Do not hide blockers.": "把各角色输出合并成一次状态更新和最终状态。不要隐藏阻塞点。",
+    "Verify the real UI path with browser evidence, not visual guesses.": "用浏览器证据验证真实 UI 路径，不靠视觉猜测。",
+    "Review the diff and plan against objective, project rules, and likely regressions.": "按目标、项目规则和可能回归审查 diff 与计划。",
     "Same visible failure repeats twice.": "同一可见问题重复出现两次。",
     "No new screenshot, console, network, or i18n evidence appears across two iterations.": "连续两轮没有新的截图、控制台、网络或 i18n 证据。",
     "The browser verifier or dev server is unavailable.": "浏览器验证器或开发服务器不可用。",
@@ -206,7 +278,34 @@ ZH_START_CARD_TEXT = {
 def start_card_text(value: str, language: str) -> str:
     if language != "zh":
         return value
-    return ZH_START_CARD_TEXT.get(value, value)
+    if value in ZH_START_CARD_TEXT:
+        return ZH_START_CARD_TEXT[value]
+    review_match = re.fullmatch(r"Review required for (.+)\.", value)
+    if review_match:
+        return f"需要审查：{start_card_text(review_match.group(1), language)}。"
+    fewer_items = re.fullmatch(r"Fewer than (\d+) item\(s\) are active in this cycle\.", value)
+    if fewer_items:
+        return f"本轮活跃事项少于 {fewer_items.group(1)} 个。"
+    fewer_iterations = re.fullmatch(r"Fewer than (\d+) iteration\(s\) have run\.", value)
+    if fewer_iterations:
+        return f"已运行轮数少于 {fewer_iterations.group(1)} 轮。"
+    more_items = re.fullmatch(r"More than (\d+) item\(s\) would be required in one cycle\.", value)
+    if more_items:
+        return f"单轮需要超过 {more_items.group(1)} 个事项。"
+    iterations_reached = re.fullmatch(r"(\d+) iteration\(s\) are reached\.", value)
+    if iterations_reached:
+        return f"达到 {iterations_reached.group(1)} 轮上限。"
+    if value.startswith("This goal is loop-shaped because"):
+        return "这个目标适合做成 loop，因为每轮都需要发现输入、选择少量高价值事项、验证结果、更新状态，并在明确边界处停止。"
+    if value.startswith("Start as "):
+        return "先从当前批准模式启动；只有在验收证据和人工接受度稳定后，才升级到更高自动化。"
+    if value.startswith("Domain `"):
+        return "当前领域、协作方式和内部级别适合先试运行；多轮产出被接受后再考虑升级。"
+    handle_role = re.fullmatch(r"Handle the (.+) role for this (.+) goal\.", value)
+    if handle_role:
+        domain = {"frontend": "前端", "backend": "后端", "fullstack": "全栈", "architecture": "架构", "review": "审查", "delivery": "交付", "maintenance": "维护"}.get(handle_role.group(2), handle_role.group(2))
+        return f"负责这个{domain}目标中的{start_card_text(handle_role.group(1), language)}角色。"
+    return value
 
 
 def start_card_items(items: list[str], language: str) -> list[str]:
@@ -726,7 +825,7 @@ def render_goal(design: dict) -> str:
     mode_display = start_card_text(mode, language)
     team_display = start_card_text(design["team_mode"], language)
     intro = (
-        "先看这张执行合同。确认后，agent 按 `RUN.md` 运行，按 `VERIFY.md` 验收，并在触达边界时返回审查。"
+        "先看这张执行合同。确认后，智能体按 `RUN.md` 运行，按 `VERIFY.md` 验收，并在触达边界时返回审查。"
         if language == "zh"
         else "Start with this execution contract. After confirmation, the agent follows `RUN.md`, verifies with `VERIFY.md`, and returns at review boundaries."
     )
@@ -740,6 +839,119 @@ def render_goal(design: dict) -> str:
     verify_label = "验证方式" if language == "zh" else "Verifier"
     stop_label = "停止/返回审查" if language == "zh" else "Stop / return for review"
     ask_label = "返回审查前需要批准" if language == "zh" else "Ask before"
+    if language == "zh":
+        return f"""# {design["name"]}
+
+{intro}
+
+## {contract_label}
+
+- {reply_label}: `{reply_text}`
+- {mode_label}: {mode_display}
+- {team_label}: {team_display}
+
+{goal_label}:
+
+{design["goal"]}
+
+{will_do_label}:
+
+{first_cycle_card(design)}
+
+{verify_label}:
+
+{bullet(start_card_items(contract["verifier_commands"], language))}
+
+{stop_label}:
+
+{bullet(start_card_items(contract["reject_conditions"], language))}
+
+{ask_label}:
+
+{bullet(start_card_items(design["safety"]["requires_approval_for"], language))}
+
+## 为什么是这个 loop
+
+- 为什么值得跑：{start_card_text(design["why_this_loop"], language)}
+- 为什么不只是更小机制：{start_card_text(design["why_not_smaller"], language)}
+- 为什么不更自动化：{start_card_text(design["why_not_more_autonomous"], language)}
+- 适配判断：{start_card_text(design["fit_summary"], language)}
+
+## Loop 形态
+
+- 领域：`{design["domain"]}`
+- 类型：`{design["loop_archetype"]}`
+- 启动模式：`{mode}`
+- 内部级别：`{design["adoption_level"]}`
+- 协作方式：`{design["team_mode"]}`
+
+## 验收标准
+
+{bullet(start_card_items(contract["success_criteria"], language))}
+
+## 循环步骤
+
+{numbered(start_card_items(managed_loop["cycle_steps"], language))}
+
+## 选择规则
+
+{bullet(start_card_items(managed_loop["selection_policy"], language))}
+
+## 验证方式
+
+{bullet(start_card_items(contract["verifier_commands"], language))}
+
+必须留下的通过证据：
+
+{bullet(start_card_items(contract["pass_evidence_required"], language))}
+
+## 停止条件
+
+{bullet(start_card_items(contract["reject_conditions"], language))}
+
+还要在达到 `{managed_loop["max_iterations_per_run"]}` 轮、重复无进展或触达审查边界时停止。
+
+## 退出协议
+
+仅在以下条件成立时继续：
+
+{bullet(start_card_items(exit_contract["continue_only_if"], language))}
+
+返回 `DONE` 的条件：
+
+{bullet(start_card_items(exit_contract["done_when"], language))}
+
+返回人工审查的条件：
+
+{bullet(start_card_items(exit_contract["needs_human_when"], language))}
+
+返回 `BLOCKED` 的条件：
+
+{bullet(start_card_items(exit_contract["blocked_when"], language))}
+
+返回 `BUDGET_STOPPED` 的条件：
+
+{bullet(start_card_items(exit_contract["budget_stopped_when"], language))}
+
+## 状态
+
+- 状态文件：`STATE.json`
+- 工作前先读状态。
+- 返回任何最终状态前必须更新状态。
+
+## 人工门禁
+
+{bullet(start_card_items(design["safety"]["requires_approval_for"], language))}
+
+## 最终状态
+
+结束前只能返回一个内部状态：`DONE`、`CONTINUE`、`BLOCKED`、`NEEDS_HUMAN` 或 `BUDGET_STOPPED`。
+面向用户说明时，把 `NEEDS_HUMAN` 写成“返回人工审查”。
+
+## 首轮复盘
+
+下一次运行前，在 `STATE.json` 记录：这个 loop 是否减少了重复人工纠正、是否产生误报、是否过度依赖人工判断、是否应该降级成 skill/checklist，或是否已有足够被接受的产出。
+"""
     return f"""# {design["name"]}
 
 {intro}
@@ -863,7 +1075,47 @@ or has enough accepted output to keep its current autonomy level.
 def render_team(design: dict) -> str:
     team = design["subagent_team"]
     if team["mode"] == "none":
-        return "# Team\n\nTeam mode is disabled for this loop.\n"
+        return "# 团队\n\n这个 loop 不启用团队模式。\n" if design_language(design) == "zh" else "# Team\n\nTeam mode is disabled for this loop.\n"
+    if design_language(design) == "zh":
+        blocks = [
+            "# 团队",
+            "",
+            f"模式：`{team['mode']}`",
+            "",
+            start_card_text(team["activation_rule"], "zh"),
+            "",
+            "## 协作规则",
+            "",
+            bullet(start_card_items(team["coordination"], "zh")),
+        ]
+        domain_label = {"frontend": "前端", "backend": "后端", "fullstack": "全栈", "architecture": "架构", "review": "审查", "delivery": "交付", "maintenance": "维护"}.get(design["domain"], design["domain"])
+        for role in team["roles"]:
+            title = start_card_text(role["title"], "zh")
+            prompt = (
+                f"你是 SixLoops {domain_label}目标的{title}。目标：{design['goal']} "
+                "只返回本角色输出、证据、阻塞点和下一步。不要扩大范围。没有明确批准时，不执行高影响动作。"
+            )
+            blocks.extend(
+                [
+                    "",
+                    f"## {title}",
+                    "",
+                    f"- 角色 id：`{role['id']}`",
+                    f"- 可修改文件：`{str(role['may_modify_files']).lower()}`",
+                    f"- 任务：{start_card_text(role['mission'], 'zh')}",
+                    "",
+                    "输出：",
+                    "",
+                    bullet(start_card_items(role["outputs"], "zh")),
+                    "",
+                    "提示词：",
+                    "",
+                    "```text",
+                    prompt,
+                    "```",
+                ]
+            )
+        return "\n".join(blocks) + "\n"
     blocks = [
         "# Team",
         "",
@@ -908,7 +1160,7 @@ def render_handoff(design: dict, artifact_dir: Path) -> str:
     mode_display = start_card_text(mode, language)
     team_display = start_card_text(design["team_mode"], language)
     intro = (
-        "这个目录是一份可执行 loop harness。先看 `GOAL.md` 的执行合同，再按 `RUN.md` 运行、按 `VERIFY.md` 验收。"
+        "这个目录是一份可执行 loop 运行包。先看 `GOAL.md` 的执行合同，再按 `RUN.md` 运行、按 `VERIFY.md` 验收。"
         if language == "zh"
         else "This folder contains an executable loop harness. Start with the `GOAL.md` execution contract, then run with `RUN.md` and verify with `VERIFY.md`."
     )
@@ -920,6 +1172,86 @@ def render_handoff(design: dict, artifact_dir: Path) -> str:
     verify_label = "验证方式" if language == "zh" else "Verifier"
     stop_label = "停止/返回审查" if language == "zh" else "Stop / return for review"
     ask_label = "返回审查前需要批准" if language == "zh" else "Ask before"
+    if language == "zh":
+        return f"""# {design["name"]} 交接说明
+
+{intro}
+
+## {contract_label}
+
+- {mode_label}: {mode_display}
+- {team_label}: {team_display}
+
+{goal_label}:
+
+{design["goal"]}
+
+{will_do_label}:
+
+{first_cycle_card(design)}
+
+{verify_label}:
+
+{bullet(start_card_items(contract["verifier_commands"], language))}
+
+{stop_label}:
+
+{bullet(start_card_items(contract["reject_conditions"], language))}
+
+{ask_label}:
+
+{bullet(start_card_items(design["safety"]["requires_approval_for"], language))}
+
+## 为什么是这个 loop
+
+- 为什么值得跑：{start_card_text(design["why_this_loop"], language)}
+- 为什么不只是更小机制：{start_card_text(design["why_not_smaller"], language)}
+- 为什么不更自动化：{start_card_text(design["why_not_more_autonomous"], language)}
+- 适配判断：{start_card_text(design["fit_summary"], language)}
+
+## 从这里开始
+
+1. 读 `GOAL.md`。
+2. 读 `RUN.md` 和 `VERIFY.md`。
+3. 如果可用团队工具且协作方式是 `subagent-team`，用 `TEAM.md` 分配规划者、执行者、检查者、验收者和整合者角色。
+4. 保持 `STATE.json` 在执行包旁边，停止前更新。
+
+## 退出协议
+
+仅在以下条件成立时继续：
+
+{bullet(start_card_items(exits["continue_only_if"], language))}
+
+返回 `DONE` 的条件：
+
+{bullet(start_card_items(exits["done_when"], language))}
+
+返回人工审查的条件：
+
+{bullet(start_card_items(exits["needs_human_when"], language))}
+
+返回 `BLOCKED` 的条件：
+
+{bullet(start_card_items(exits["blocked_when"], language))}
+
+返回 `BUDGET_STOPPED` 的条件：
+
+{bullet(start_card_items(exits["budget_stopped_when"], language))}
+
+## 复盘记录
+
+每轮结束后，在 `STATE.json` 记录基线摩擦、运行结果、节省的人工纠正、误报、人工接受度、下一步调整和是否建议降级。
+
+## 文件
+
+- `{artifact_dir / "GOAL.md"}`
+- `{artifact_dir / "STATE.json"}`
+- `{artifact_dir / "RUN.md"}`
+- `{artifact_dir / "VERIFY.md"}`
+- `{artifact_dir / "TEAM.md"}`
+- `{artifact_dir / "goal-loop-design.json"}`
+- `{artifact_dir / "AGENTS-snippet.md"}`
+"""
     return f"""# {design["name"]} Handoff
 
 {intro}
@@ -1023,6 +1355,12 @@ def render_run(design: dict) -> str:
             "`BLOCKED`：同一失败重复两次、证据不再变化或验收器不可用时阻塞。",
             "`BUDGET_STOPPED`：事项、轮次、时间、token 或成本上限到达时停止。",
         ]
+        read_steps = [
+            "读 `GOAL.md`。",
+            "读 `STATE.json`。",
+            "读 `VERIFY.md`。",
+            f"本轮最多选择 `{managed_loop['max_items_per_cycle']}` 个事项。",
+        ]
         state_lines = ["选中的事项", "采取的动作", "验收证据", "证据变化", "失败签名（如有）", "最终状态", "下次位置或待用户确认事项"]
     else:
         title = "Run Protocol"
@@ -1041,6 +1379,12 @@ def render_run(design: dict) -> str:
             "`BLOCKED`: when the same failure repeats twice, evidence stops changing, or the verifier is unavailable.",
             "`BUDGET_STOPPED`: when an item, iteration, time, token, or cost cap is reached.",
         ]
+        read_steps = [
+            "Read `GOAL.md`.",
+            "Read `STATE.json`.",
+            "Read `VERIFY.md`.",
+            f"Choose at most `{managed_loop['max_items_per_cycle']}` item(s) for this cycle.",
+        ]
         state_lines = [
             "selected items",
             "action taken",
@@ -1054,14 +1398,11 @@ def render_run(design: dict) -> str:
 
 ## {read_first}
 
-1. Read `GOAL.md`.
-2. Read `STATE.json`.
-3. Read `VERIFY.md`.
-4. Choose at most `{managed_loop["max_items_per_cycle"]}` item(s) for this cycle.
+{numbered(read_steps)}
 
 ## {cycle}
 
-{numbered(managed_loop["cycle_steps"])}
+{numbered(start_card_items(managed_loop["cycle_steps"], language))}
 
 ## {exit_rule}
 
@@ -1071,7 +1412,7 @@ def render_run(design: dict) -> str:
 
 ## {continue_only_if}
 
-{bullet(exit_contract["continue_only_if"])}
+{bullet(start_card_items(exit_contract["continue_only_if"], language))}
 
 ## {stop_conditions}
 
@@ -1146,6 +1487,21 @@ def render_verify(design: dict) -> str:
 def render_agents_snippet(design: dict) -> str:
     managed_loop = design["managed_loop"]
     mode = level_to_mode(design["adoption_level"])
+    language = design_language(design)
+    if language == "zh":
+        return f"""# AGENTS.md 草稿片段：{design["name"]}
+
+这是待审查的 loop 指令草稿。复制进项目规则前先人工确认。
+
+当目标匹配 `{design["loop_id"]}` 时：
+
+- 以 `{mode}` 运行（内部级别 `{design["adoption_level"]}`），协作方式为 `{design["team_mode"]}`。
+- 目标：{design["goal"]}
+- 每轮最多选择 {managed_loop["max_items_per_cycle"]} 个事项。
+- 达到 {managed_loop["max_iterations_per_run"]} 轮、重复无进展或触达审查边界时停止。
+- 返回前必须读取并更新 `STATE.json`。
+- 需要先询问：{"、".join(start_card_items(design["safety"]["requires_approval_for"], language))}。
+"""
     return f"""# Draft AGENTS.md Snippet: {design["name"]}
 
 This is a draft loop instruction. Review before copying into project instructions.

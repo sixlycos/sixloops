@@ -158,9 +158,11 @@ Only show edit, PR, or scheduled start options when the rendered candidate can a
 ## Output Requirements
 
 - Default close is a Start Plan, not an execution diary. Lead with what the user should start, shrink, reject, or run next.
-- Lead with an action overview table and 1-3 concrete Start Plans, not with evidence inventory.
+- Lead with a decision table and 1-3 concrete Start Plans, not with evidence inventory.
+- The first screen helps the user choose. Show rank, plan, judgment, why it ranks there, cost/risk, and the exact reply.
+- Do not expand Observe / Decide / Act / Verify / State for every candidate on the first screen. Put that execution protocol in the individual card or adoption packet after the user chooses.
 - Do not open with pipeline steps, record counts, redaction counts, file inventories, or "I processed..." unless source quality blocks any recommendation.
-- For each proposal, show start options, first-cycle packet, run card, mechanism decision, objective, heartbeat, recommended mode, trigger, cycle, verifier box, stop conditions, review boundary, and why this loop should exist.
+- For each proposal on the first screen, show start options, objective, verifier, stop/review boundary, run-card flags, and the path to the full card. Keep first-cycle packets, mechanism decisions, heartbeat, trigger, cycle, acceptance contract, exit contract, and loop economics in the detailed card or adoption packet.
 - Use exact confirmation strings from the rendered Start Plan, such as `start <candidate-id> as read-only`, `start <candidate-id> as low-risk edit`, `start <candidate-id> as worktree draft`, `start <candidate-id> as PR draft`, `start <candidate-id> as scheduled read-only`, `start <candidate-id> as scheduled draft`, `shrink <candidate-id> to skill`, or `reject <candidate-id>`. Do not invent stronger options that are absent from the card.
 - Only render goal-ready loop artifacts when the candidate has an acceptance contract: success criteria, verifier, state schema, resume policy, stop policy, budget cap, and human checkpoint.
 - For unattended or draft-producing loops, include the minimum safety checklist: success criteria, hard caps, isolation, read-only checker or deterministic verifier, state file, human gate, and visible logs or notifications.
@@ -168,6 +170,7 @@ Only show edit, PR, or scheduled start options when the rendered candidate can a
 - Make clear that `start <candidate-id> as <mode>` is a reply in the current chat, not a terminal command, and that the user does not need to copy the whole card unless handing it to another agent.
 - After start confirmation, generate an adoption packet with `GOAL.md`, `STATE.json`, `HANDOFF.md`, and a draft `AGENTS-snippet.md` when stateful reuse is needed; do not silently install it into the target project.
 - Match the user's language in the final response and user-facing artifact labels, headings, explanations, and review text. Keep internal schemas, exact confirmation strings, status codes, file paths, and deterministic script fields in English.
+- For Chinese output, translate product labels such as candidate, recommendation, review boundary, first cycle, verification, and state into Chinese. Keep only protocol tokens in English.
 - Separate private raw evidence from shareable summaries.
 - Quote only short redacted snippets when necessary.
 - Put evidence strength and source limitations after the proposals unless the source quality blocks recommendation.

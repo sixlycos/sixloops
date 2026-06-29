@@ -1,24 +1,20 @@
-# SixLoops 可执行建议
+# SixLoops 启动建议
 
 {{summary}}
 
-## 最省事的下一步
-
-{{default_next_step}}
-
-## 先看这里
+## 建议先看这里
 
 {{proposal_overview}}
 
-## 回复其中一行
+## 默认回复
 
-{{confirmation_prompt}}
+{{default_next_step}}
 
-## 六段计划
+## 候选摘要
 
 {{loop_proposals}}
 
-## 如果不启动
+## 如果不启动这些方案
 
 如果你拒绝或降级上面的方案，这些更小做法才有用。
 
