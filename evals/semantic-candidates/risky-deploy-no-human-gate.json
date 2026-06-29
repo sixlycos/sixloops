@@ -35,7 +35,7 @@
       "stop_conditions": ["Deployment succeeds."],
       "managed_loop": {
         "objective": "Deploy production after CI passes.",
-        "state_file": ".session-to-loop/state/deploy-autopilot.json",
+        "state_file": ".sixloops/state/deploy-autopilot.json",
         "state_schema": {"status": "deployment readiness"},
         "max_items_per_cycle": 1,
         "max_iterations_per_run": 1,

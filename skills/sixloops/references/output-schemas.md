@@ -10,7 +10,7 @@ Use these structures when producing machine-readable artifacts. Markdown reports
 - `managed_loop.heartbeat`: `session`, `goal`, `scheduled`, or `event`.
 - `managed_loop.recommended_maturity`: `read-only`, `goal-loop`, `isolated-draft`, `verified-pr-draft`, `scheduled-readonly`, or `scheduled-draft`.
 - `decision_card`: user-facing readiness summary: `can_use_now`, `can_confirm`, `can_delegate`, `missing_before_delegate`, `next_action`, and `confirmation_options`.
-- User-facing mode names map onto internal maturity values through `scripts/mode_policy.py`: `read-only` -> `read-only`, `low-risk edit` -> `goal-loop`, `worktree draft` -> `isolated-draft`, `PR draft` -> `verified-pr-draft`, `scheduled read-only` -> `scheduled-readonly`, and `scheduled draft` -> `scheduled-draft`.
+- User-facing mode names map onto internal maturity values through `scripts/sixloops/core/mode_policy.py`: `read-only` -> `read-only`, `low-risk edit` -> `goal-loop`, `worktree draft` -> `isolated-draft`, `PR draft` -> `verified-pr-draft`, `scheduled read-only` -> `scheduled-readonly`, and `scheduled draft` -> `scheduled-draft`.
 - `schemas/semantic-candidates.schema.json`: host AI output contract. Scripts consume this schema after packet selection; they do not use regex fallback as the primary loop-value judge.
 - `raw_ai_claims`: private copy of the host AI candidate before deterministic guardrails normalize render fields.
 - `normalized_render_fields`: fields defaulted only so draft artifacts can render; defaults do not make a loop delegable.
@@ -42,7 +42,7 @@ first_run_packet:
   recommended_action: "start ci-babysitter as PR draft"
   reply_to_confirm: "start ci-babysitter as PR draft"
   first_run_mode: "PR draft"
-  state_file: ".session-to-loop/state/ci-babysitter.json"
+  state_file: ".sixloops/state/ci-babysitter.json"
   stop_after: "8 iterations or the same failure repeats twice"
   human_gate: "Do not push, merge, deploy, migrate, or change credentials without approval."
   starter_goal_prompt: |
@@ -55,7 +55,7 @@ first_run_packet:
     2. Decide the next failure, action, verifier, and escalation path.
     3. Act on at most 1-3 directly evidenced failures.
     4. Verify with the focused project check.
-    5. Update .session-to-loop/state/ci-babysitter.json before stopping.
+    5. Update .sixloops/state/ci-babysitter.json before stopping.
     Stop after 8 iterations, two repeated failure signatures, or a human gate.
 trigger:
   - "Open PR has pending or failed CI."
@@ -86,7 +86,7 @@ managed_loop:
     - "CI status"
     - "failed job logs"
     - "git diff"
-  state_file: ".session-to-loop/state/ci-babysitter.json"
+  state_file: ".sixloops/state/ci-babysitter.json"
   state_schema:
     status: "One of pending, discovering, active, verifying, done, blocked, escalated, budget_stopped, rejected."
     objective_hash: "Stable hash of objective and success criteria."
@@ -224,9 +224,9 @@ rejected:
   - id: "one-off-bugfix"
     reason: "appeared once"
 private_outputs:
-  - ".session-to-loop/private/signals.json"
+  - ".sixloops/private/signals.json"
 shareable_outputs:
-  - ".session-to-loop/public/loop-playbook.md"
+  - ".sixloops/public/loop-playbook.md"
 ```
 
 ## Analysis Scope
@@ -244,7 +244,7 @@ scope_lease:
     - "allowed roles change"
     - "snippet policy changes"
     - "output visibility changes"
-manifest: ".session-to-loop/private/discovered-sessions.json"
+manifest: ".sixloops/private/discovered-sessions.json"
 allowed_files:
   - path: "/absolute/path/to/session.jsonl"
     label: "session.jsonl"
@@ -354,7 +354,7 @@ first_run_packet:
   recommended_action: "start ci-babysitter as PR draft"
   reply_to_confirm: "start ci-babysitter as PR draft"
   first_run_mode: "PR draft"
-  state_file: ".session-to-loop/state/ci-babysitter.json"
+  state_file: ".sixloops/state/ci-babysitter.json"
   stop_after: "8 iterations or two repeated failure signatures"
   human_gate: "Do not push, merge, deploy, migrate, or change credentials without approval."
   starter_goal_prompt: "Objective: Keep CI failures moving toward a verified fix without guessing..."
@@ -382,7 +382,7 @@ managed_loop:
   discovery_sources:
     - "CI status"
     - "failed job logs"
-  state_file: ".session-to-loop/state/ci-babysitter.json"
+  state_file: ".sixloops/state/ci-babysitter.json"
   state_schema:
     status: "Current loop status."
     objective_hash: "Stable hash of objective and success criteria."
@@ -473,13 +473,13 @@ mechanisms:
   - "loop"
   - "skill"
 adoption_level: "goal-loop"
-source_candidates: ".session-to-loop/private/candidates.json"
+source_candidates: ".sixloops/private/candidates.json"
 source_analysis_model: "user-message-primary-tool-usage-supporting-v1"
 files:
-  state: ".session-to-loop/adopted/ci-babysitter/STATE.json"
-  goal: ".session-to-loop/adopted/ci-babysitter/GOAL.md"
-  handoff: ".session-to-loop/adopted/ci-babysitter/HANDOFF.md"
-  agents_snippet: ".session-to-loop/adopted/ci-babysitter/AGENTS-snippet.md"
+  state: ".sixloops/adopted/ci-babysitter/STATE.json"
+  goal: ".sixloops/adopted/ci-babysitter/GOAL.md"
+  handoff: ".sixloops/adopted/ci-babysitter/HANDOFF.md"
+  agents_snippet: ".sixloops/adopted/ci-babysitter/AGENTS-snippet.md"
 ```
 
 ## Adoption State

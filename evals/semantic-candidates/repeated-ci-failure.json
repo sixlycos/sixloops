@@ -63,7 +63,7 @@
       "managed_loop": {
         "objective": "Keep CI failures moving toward a verified fix without guessing.",
         "cadence_or_trigger": ["When CI is pending or failed on the current branch."],
-        "state_file": ".session-to-loop/state/ci-babysitter.json",
+        "state_file": ".sixloops/state/ci-babysitter.json",
         "cycle_steps": [
           "Read the previous state file if it exists.",
           "Inspect CI status, failed logs, and current git diff.",

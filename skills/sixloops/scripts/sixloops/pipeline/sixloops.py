@@ -5,20 +5,27 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from sixloops.paths import REFERENCES_DIR, SCHEMAS_DIR, SCRIPT_DIR
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-SKILL_DIR = SCRIPT_DIR.parent
-SEMANTIC_PROMPT = SKILL_DIR / "references" / "semantic-analysis-prompt.md"
-SEMANTIC_SCHEMA = SKILL_DIR / "schemas" / "semantic-candidates.schema.json"
+SEMANTIC_PROMPT = REFERENCES_DIR / "semantic-analysis-prompt.md"
+SEMANTIC_SCHEMA = SCHEMAS_DIR / "semantic-candidates.schema.json"
 
 
-def run_step(args: list[str]) -> None:
-    subprocess.run([sys.executable, *args], check=True)
+def run_module(module: str, args: list[str]) -> None:
+    env = os.environ.copy()
+    existing_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        str(SCRIPT_DIR)
+        if not existing_pythonpath
+        else str(SCRIPT_DIR) + os.pathsep + existing_pythonpath
+    )
+    subprocess.run([sys.executable, "-m", module, *args], check=True, env=env)
 
 
 def private_path(out_root: Path, name: str) -> Path:
@@ -42,7 +49,7 @@ def write_analysis_run(
     packet_index_data = json.loads(packet_index.read_text(encoding="utf-8"))
     continue_command = [
         sys.executable,
-        str(SCRIPT_DIR / "session_to_loop.py"),
+        str(SCRIPT_DIR / "sixloops.py"),
         "--input",
         *argv.input,
         "--out-root",
@@ -94,7 +101,7 @@ def parse_args() -> argparse.Namespace:
         )
     )
     parser.add_argument("--input", nargs="+", required=True, help="Explicit transcript file(s) or directory path(s).")
-    parser.add_argument("--out-root", default=".session-to-loop", help="Output root. Default: .session-to-loop")
+    parser.add_argument("--out-root", default=".sixloops", help="Output root. Default: .sixloops")
     parser.add_argument("--recursive", action="store_true", help="Recursively search explicit input directories.")
     parser.add_argument("--approve", action="store_true", help="Approve generated scope. Use only after user confirmation or for evals.")
     parser.add_argument("--scope", default=None, help="Existing approved analysis-scope.json.")
@@ -137,18 +144,18 @@ def main() -> int:
     semantic_candidates = private_path(out_root, "semantic-candidates.json")
     candidates = private_path(out_root, "candidates.json")
 
-    discover_cmd = [str(SCRIPT_DIR / "discover_claude_sessions.py"), "--input", *args.input, "--out", str(manifest)]
+    discover_args = ["--input", *args.input, "--out", str(manifest)]
     if args.recursive:
-        discover_cmd.append("--recursive")
-    run_step(discover_cmd)
+        discover_args.append("--recursive")
+    run_module("sixloops.pipeline.discover_claude_sessions", discover_args)
 
     if not args.scope:
-        scope_cmd = [str(SCRIPT_DIR / "prepare_analysis_scope.py"), "--manifest", str(manifest), "--roles", *args.roles, "--out", str(scope)]
+        scope_args = ["--manifest", str(manifest), "--roles", *args.roles, "--out", str(scope)]
         if args.approve:
-            scope_cmd.append("--approve")
+            scope_args.append("--approve")
         if args.source_pointers_only:
-            scope_cmd.append("--source-pointers-only")
-        run_step(scope_cmd)
+            scope_args.append("--source-pointers-only")
+        run_module("sixloops.pipeline.prepare_analysis_scope", scope_args)
 
     scope_data = json.loads(scope.read_text(encoding="utf-8"))
     if not scope_data.get("approved"):
@@ -156,9 +163,9 @@ def main() -> int:
         print("Ask the user to confirm files, roles, snippet policy, and output visibility, then rerun with --approve or --scope.")
         return 0
 
-    run_step(
+    run_module(
+        "sixloops.pipeline.redact_transcripts",
         [
-            str(SCRIPT_DIR / "redact_transcripts.py"),
             "--manifest",
             str(manifest),
             "--scope",
@@ -169,9 +176,9 @@ def main() -> int:
             str(redacted_index),
         ]
     )
-    run_step(
+    run_module(
+        "sixloops.pipeline.build_analysis_packets",
         [
-            str(SCRIPT_DIR / "build_analysis_packets.py"),
             "--redacted-index",
             str(redacted_index),
             "--out",
@@ -189,9 +196,9 @@ def main() -> int:
     )
 
     if args.semantic_candidates:
-        run_step(
+        run_module(
+            "sixloops.pipeline.apply_guardrails",
             [
-                str(SCRIPT_DIR / "apply_guardrails.py"),
                 "--semantic-candidates",
                 args.semantic_candidates,
                 "--packet-index",
@@ -200,14 +207,14 @@ def main() -> int:
                 str(candidates),
             ]
         )
-        run_step([str(SCRIPT_DIR / "render_artifacts.py"), "--candidates", str(candidates), "--out-dir", str(public)])
+        run_module("sixloops.pipeline.render_artifacts", ["--candidates", str(candidates), "--out-dir", str(public)])
         print(f"Rendered semantic analysis artifacts: {public}")
         return 0
 
     if args.rule_fallback:
-        run_step([str(SCRIPT_DIR / "extract_signals.py"), "--redacted-index", str(redacted_index), "--out", str(signals)])
-        run_step([str(SCRIPT_DIR / "score_candidates.py"), "--signals", str(signals), "--out", str(candidates)])
-        run_step([str(SCRIPT_DIR / "render_artifacts.py"), "--candidates", str(candidates), "--out-dir", str(public)])
+        run_module("sixloops.pipeline.extract_signals", ["--redacted-index", str(redacted_index), "--out", str(signals)])
+        run_module("sixloops.pipeline.score_candidates", ["--signals", str(signals), "--out", str(candidates)])
+        run_module("sixloops.pipeline.render_artifacts", ["--candidates", str(candidates), "--out-dir", str(public)])
         print(f"Rendered fallback analysis artifacts: {public}")
         return 0
 

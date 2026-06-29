@@ -12,10 +12,10 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_MANIFEST = Path(".session-to-loop/private/discovered-sessions.json")
-DEFAULT_SCOPE = Path(".session-to-loop/private/analysis-scope.json")
-DEFAULT_OUT_DIR = Path(".session-to-loop/private/redacted")
-DEFAULT_INDEX = Path(".session-to-loop/private/redacted-index.json")
+DEFAULT_MANIFEST = Path(".sixloops/private/discovered-sessions.json")
+DEFAULT_SCOPE = Path(".sixloops/private/analysis-scope.json")
+DEFAULT_OUT_DIR = Path(".sixloops/private/redacted")
+DEFAULT_INDEX = Path(".sixloops/private/redacted-index.json")
 
 REDACTION_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (

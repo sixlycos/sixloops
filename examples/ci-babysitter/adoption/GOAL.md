@@ -13,7 +13,7 @@ Keep CI failures moving toward a verified fix without guessing.
 ## State
 
 - Active state file for this adoption packet: `STATE.json`
-- Suggested project state path: `.session-to-loop/state/ci-babysitter.json`
+- Suggested project state path: `.sixloops/state/ci-babysitter.json`
 - Read state before every cycle and update it before stopping.
 
 ## Acceptance Checks

@@ -13,8 +13,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVALS = REPO_ROOT / "evals" / "goal_design_evals.json"
-DEFAULT_OUT_ROOT = REPO_ROOT / ".session-to-loop" / "tmp" / "goal-design-evals"
-DESIGNER = REPO_ROOT / "skills" / "session-to-loop" / "scripts" / "design_goal_loop.py"
+DEFAULT_OUT_ROOT = REPO_ROOT / ".sixloops" / "tmp" / "goal-design-evals"
+DESIGNER = REPO_ROOT / "skills" / "sixloops" / "scripts" / "design_goal_loop.py"
 
 
 def load_json(path: Path) -> object:

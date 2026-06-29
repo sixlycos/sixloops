@@ -10,11 +10,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from transcript_adapters import iter_normalized_events
+from sixloops.core.transcript_adapters import iter_normalized_events
 
 
-DEFAULT_INDEX = Path(".session-to-loop/private/redacted-index.json")
-DEFAULT_OUT = Path(".session-to-loop/private/signals.json")
+DEFAULT_INDEX = Path(".sixloops/private/redacted-index.json")
+DEFAULT_OUT = Path(".sixloops/private/signals.json")
 
 USER_PATTERNS = [
     {

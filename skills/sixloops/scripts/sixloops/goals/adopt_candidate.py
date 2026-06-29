@@ -11,12 +11,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from loop_contract import normalize_exit_contract
-from mode_policy import INTERNAL_TO_MODE, level_to_mode, mode_to_level
+from sixloops.core.loop_contract import normalize_exit_contract
+from sixloops.core.mode_policy import INTERNAL_TO_MODE, level_to_mode, mode_to_level
 
 
-DEFAULT_CANDIDATES = Path(".session-to-loop/private/candidates.json")
-DEFAULT_OUT_DIR = Path(".session-to-loop/adopted")
+DEFAULT_CANDIDATES = Path(".sixloops/private/candidates.json")
+DEFAULT_OUT_DIR = Path(".sixloops/adopted")
 ALLOWED_LEVELS = set(INTERNAL_TO_MODE)
 
 
@@ -186,7 +186,7 @@ def render_goal(candidate: dict, level: str) -> str:
     exits = exit_contract(candidate)
     candidate_id = str(candidate.get("id"))
     state_file = "STATE.json"
-    suggested_state = managed_loop.get("state_file", f".session-to-loop/state/{candidate_id}.json")
+    suggested_state = managed_loop.get("state_file", f".sixloops/state/{candidate_id}.json")
     success = strings(contract.get("success_criteria") or candidate.get("verification"))
     verifiers = strings(contract.get("verifier_commands"))
     reject_conditions = strings(contract.get("reject_conditions") or candidate.get("stop_conditions"))

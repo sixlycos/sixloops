@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-DEFAULT_MANIFEST = Path(".session-to-loop/private/discovered-sessions.json")
-DEFAULT_OUT = Path(".session-to-loop/private/analysis-scope.json")
+DEFAULT_MANIFEST = Path(".sixloops/private/discovered-sessions.json")
+DEFAULT_OUT = Path(".sixloops/private/analysis-scope.json")
 DEFAULT_ROLES = ["user", "tool"]
 VALID_ROLES = {"user", "tool", "assistant"}
 

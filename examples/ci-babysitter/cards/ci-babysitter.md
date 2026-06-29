@@ -87,7 +87,7 @@ First cycle:
 2. Decide: choose at most 3 item(s), the next action, and any review boundary
 3. Act: pick at most 3 directly evidenced item(s)
 4. Verify: Run the focused project checks listed in verification.
-5. Update state: .session-to-loop/state/ci-babysitter.json
+5. Update state: .sixloops/state/ci-babysitter.json
 
 Stop after:
 8 iterations, repeated failure, no progress across two iterations, or a review boundary
@@ -255,7 +255,7 @@ User-facing mode:
 
 State file:
 
-`.session-to-loop/state/ci-babysitter.json`
+`.sixloops/state/ci-babysitter.json`
 
 State schema:
 

@@ -9,10 +9,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from transcript_adapters import classify_file
+from sixloops.core.transcript_adapters import classify_file
 
 
-DEFAULT_OUT = Path(".session-to-loop/private/discovered-sessions.json")
+DEFAULT_OUT = Path(".sixloops/private/discovered-sessions.json")
 SUPPORTED_SUFFIXES = {".jsonl"}
 
 

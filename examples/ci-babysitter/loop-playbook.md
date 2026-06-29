@@ -35,7 +35,7 @@ First cycle:
 - Decide: choose at most 3 item(s), the next action, and any review boundary
 - Act: pick at most 3 directly evidenced item(s)
 - Verify: Run the focused project checks listed in verification.
-- State: .session-to-loop/state/ci-babysitter.json
+- State: .sixloops/state/ci-babysitter.json
 - Stop after: 8 iterations, repeated failure, no progress across two iterations, or a review boundary
 
 Trigger:
@@ -150,7 +150,7 @@ Loop candidates:
 
 ## Run Notes
 
-Project: `session-to-loop`
+Project: `sixloops`
 
 Analysis window: `explicit local inputs`
 
@@ -164,7 +164,7 @@ Files: 1; records: 5; providers: generic=4; source types: generic-jsonl=4
 
 ## Private Outputs
 
-- .session-to-loop/private/candidates.json
+- .sixloops/private/candidates.json
 
 ## Shareable Outputs
 

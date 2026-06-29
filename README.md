@@ -1,40 +1,42 @@
 # SixLoops
 
-**Turn repeated AI-coding corrections into reusable agent loops.**
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-SixLoops is an open-source Agent Skill for Codex and Claude Code. It reads local
-session logs, project evidence, or a direct development goal, then recommends
-the smallest useful mechanism for next time: a rule, skill, hook, checklist,
-approval gate, eval case, or managed loop.
+**Turn development goals and coding evidence into controlled agent loops.**
+
+SixLoops is an open-source Agent Skill for Codex and Claude Code. Start from a
+fresh development goal, project evidence, or local session logs; SixLoops then
+recommends the smallest useful mechanism for next time: a rule, skill, hook,
+checklist, approval gate, eval case, or managed loop.
 
 It is not a chat summarizer. It is a loop engineering assistant for developers
-who keep correcting the same agent behavior.
+who want agent work to become more repeatable, verifiable, and bounded.
 
-The repository is named `sixloops`. The installed skill folder remains
-`session-to-loop` for Codex and Claude compatibility, so invoke it as
-`$session-to-loop` in Codex or `session-to-loop` in Claude Code.
+The product name, repository, and installed skill package are all `sixloops`.
 
 ![Let's loop meme](assets/readme/lets-loop-meme.png)
 
 ## The Core Idea
 
-Repeated agent mistakes usually need one of three responses:
+Agent loop engineering usually starts from one of three inputs:
 
-- **Remember it**: save a rule, skill, checklist, or approval gate.
-- **Verify it**: add a test, browser check, CI check, screenshot, log check, or
-  rubric.
-- **Loop it**: create a controlled workflow with scope, state, verifier, budget,
-  human gate, and adoption feedback.
+- **A fresh goal**: turn a workflow you want to delegate into a bounded agent
+  loop.
+- **Project evidence**: use browser audits, CI logs, eval output, or result files
+  to design the next useful mechanism.
+- **Repeated correction**: turn recurring agent failure into a rule, skill,
+  checklist, verifier, or loop.
 
-SixLoops helps decide which response is actually worth adding.
+SixLoops helps decide which mechanism is actually worth adding.
 
 ![SixLoops semantic analysis turns noisy packets into loop cards](assets/readme/semantic-kitchen.png)
 
-| Repeated correction | Better artifact |
+| Input signal | Better artifact |
 | --- | --- |
+| "After UI changes, open changed routes and capture screenshots." | Browser Audit loop with route discovery and visual evidence. |
+| "Keep checking CI failures and draft low-risk fixes." | CI Babysitter loop with state, verifier, cap, and review boundary. |
 | "Read the CI logs before guessing." | CI Babysitter loop with state, verifier, cap, and review boundary. |
 | "Use pnpm here, not npm." | Package-manager rule or checklist. |
-| "After UI changes, open the route and screenshot it." | Browser Audit loop with route discovery and visual evidence. |
 | "Deploy only after I approve." | Approval gate, not autonomous deployment. |
 
 Complete examples:
@@ -64,6 +66,40 @@ SixLoops can render:
 - draft `AGENTS.md` / `CLAUDE.md` snippets
 - approval gates and checklists
 - eval cases
+
+## Workflow
+
+```mermaid
+flowchart TD
+  A["Start with a goal, session logs, or project evidence"] --> B{"Input type"}
+  B -->|Direct goal| C["Design a goal loop<br/>design_goal_loop.py"]
+  B -->|Session logs| D["Confirm a narrow analysis scope"]
+  B -->|Project evidence| E["Package supporting evidence"]
+
+  D --> F["Redact, normalize, and build analysis packets"]
+  E --> G["Semantic analysis<br/>find loop candidates"]
+  F --> G
+  C --> H["Fast loop check<br/>cadence, verifier, reproducibility, cap, human gate"]
+  G --> H
+
+  H --> I{"Smallest useful mechanism?"}
+  I -->|Rule, skill, checklist, gate, or eval| J["Render lightweight artifact"]
+  I -->|Managed loop| K["Render loop playbook<br/>state, verifier, stop policy, review boundary"]
+  I -->|Weak, rare, unsafe, or unverifiable| L["Reject or downgrade"]
+
+  J --> M["User chooses start, shrink, or reject"]
+  K --> M
+  L --> M
+
+  M --> N{"Start mode approved?"}
+  N -->|No| O["Keep the artifact for manual use"]
+  N -->|Read-only, edit, draft, or PR| P["Run one controlled cycle"]
+
+  P --> Q{"Exit contract"}
+  Q -->|DONE| R["Accepted result"]
+  Q -->|CONTINUE| P
+  Q -->|Review needed, blocked, or budget stopped| S["Return to human"]
+```
 
 ## Quick Start
 
@@ -105,27 +141,36 @@ One-line install from GitHub:
 git clone https://github.com/sixlycos/sixloops.git; cd sixloops; .\scripts\install.ps1 -Target codex
 ```
 
-Manual install: copy `skills/session-to-loop` to one of these directories:
+Manual install: copy `skills/sixloops` to one of these directories:
 
-- Codex user skills: `~/.agents/skills/session-to-loop`
-- Claude Code user skills: `~/.claude/skills/session-to-loop`
-- Project skills: `<repo>/.agents/skills/session-to-loop` or
-  `<repo>/.claude/skills/session-to-loop`
+- Codex user skills: `~/.agents/skills/sixloops`
+- Claude Code user skills: `~/.claude/skills/sixloops`
+- Project skills: `<repo>/.agents/skills/sixloops` or
+  `<repo>/.claude/skills/sixloops`
 
-### Invoke The Skill
+### Invoke SixLoops
+
+Use the product name in Codex. If your Codex environment needs an explicit skill
+trigger, use the skill id `$sixloops`.
 
 Codex:
 
 ```text
-Use $session-to-loop to find the first loop in this repo worth trying.
+Use SixLoops to find the first loop in this repo worth trying.
 Return 1-3 Start Plans with verifier, state, stop condition, and review boundary.
 Reject weak patterns.
+```
+
+Explicit Codex trigger:
+
+```text
+Use $sixloops (SixLoops) to design a goal loop for this project.
 ```
 
 Claude Code:
 
 ```text
-Use session-to-loop to design a loop for this project.
+Use sixloops to design a loop for this project.
 ```
 
 ## Try It Without Private Logs
@@ -133,9 +178,9 @@ Use session-to-loop to design a loop for this project.
 Run the synthetic fixture demo:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
+python skills/sixloops/scripts/sixloops.py \
   --input evals/fixtures/repeated-ci-failure.jsonl \
-  --out-root .session-to-loop/tmp/repeated-ci \
+  --out-root .sixloops/tmp/repeated-ci \
   --approve \
   --rule-fallback
 ```
@@ -143,7 +188,7 @@ python skills/session-to-loop/scripts/session_to_loop.py \
 Open:
 
 ```text
-.session-to-loop/tmp/repeated-ci/public/loop-playbook.md
+.sixloops/tmp/repeated-ci/public/loop-playbook.md
 ```
 
 Expected actions include:
@@ -160,12 +205,12 @@ Expected actions include:
 You do not need session logs to start. Give SixLoops a goal:
 
 ```bash
-python skills/session-to-loop/scripts/design_goal_loop.py \
+python skills/sixloops/scripts/design_goal_loop.py \
   --goal "After frontend changes, verify changed routes with browser screenshots, fix low-risk regressions, and stop when review or product judgment is needed." \
   --domain frontend \
   --team-mode auto \
   --level auto \
-  --out-dir .session-to-loop/tmp/frontend-goal \
+  --out-dir .sixloops/tmp/frontend-goal \
   --overwrite
 ```
 
@@ -179,14 +224,14 @@ The output folder contains `GOAL.md`, `TEAM.md`, `STATE.json`, `HANDOFF.md`, and
 Run against an explicit file or narrow directory:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py --input <session-log-file-or-dir>
+python skills/sixloops/scripts/sixloops.py --input <session-log-file-or-dir>
 ```
 
 For real logs, SixLoops first creates a scope proposal. Review it, then approve
 the same narrow scope:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
+python skills/sixloops/scripts/sixloops.py \
   --input <session-log-file-or-dir> \
   --approve
 ```
@@ -194,7 +239,7 @@ python skills/session-to-loop/scripts/session_to_loop.py \
 For larger approved sets, cap semantic review cost:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
+python skills/sixloops/scripts/sixloops.py \
   --input <session-log-file-or-dir> \
   --approve \
   --max-packets 120 \
@@ -203,28 +248,28 @@ python skills/session-to-loop/scripts/session_to_loop.py \
   --role-quota tool=40
 ```
 
-This creates compact analysis packets under `.session-to-loop/private/`. The
+This creates compact analysis packets under `.sixloops/private/`. The
 host AI reads those packets with:
 
 ```text
-skills/session-to-loop/references/semantic-analysis-prompt.md
-skills/session-to-loop/schemas/semantic-candidates.schema.json
-.session-to-loop/private/analysis-packets.jsonl
+skills/sixloops/references/semantic-analysis-prompt.md
+skills/sixloops/schemas/semantic-candidates.schema.json
+.sixloops/private/analysis-packets.jsonl
 ```
 
 Then it writes:
 
 ```text
-.session-to-loop/private/semantic-candidates.json
+.sixloops/private/semantic-candidates.json
 ```
 
 Continue with the command stored in `analysis-run.json`, or run:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
+python skills/sixloops/scripts/sixloops.py \
   --input <session-log-file-or-dir> \
-  --scope .session-to-loop/private/analysis-scope.json \
-  --semantic-candidates .session-to-loop/private/semantic-candidates.json
+  --scope .sixloops/private/analysis-scope.json \
+  --semantic-candidates .sixloops/private/semantic-candidates.json
 ```
 
 `--rule-fallback` is for offline fixtures, synthetic evals, and
@@ -280,7 +325,7 @@ loop to a skill/checklist.
 
 - No network access is needed by the local pipeline.
 - No whole-disk or broad home-directory scan is performed by default.
-- Raw logs stay under `.session-to-loop/private/` or `.session-to-loop/tmp/`.
+- Raw logs stay under `.sixloops/private/` or `.sixloops/tmp/`.
 - Redaction runs before shareable artifacts are rendered.
 - Session content is treated as untrusted data.
 - The skill is read-only by default and does not install hooks, edit project
@@ -289,29 +334,49 @@ loop to a skill/checklist.
 ## Repository Layout
 
 ```text
-skills/session-to-loop/
-  SKILL.md
-  agents/openai.yaml
-  references/
-  schemas/
-  assets/templates/
-  scripts/
+README.md
+README.zh-CN.md
+SECURITY.md
+docs/
+  ARCHITECTURE.md
+
+skills/sixloops/
+  SKILL.md             # host-agent operating contract
+  agents/              # host integration metadata
+  references/          # policy, prompts, rubrics, and loop contracts
+  schemas/             # machine-readable JSON contracts
+  assets/templates/    # rendered artifact templates
+  scripts/             # public CLI entrypoints
+    sixloops/
+      core/            # shared contracts, modes, transcript adapters
+      pipeline/        # transcript discovery, redaction, packets, rendering
+      goals/           # direct goal design and adoption packets
 
 examples/
-  ci-babysitter/
+  ci-babysitter/       # checked-in example output
   frontend-browser-audit/
 
 evals/
-  fixtures/
-  semantic-candidates/
-  run_evals.py
+  fixtures/            # input transcript and evidence fixtures
+  semantic-candidates/ # host-AI candidate fixtures
+  run_evals.py         # transcript pipeline evals
   run_goal_design_evals.py
 
 scripts/
-  install.ps1
-  install.sh
-  package_skill.py
+  install.ps1          # Windows install helper
+  install.sh           # macOS/Linux install helper
+  package_skill.py     # release zip builder
+
+assets/readme/         # README media
+dist/                  # generated release archives
+.sixloops/      # generated local run data
 ```
+
+The stable publishable boundary is `skills/sixloops/`. Repository
+support layers may depend on that package, but the skill package should remain
+portable after it is copied into a user or project skills directory. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full layer map, dependency
+direction, and placement rules.
 
 ## Package A Release Zip
 
@@ -333,7 +398,7 @@ skills directory.
 Validate the skill:
 
 ```bash
-python C:/Users/Administrator/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/session-to-loop
+python C:/Users/Administrator/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/sixloops
 ```
 
 Run transcript evals:
@@ -351,9 +416,9 @@ python evals/run_goal_design_evals.py --keep-going
 Run a representative fixture:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
+python skills/sixloops/scripts/sixloops.py \
   --input evals/fixtures/auxiliary-project-evidence.jsonl \
-  --out-root .session-to-loop/tmp/auxiliary \
+  --out-root .sixloops/tmp/auxiliary \
   --approve \
   --rule-fallback
 ```

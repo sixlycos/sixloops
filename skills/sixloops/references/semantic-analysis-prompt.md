@@ -1,6 +1,6 @@
 # Semantic Analysis Prompt
 
-Use this prompt after `scripts/session_to_loop.py` or `scripts/build_analysis_packets.py` creates
+Use this prompt after `scripts/sixloops.py` or `scripts/build_analysis_packets.py` creates
 `analysis-packets.jsonl`.
 
 ## Role
@@ -178,7 +178,7 @@ Write only JSON:
         "recommended_maturity": "verified-pr-draft",
         "cadence_or_trigger": ["When CI is pending or failed on the current branch."],
         "discovery_sources": ["CI status", "failed job logs", "git diff"],
-        "state_file": ".session-to-loop/state/ci-babysitter.json",
+        "state_file": ".sixloops/state/ci-babysitter.json",
         "state_schema": {
           "status": "Current loop status and stop reason.",
           "items": "Tracked failures with status: inbox, active, blocked, done.",

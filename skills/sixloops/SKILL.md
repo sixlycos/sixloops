@@ -1,13 +1,13 @@
 ---
-name: session-to-loop
-description: SixLoops analyzes local AI coding session transcripts, project context, or direct user goals to design project-specific loop engineering artifacts. Use when the user wants to mine past Codex, Claude Code, or coding-agent JSONL sessions, improve agent workflows, design goal-ready loops, create subagent/team loop plans, convert repeated manual prompting into reusable rules, skills, hooks, loop prompts, checklists, approval gates, eval cases, or decide whether a repeated pattern should not be automated.
+name: sixloops
+description: SixLoops turns fresh development goals, project evidence, or scoped AI coding session transcripts into project-specific loop engineering artifacts. Use when the user wants to design goal-ready loops from direct objectives, mine past Codex, Claude Code, or coding-agent JSONL sessions, improve agent workflows, create subagent/team loop plans, convert repeated manual prompting into reusable rules, skills, hooks, loop prompts, checklists, approval gates, eval cases, or decide whether a pattern should not be automated.
 ---
 
 # SixLoops
 
 ## Overview
 
-Compile past AI coding sessions into evidence-backed loop engineering artifacts. Optimize first for useful mechanism recommendations that improve future agent performance. Treat local execution, redaction, and approval scope as guardrails around the analysis, not as the main value.
+Turn fresh development goals, project evidence, or scoped AI coding sessions into evidence-backed loop engineering artifacts. Optimize first for useful mechanism recommendations that improve future agent performance. Treat local execution, redaction, and approval scope as guardrails around the analysis, not as the main value.
 
 The user-facing product is a small set of project-specific loop plans that the user can start, shrink, or reject. If the user grants an edit/worktree/PR mode, the next step is the first controlled cycle, not another explanatory report. Evidence explains why the proposals are credible; it is not the lead story.
 
@@ -15,7 +15,7 @@ The user-facing product is a small set of project-specific loop plans that the u
 
 - Prefer evidence-backed recommendations over generic workflow advice.
 - Let the host AI perform semantic grouping; use scripts for deterministic discovery, redaction, packet building, hard gates, and rendering.
-- When the user starts from a current goal instead of transcripts, design the goal loop directly; do not force transcript discovery.
+- Treat fresh goals as first-class input. When the user starts from a current goal instead of transcripts, design the goal loop directly; do not force transcript discovery.
 - Choose the smallest mechanism that would actually reduce repeated friction.
 - Reserve `loop` for managed goal loops that a user can delegate after one explicit approval.
 - Treat actions as mode-gated, not absolutely forbidden. Read-only mode reports; low-risk edit mode may patch bounded local issues; worktree draft mode may explore larger reversible changes; PR draft mode may prepare reviewable output; landing, merge, deploy, migration, credential, schema, data, payment, and production changes need the matching user-approved mode or review.
@@ -46,7 +46,7 @@ The user-facing product is a small set of project-specific loop plans that the u
 2. Discover and protect inputs with bundled scripts.
    - Inventory candidate session files without reading unrelated private locations.
    - Redact obvious secrets, tokens, credentials, emails, private URLs, customer identifiers, and sensitive local paths before writing shareable outputs.
-   - Normalize Codex, Claude Code, and generic JSONL with `scripts/transcript_adapters.py`.
+   - Normalize Codex, Claude Code, and generic JSONL with `scripts/sixloops/core/transcript_adapters.py`.
    - Build `analysis-packets.jsonl` for semantic review instead of asking the AI to read raw transcripts.
 
 3. Analyze packets semantically with the host AI.
@@ -82,14 +82,24 @@ The user-facing product is a small set of project-specific loop plans that the u
 
 ## Bundled Scripts
 
-Recommended unified entry:
+Documented script paths under `scripts/*.py` are public CLI entrypoints.
+Implementation code lives under `scripts/sixloops/` and is grouped into
+`core/`, `pipeline/`, and `goals/`.
 
-1. Run `scripts/session_to_loop.py --input <file-or-dir>`.
+Direct goal entry:
+
+1. Run `scripts/design_goal_loop.py --goal "<user goal>" --domain auto --team-mode auto --level auto --out-dir <artifact-dir>`.
+2. Read the generated `GOAL.md`, `STATE.json`, `HANDOFF.md`, `TEAM.md`, and `goal-loop-design.json`.
+3. Present the start mode, verifier, state file, stop conditions, and review boundary before any execution.
+
+Transcript or project-evidence pipeline entry:
+
+1. Run `scripts/sixloops.py --input <file-or-dir>`.
 2. If it stops with a pending scope, ask the user to confirm files, roles, snippet policy, and output visibility.
 3. Rerun with `--approve` or `--scope <approved-scope.json>` to produce `analysis-packets.jsonl`, `analysis-packets-index.json`, and `analysis-run.json`.
 4. Read `analysis-run.json`, `references/semantic-analysis-prompt.md`, `schemas/semantic-candidates.schema.json`, and the selected packets.
 5. Use host AI semantic judgment to write `semantic-candidates.json`; do not use regex matching as the primary product path.
-6. Continue with the `analysis-run.json` `continue_command`, or rerun `scripts/session_to_loop.py --input <file-or-dir> --scope <approved-scope.json> --semantic-candidates <semantic-candidates.json>`.
+6. Continue with the `analysis-run.json` `continue_command`, or rerun `scripts/sixloops.py --input <file-or-dir> --scope <approved-scope.json> --semantic-candidates <semantic-candidates.json>`.
 7. Present 1-3 Start Plans from rendered artifacts. If the user chooses a start mode, either run the first controlled cycle directly or run `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --mode "<start-mode>" --out-dir <adoption-dir>` to create the stateful run packet before execution. The script also accepts internal `--level <level>` for automation.
 
 Low-level deterministic scripts remain available:
@@ -104,7 +114,7 @@ Low-level deterministic scripts remain available:
 7. `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --mode "low-risk edit" --out-dir <adoption-dir>`
 
 Only pass explicit transcript files or narrow directories. Keep raw and intermediate outputs under
-`.session-to-loop/private/` or `.session-to-loop/tmp/` unless the user asks for shareable artifacts.
+`.sixloops/private/` or `.sixloops/tmp/` unless the user asks for shareable artifacts.
 Use the host agent's user-question capability when available; otherwise ask directly in chat before
 running `prepare_analysis_scope.py --approve`. Do not approve a scope silently for real transcripts, but avoid repeated approval prompts after the scope is confirmed.
 For synthetic evals only, `--approve` may be used non-interactively.

@@ -28,7 +28,7 @@ goal-loop
 
 Read this file first. Create or update it before stopping:
 
-`.session-to-loop/state/ci-babysitter.json`
+`.sixloops/state/ci-babysitter.json`
 
 State update format:
 

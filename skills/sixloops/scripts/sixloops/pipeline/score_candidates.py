@@ -9,11 +9,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from loop_contract import build_exit_contract, validate_exit_contract
+from sixloops.core.loop_contract import build_exit_contract, validate_exit_contract
 
 
-DEFAULT_SIGNALS = Path(".session-to-loop/private/signals.json")
-DEFAULT_OUT = Path(".session-to-loop/private/candidates.json")
+DEFAULT_SIGNALS = Path(".sixloops/private/signals.json")
+DEFAULT_OUT = Path(".sixloops/private/candidates.json")
 
 
 PROFILES = {
@@ -39,7 +39,7 @@ PROFILES = {
             "heartbeat": "goal",
             "recommended_maturity": "verified-pr-draft",
             "cadence_or_trigger": ["When CI is pending or failed on the current branch."],
-            "state_file": ".session-to-loop/state/ci-babysitter.json",
+            "state_file": ".sixloops/state/ci-babysitter.json",
             "cycle_steps": [
                 "Read the previous state file if it exists.",
                 "Inspect CI status, failed logs, and current git diff.",
@@ -119,7 +119,7 @@ PROFILES = {
             "heartbeat": "goal",
             "recommended_maturity": "isolated-draft",
             "cadence_or_trigger": ["Before provider, channel, model alias, or relay release candidates."],
-            "state_file": ".session-to-loop/state/provider-acceptance-soak.json",
+            "state_file": ".sixloops/state/provider-acceptance-soak.json",
             "cycle_steps": [
                 "Read the previous provider acceptance state file if it exists.",
                 "Run or inspect the bounded relay acceptance result set.",
@@ -172,7 +172,7 @@ PROFILES = {
             "heartbeat": "goal",
             "recommended_maturity": "isolated-draft",
             "cadence_or_trigger": ["After frontend, routing, copy, auth UI, or i18n changes."],
-            "state_file": ".session-to-loop/state/browser-audit-loop.json",
+            "state_file": ".sixloops/state/browser-audit-loop.json",
             "cycle_steps": [
                 "Read the previous browser audit state file if it exists.",
                 "Identify changed routes and the smallest meaningful route set.",
@@ -361,7 +361,7 @@ def enrich_profile(candidate_id: str, base_profile: dict) -> dict:
         "demotion_criteria",
         ["Demote when outputs are rejected, verification is inconclusive, cost grows, or human judgment is repeatedly required."],
     )
-    managed_loop.setdefault("state_file", f".session-to-loop/state/{candidate_id}.json")
+    managed_loop.setdefault("state_file", f".sixloops/state/{candidate_id}.json")
     profile["managed_loop"] = managed_loop
     return profile
 

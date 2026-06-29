@@ -12,12 +12,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator
 
-from transcript_adapters import NormalizedEvent, iter_normalized_events
+from sixloops.core.transcript_adapters import NormalizedEvent, iter_normalized_events
 
 
-DEFAULT_INDEX = Path(".session-to-loop/private/redacted-index.json")
-DEFAULT_OUT = Path(".session-to-loop/private/analysis-packets.jsonl")
-DEFAULT_PACKET_INDEX = Path(".session-to-loop/private/analysis-packets-index.json")
+DEFAULT_INDEX = Path(".sixloops/private/redacted-index.json")
+DEFAULT_OUT = Path(".sixloops/private/analysis-packets.jsonl")
+DEFAULT_PACKET_INDEX = Path(".sixloops/private/analysis-packets-index.json")
 DEFAULT_ROLE_QUOTAS = {"user": 0, "tool": 0}
 
 HIGH_VALUE_TERMS = {

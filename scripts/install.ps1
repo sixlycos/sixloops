@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$Source = Join-Path $RepoRoot "skills\session-to-loop"
+$Source = Join-Path $RepoRoot "skills\sixloops"
 
 if (!(Test-Path $Source)) {
   throw "Skill source not found: $Source"
@@ -20,10 +20,28 @@ if (!(Test-Path $Source)) {
 function Copy-SixLoopsSkill {
   param([string]$DestinationRoot)
 
-  $Destination = Join-Path $DestinationRoot "session-to-loop"
-  New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-  Copy-Item -Path (Join-Path $Source "*") -Destination $Destination -Recurse -Force
-  Write-Output "Installed session-to-loop -> $Destination"
+  $DestinationRootFull = [System.IO.Path]::GetFullPath($DestinationRoot)
+  $Destination = Join-Path $DestinationRootFull "sixloops"
+  $DestinationFull = [System.IO.Path]::GetFullPath($Destination)
+  $DestinationParent = [System.IO.Path]::GetFullPath((Split-Path -Parent $DestinationFull)).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+  $ExpectedParent = $DestinationRootFull.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+
+  if ($DestinationParent -ine $ExpectedParent) {
+    throw "Refusing to install outside destination root: $DestinationFull"
+  }
+
+  New-Item -ItemType Directory -Force -Path $DestinationRootFull | Out-Null
+  if (Test-Path -LiteralPath $DestinationFull) {
+    Remove-Item -LiteralPath $DestinationFull -Recurse -Force
+  }
+  New-Item -ItemType Directory -Force -Path $DestinationFull | Out-Null
+  Copy-Item -Path (Join-Path $Source "*") -Destination $DestinationFull -Recurse -Force
+  Get-ChildItem -LiteralPath $DestinationFull -Directory -Recurse -Filter "__pycache__" -ErrorAction SilentlyContinue |
+    Remove-Item -Recurse -Force
+  Get-ChildItem -LiteralPath $DestinationFull -File -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.Extension -in ".pyc", ".pyo" } |
+    Remove-Item -Force
+  Write-Output "Installed sixloops -> $DestinationFull"
 }
 
 function Install-Codex {

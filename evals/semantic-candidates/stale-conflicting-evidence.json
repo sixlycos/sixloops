@@ -58,7 +58,7 @@
       "managed_loop": {
         "objective": "Keep CI failures moving toward a verified fix without guessing.",
         "cadence_or_trigger": ["When CI is pending or failed on the current branch."],
-        "state_file": ".session-to-loop/state/conflicting-ci-loop.json",
+        "state_file": ".sixloops/state/conflicting-ci-loop.json",
         "state_schema": {
           "status": "Current loop status.",
           "items": "Tracked failures.",

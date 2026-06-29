@@ -77,12 +77,12 @@ Default team roles:
 Run:
 
 ```bash
-python skills/session-to-loop/scripts/design_goal_loop.py \
+python skills/sixloops/scripts/design_goal_loop.py \
   --goal "<user goal>" \
   --domain auto \
   --team-mode auto \
   --level auto \
-  --out-dir .session-to-loop/goal-design
+  --out-dir .sixloops/goal-design
 ```
 
 The script writes:

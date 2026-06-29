@@ -28,7 +28,7 @@ SixLoops turns that repeated correction into **CI Babysitter Loop**:
 - **Internal level**: `goal-loop`
 - **Can delegate**: `yes`
 - **Verifier**: focused project checks / CI status
-- **State file**: `.session-to-loop/state/ci-babysitter.json`
+- **State file**: `.sixloops/state/ci-babysitter.json`
 - **Review boundary**: push, merge
 - **Stop condition**: CI green, same failure repeats twice, or push/merge is required
 
@@ -63,18 +63,18 @@ This is not just a rule because the work needs repeated observe-decide-act-verif
 ## Try This Case
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
+python skills/sixloops/scripts/sixloops.py \
   --input evals/fixtures/repeated-ci-failure.jsonl \
-  --out-root .session-to-loop/tmp/repeated-ci \
+  --out-root .sixloops/tmp/repeated-ci \
   --approve
 ```
 
 Then let the host AI write `semantic-candidates.json`, or use the deterministic semantic fixture:
 
 ```bash
-python skills/session-to-loop/scripts/session_to_loop.py \
+python skills/sixloops/scripts/sixloops.py \
   --input evals/fixtures/repeated-ci-failure.jsonl \
-  --out-root .session-to-loop/tmp/repeated-ci \
-  --scope .session-to-loop/tmp/repeated-ci/private/analysis-scope.json \
+  --out-root .sixloops/tmp/repeated-ci \
+  --scope .sixloops/tmp/repeated-ci/private/analysis-scope.json \
   --semantic-candidates evals/semantic-candidates/repeated-ci-failure.json
 ```

@@ -11,12 +11,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from loop_contract import normalize_exit_contract, validate_exit_contract
+from sixloops.core.loop_contract import normalize_exit_contract, validate_exit_contract
 
 
-DEFAULT_SEMANTIC = Path(".session-to-loop/private/semantic-candidates.json")
-DEFAULT_PACKET_INDEX = Path(".session-to-loop/private/analysis-packets-index.json")
-DEFAULT_OUT = Path(".session-to-loop/private/candidates.json")
+DEFAULT_SEMANTIC = Path(".sixloops/private/semantic-candidates.json")
+DEFAULT_PACKET_INDEX = Path(".sixloops/private/analysis-packets-index.json")
+DEFAULT_OUT = Path(".sixloops/private/candidates.json")
 VALID_DECISIONS = {"commit", "draft", "checklist-only", "rule-only", "needs-human", "reject"}
 REQUIRED_SEMANTIC_TOP_LEVEL = {"version", "analysis_model", "evidence_basis", "candidates"}
 REQUIRED_SEMANTIC_CANDIDATE = {
@@ -259,7 +259,7 @@ def normalize_managed_loop(
         "Verify the result and record state for the next run.",
     ]
     objective = str(source.get("objective") or summary)
-    state_file = str(source.get("state_file") or f".session-to-loop/state/{candidate_id}.json")
+    state_file = str(source.get("state_file") or f".sixloops/state/{candidate_id}.json")
     completion_contract = normalize_completion_contract(source, verification, stop_conditions)
     max_items = positive_int(source.get("max_items_per_cycle"), 3)
     max_iterations = positive_int(source.get("max_iterations_per_run"), 8)

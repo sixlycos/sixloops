@@ -13,8 +13,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVALS = REPO_ROOT / "evals" / "evals.json"
-DEFAULT_OUT_ROOT = REPO_ROOT / ".session-to-loop" / "tmp" / "evals"
-PIPELINE = REPO_ROOT / "skills" / "session-to-loop" / "scripts" / "session_to_loop.py"
+DEFAULT_OUT_ROOT = REPO_ROOT / ".sixloops" / "tmp" / "evals"
+PIPELINE = REPO_ROOT / "skills" / "sixloops" / "scripts" / "sixloops.py"
 EXIT_STATUSES = ["CONTINUE", "DONE", "NEEDS_HUMAN", "BLOCKED", "BUDGET_STOPPED"]
 EXIT_CONTRACT_KEYS = [
     "continue_only_if",

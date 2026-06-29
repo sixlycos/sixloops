@@ -11,11 +11,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from loop_contract import build_exit_contract
-from mode_policy import level_to_mode
+from sixloops.core.loop_contract import build_exit_contract
+from sixloops.core.mode_policy import level_to_mode
 
 
-DEFAULT_OUT_DIR = Path(".session-to-loop/goal-design")
+DEFAULT_OUT_DIR = Path(".sixloops/goal-design")
 DOMAINS = {
     "auto",
     "general",

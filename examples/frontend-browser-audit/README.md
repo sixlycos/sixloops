@@ -54,11 +54,11 @@ This is not just a checklist because verification often discovers new visible fa
 ## Try This Case
 
 ```bash
-python skills/session-to-loop/scripts/design_goal_loop.py \
+python skills/sixloops/scripts/design_goal_loop.py \
   --goal "After frontend route or i18n changes, verify browser screenshots, fix low-risk UI regressions, and stop when product or visual judgment is needed." \
   --domain frontend \
   --team-mode auto \
   --level isolated-draft \
-  --out-dir .session-to-loop/tmp/frontend-browser-audit \
+  --out-dir .sixloops/tmp/frontend-browser-audit \
   --overwrite
 ```

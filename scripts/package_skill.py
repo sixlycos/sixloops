@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SOURCE = REPO_ROOT / "skills" / "session-to-loop"
+DEFAULT_SOURCE = REPO_ROOT / "skills" / "sixloops"
 DEFAULT_OUT = REPO_ROOT / "dist" / "sixloops-skill.zip"
 
 
@@ -30,7 +30,7 @@ def package_skill(source: Path, out: Path) -> None:
         for path in sorted(source.rglob("*")):
             if path.is_dir() or should_skip(path):
                 continue
-            archive.write(path, Path("session-to-loop") / path.relative_to(source))
+            archive.write(path, Path("sixloops") / path.relative_to(source))
 
 
 def parse_args() -> argparse.Namespace:

@@ -12,13 +12,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-from loop_contract import normalize_exit_contract
-from mode_policy import RUN_MODES, SCHEDULED_MODES, level_to_mode
+from sixloops.core.loop_contract import normalize_exit_contract
+from sixloops.core.mode_policy import RUN_MODES, SCHEDULED_MODES, level_to_mode
+from sixloops.paths import TEMPLATE_DIR
 
 
-DEFAULT_CANDIDATES = Path(".session-to-loop/private/candidates.json")
-DEFAULT_OUT_DIR = Path(".session-to-loop/public")
-TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "assets" / "templates"
+DEFAULT_CANDIDATES = Path(".sixloops/private/candidates.json")
+DEFAULT_OUT_DIR = Path(".sixloops/public")
 CJK_TEXT = re.compile(r"[\u3400-\u9fff]")
 LATIN_WORD = re.compile(r"\b[A-Za-z][A-Za-z-]{2,}\b")
 ENGLISH_SENTENCE_HINT = re.compile(
@@ -512,7 +512,7 @@ def first_run_defaults(
         contract.get("verifier_commands", []),
         first(candidate.get("verification", []), "运行聚焦验证命令。" if language == "zh" else "Run the focused verifier."),
     )
-    state_file = managed_loop.get("state_file", f".session-to-loop/state/{candidate['id']}.json")
+    state_file = managed_loop.get("state_file", f".sixloops/state/{candidate['id']}.json")
     approvals = candidate.get("safety", {}).get("requires_approval_for", [])
     human_gate = packet.get("human_gate") or (
         f"执行 {', '.join(approvals)} 前先询问。" if language == "zh" and approvals
@@ -820,7 +820,7 @@ def render_loop_proposals(candidates: list[dict], language: str = "en") -> str:
             candidate.get("safety", {}).get("autonomy_level", "draft-only"),
         )
         mode = display_mode_for_candidate(candidate, card, managed_loop, language)
-        state_file = managed_loop.get("state_file", f".session-to-loop/state/{candidate['id']}.json")
+        state_file = managed_loop.get("state_file", f".sixloops/state/{candidate['id']}.json")
         blocks.append(
             "\n".join(
                 [
@@ -1205,7 +1205,7 @@ def candidate_card(candidate: dict, scope: dict | None = None, language: str = "
         "managed_heartbeat": managed_loop.get("heartbeat", "goal"),
         "managed_recommended_maturity": maturity,
         "managed_display_mode": mode,
-        "managed_state_file": managed_loop.get("state_file", f".session-to-loop/state/{candidate['id']}.json"),
+        "managed_state_file": managed_loop.get("state_file", f".sixloops/state/{candidate['id']}.json"),
         "managed_state_schema": mapping_block(managed_loop.get("state_schema", {}), language),
         "managed_cycle_steps": bullet_block(cycle_steps(candidate, managed_loop, language), language),
         "managed_selection_policy": bullet_block(
@@ -1291,7 +1291,7 @@ def claude_loop(candidate: dict) -> str:
         ),
         "discovery_sources": bullet_block(managed_loop.get("discovery_sources", candidate.get("inputs", []))),
         "context_source": bullet_block(candidate.get("inputs", [])),
-        "state_file": managed_loop.get("state_file", f".session-to-loop/state/{candidate['id']}.json"),
+        "state_file": managed_loop.get("state_file", f".sixloops/state/{candidate['id']}.json"),
         "state_schema": mapping_block(managed_loop.get("state_schema", {})),
         "contract_success_criteria": bullet_block(contract.get("success_criteria", [])),
         "contract_verifier_commands": bullet_block(contract.get("verifier_commands", [])),
@@ -1404,7 +1404,7 @@ def playbook(data: dict, out_dir: Path, rendered_paths: list[str], language: str
         "approval_gates": "\n".join(by_mechanism["approval"]) or ui(language, "none"),
         "rejected_candidates": "\n".join(by_mechanism["rejected"]) or ui(language, "none"),
         "decision_index": decision_index(candidates, language),
-        "private_output": ".session-to-loop/private/candidates.json",
+        "private_output": ".sixloops/private/candidates.json",
         "shareable_output": "\n- ".join(rendered_paths) if rendered_paths else str(out_dir / "loop-playbook.md"),
         "source_limitations": source_limitations(data, language),
     }
@@ -1477,7 +1477,7 @@ def main() -> int:
         "source": safe_source_summary(data.get("source", {})),
         "redaction": data.get("redaction"),
         "artifact_visibility": "local-shareable-after-review",
-        "private_candidates": ".session-to-loop/private/candidates.json",
+        "private_candidates": ".sixloops/private/candidates.json",
         "candidates": [safe_candidate_summary(candidate) for candidate in data.get("candidates", [])],
     }
     summary_path.write_text(json.dumps(public_summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
