@@ -10,6 +10,12 @@
 
 {{default_next_step}}
 
+## 怎么用
+
+- 上面的 `start ...` / `shrink ...` / `reject ...` 是你在当前聊天里回复的一行，不是终端命令。
+- 启动后智能体会先读/更新对应状态文件，连续运行到 `DONE`、review-needed、`BLOCKED` 或 `BUDGET_STOPPED`，不会每一步都问你。
+- 每张卡片里有第一轮步骤、验证方式、退出协议和人审边界；把 `claude-loops/<id>.md` 交给另一个智能体也能直接执行。
+
 ## 候选摘要
 
 {{loop_proposals}}

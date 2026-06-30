@@ -20,25 +20,54 @@
 
 {{autopilot_contract}}
 
-### 3. 执行范围
+### 3. 启动后怎么跑
+
+1. 观察 / 决策：{{first_run_observe}}；{{first_run_decide}}。
+2. 执行：{{first_run_act}}。
+3. 验证：{{first_run_verify}}
+4. 交付 / 停止：更新 `{{managed_state_file}}`；停止于 {{first_run_stop_after}}；人审边界：{{first_run_human_gate}}
+
+### 4. 执行范围
 
 {{control_will_do}}
 
-### 4. 不会做
+### 5. 不会做
 
 {{control_will_not}}
 
-### 5. 验收方式
+### 6. 验收方式
 
 {{control_verify}}
 
-### 6. 停止和交还
+### 7. 停止和交还
 
 {{control_stop}}
 
 它还会在这些动作前停下：
 
 {{control_must_ask}}
+
+### 8. 退出协议
+
+继续下一轮，仅当：
+
+{{exit_continue_only_if}}
+
+返回 `DONE`，当：
+
+{{exit_done_when}}
+
+返回 review-needed，当：
+
+{{exit_needs_human_when}}
+
+返回 `BLOCKED`，当：
+
+{{exit_blocked_when}}
+
+返回 `BUDGET_STOPPED`，当：
+
+{{exit_budget_stopped_when}}
 
 ## 为什么值得做
 
