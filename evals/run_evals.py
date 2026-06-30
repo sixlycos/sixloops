@@ -220,7 +220,7 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
             analysis_run = load_json(analysis_run_path)
             if analysis_run.get("status") != "needs_semantic_analysis":
                 failures.append(f"expected analysis-run status needs_semantic_analysis, got {analysis_run.get('status')!r}")
-            for key in ("prompt_path", "schema_path", "packets_path", "packet_index_path", "semantic_candidates_path"):
+            for key in ("workflow_path", "prompt_path", "schema_path", "packets_path", "packet_index_path", "semantic_candidates_path"):
                 if not analysis_run.get(key):
                     failures.append(f"analysis-run missing {key}")
             command = analysis_run.get("continue_command", [])
@@ -293,6 +293,8 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
                     failures.append("public summary candidate missing recommended_next_reply")
                 if "autopilot" not in candidate:
                     failures.append("public summary candidate missing autopilot")
+                if expected.get("require_public_user_value") and not candidate.get("user_value"):
+                    failures.append("public summary candidate missing user_value")
             forbidden_options = set(expected.get("forbidden_confirmation_options", []))
             if forbidden_options:
                 rendered_options = {

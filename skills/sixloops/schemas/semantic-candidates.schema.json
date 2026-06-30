@@ -50,6 +50,7 @@
             }
           },
           "summary": { "type": "string", "minLength": 1 },
+          "user_value": { "type": "string" },
           "user_semantics": { "type": "array", "items": { "type": "string" } },
           "tool_patterns": { "type": "array", "items": { "type": "string" } },
           "failure_paths": { "type": "array", "items": { "type": "string" } },

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply deterministic hard gates to AI-generated semantic candidates."""
+"""Apply safety downgrade gates to model-authored semantic candidates."""
 
 from __future__ import annotations
 
@@ -393,6 +393,16 @@ def normalize_candidate(raw: dict) -> dict:
         "work_shape": str(raw.get("work_shape") or ("goal-driven" if "loop" in mechanisms else "tool-assisted")),
         "loop_archetype": str(raw.get("loop_archetype") or ("engineering-maintenance" if "loop" in mechanisms else "none")),
         "summary": summary,
+        "user_value": str(raw.get("user_value") or raw.get("value_to_user") or raw.get("plain_language_value") or ""),
+        "user_semantics": strings(raw.get("user_semantics")),
+        "tool_patterns": strings(raw.get("tool_patterns")),
+        "failure_paths": strings(raw.get("failure_paths")),
+        "verifier_habits": strings(raw.get("verifier_habits")),
+        "approval_boundaries": strings(raw.get("approval_boundaries")),
+        "why_this_loop": str(raw.get("why_this_loop", "")),
+        "why_not_smaller": str(raw.get("why_not_smaller", "")),
+        "why_not_more_autonomous": str(raw.get("why_not_more_autonomous", "")),
+        "where_this_may_be_wrong": strings(raw.get("where_this_may_be_wrong")),
         "evidence": evidence,
         "raw_ai_claims": raw,
         "trigger": trigger,
@@ -575,7 +585,7 @@ def apply_gates(candidate: dict) -> dict:
     candidate["delegation_gate"] = delegate_gate
     candidate["decision_card"] = decision_card(candidate, mechanisms, loop_gate, delegate_gate)
     candidate["decision_trace"] = {
-        "analysis_basis": "AI semantic candidate with deterministic scope, recurrence, loop, and safety gates applied.",
+        "analysis_basis": "Model-authored semantic candidate with scope, recurrence, loop, and safety downgrade gates applied.",
         "primary_role": "user" if role_counts(candidate.get("evidence", [])).get("user", 0) else "unknown",
         "role_counts": role_counts(candidate.get("evidence", [])),
         "user_session_count": user_session_count(candidate.get("evidence", [])),
@@ -611,7 +621,7 @@ def semantic_candidates(data: dict) -> list[dict]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Apply deterministic hard gates to AI semantic candidates.")
+    parser = argparse.ArgumentParser(description="Apply safety downgrade gates to model-authored semantic candidates.")
     parser.add_argument("--semantic-candidates", default=str(DEFAULT_SEMANTIC), help=f"AI candidates JSON. Default: {DEFAULT_SEMANTIC}")
     parser.add_argument("--packet-index", default=str(DEFAULT_PACKET_INDEX), help=f"Packet index JSON. Default: {DEFAULT_PACKET_INDEX}")
     parser.add_argument("--out", default=str(DEFAULT_OUT), help=f"Guarded candidates output. Default: {DEFAULT_OUT}")
@@ -626,7 +636,7 @@ def main() -> int:
     output = {
         "version": 1,
         "created_at": now_iso(),
-        "analysis_model": "ai-semantic-with-deterministic-guardrails-v1",
+        "analysis_model": "ai-semantic-with-safety-guardrails-v1",
         "scope_policy": packet_index.get("scope_policy", {}),
         "source": packet_index.get("source", {}),
         "redaction": packet_index.get("redaction", {}),

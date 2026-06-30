@@ -128,9 +128,9 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
         handoff = (design_dir / "HANDOFF.md").read_text(encoding="utf-8", errors="ignore")
         goal = (design_dir / "GOAL.md").read_text(encoding="utf-8", errors="ignore")
         for label, text in (("HANDOFF.md", handoff), ("GOAL.md", goal)):
-            if "## Exit Contract" not in text:
+            if "## Exit Contract" not in text and "## 退出协议" not in text:
                 failures.append(f"{label} missing ## Exit Contract")
-            if "Learning Check" not in text and "First Run Retro" not in text:
+            if not any(marker in text for marker in ("Learning Check", "First Run Retro", "复盘记录", "首轮复盘")):
                 failures.append(f"{label} missing learning check or first run retro")
 
     if expected.get("require_rationale"):
@@ -138,9 +138,15 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
             if not design.get(key):
                 failures.append(f"missing rationale field {key}")
         goal = (design_dir / "GOAL.md").read_text(encoding="utf-8", errors="ignore")
-        for marker in ("## Why This Loop", "Why this loop:", "Why not smaller:", "Why not more autonomous:"):
-            if marker not in goal:
-                failures.append(f"GOAL.md missing rationale marker {marker!r}")
+        markers = [
+            ("## Why This Loop", "## 为什么是这个 loop"),
+            ("Why this loop:", "为什么值得跑："),
+            ("Why not smaller:", "为什么不只是更小机制："),
+            ("Why not more autonomous:", "为什么不更自动化："),
+        ]
+        for marker_options in markers:
+            if not any(marker in goal for marker in marker_options):
+                failures.append(f"GOAL.md missing rationale marker {marker_options[0]!r}")
 
     if expected.get("forbid_done_blocker"):
         done_text = " ".join(design.get("managed_loop", {}).get("loop_exit_contract", {}).get("done_when", [])).lower()

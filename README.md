@@ -4,15 +4,22 @@
 
 **Turn development goals and coding evidence into controlled agent loops.**
 
-SixLoops is an open-source Agent Skill for Codex and Claude Code. Start from a
-fresh development goal, project evidence, or local session logs; SixLoops then
-recommends the smallest useful mechanism for next time: a rule, skill, hook,
-checklist, approval gate, eval case, or managed loop.
+SixLoops is an open-source Agent Skill collection for Codex and Claude Code.
+Start from a fresh development goal, project evidence, or local session logs;
+SixLoops then recommends the smallest useful mechanism for next time: a rule,
+skill, hook, checklist, approval gate, eval case, or managed loop.
 
 It is not a chat summarizer. It is a loop engineering assistant for developers
 who want agent work to become more repeatable, verifiable, and bounded.
 
-The product name, repository, and installed skill package are all `sixloops`.
+SixLoops is model-led. Codex or Claude Code does the semantic extraction,
+naming, judgment, and explanation through skill prompts. The Python pipeline is
+deliberately boring: discover narrow inputs, redact, packetize, apply safety
+downgrades, and render model-authored artifacts.
+
+The product and repository are `sixloops`; the installed package is a small
+skill collection: `sixloops`, `sixloops-mine`, `sixloops-design`, and
+`sixloops-adopt`.
 
 ![Let's loop meme](assets/readme/lets-loop-meme.png)
 
@@ -82,9 +89,9 @@ flowchart TD
   F -->|No| G["Present inventory and ask for narrow scope"]
   G --> E
   F -->|Yes| H["Redact, normalize, and build analysis-packets.jsonl"]
-  H --> I["Host AI writes semantic-candidates.json"]
+  H --> I["Host AI uses sixloops-mine<br/>to write semantic-candidates.json"]
   I --> J["Rerun sixloops.py with scope and semantic candidates"]
-  J --> K["Apply guardrails, score candidates, and render artifacts"]
+  J --> K["Apply safety guardrails and render artifacts"]
   K --> L
 
   B -->|Start or continue an existing loop| M["Read latest runbook or adoption packet"]
@@ -105,8 +112,9 @@ flowchart TD
 
 ## Quick Start
 
-Pasting the GitHub URL into Codex or Claude does not install the skill. Install
-it first, then start a new agent session so the skill index refreshes.
+Pasting the GitHub URL into Codex or Claude does not install the skill
+collection. Install it first, then start a new agent session so the skill index
+refreshes.
 
 ### Install From This Repo
 
@@ -143,17 +151,25 @@ One-line install from GitHub:
 git clone https://github.com/sixlycos/sixloops.git; cd sixloops; .\scripts\install.ps1 -Target codex
 ```
 
-Manual install: copy `skills/sixloops` to one of these directories:
+Manual install: copy these four directories into the same skills directory:
 
-- Codex user skills: `~/.agents/skills/sixloops`
-- Claude Code user skills: `~/.claude/skills/sixloops`
-- Project skills: `<repo>/.agents/skills/sixloops` or
-  `<repo>/.claude/skills/sixloops`
+- `skills/sixloops`
+- `skills/sixloops-mine`
+- `skills/sixloops-design`
+- `skills/sixloops-adopt`
+
+Targets:
+
+- Codex user skills: `~/.agents/skills/`
+- Claude Code user skills: `~/.claude/skills/`
+- Project skills: `<repo>/.agents/skills/` or `<repo>/.claude/skills/`
 
 ### Invoke SixLoops
 
 Use the product name in Codex. If your Codex environment needs an explicit skill
-trigger, use the skill id `$sixloops`.
+trigger, prefer the narrow skill: `$sixloops-mine` for logs and sessions,
+`$sixloops-design` for current goals, `$sixloops-adopt` for start/continue
+commands, or `$sixloops` when unsure.
 
 Codex:
 
@@ -166,7 +182,7 @@ Reject weak patterns.
 Explicit Codex trigger:
 
 ```text
-Use $sixloops (SixLoops) to design a goal loop for this project.
+Use $sixloops-design to design a goal loop for this project.
 ```
 
 Claude Code:
@@ -250,14 +266,21 @@ python skills/sixloops/scripts/sixloops.py \
   --role-quota tool=40
 ```
 
-This creates compact analysis packets under `.sixloops/private/`. The
-host AI reads those packets with:
+This creates compact analysis packets under `.sixloops/private/`. The host AI
+uses `$sixloops-mine` to understand the packets and write
+model-authored candidates:
 
 ```text
+skills/sixloops-mine/SKILL.md
+skills/sixloops/references/mine-loop-opportunities.md
 skills/sixloops/references/semantic-analysis-prompt.md
 skills/sixloops/schemas/semantic-candidates.schema.json
 .sixloops/private/analysis-packets.jsonl
 ```
+
+The schema is only the handoff envelope. Candidate extraction, naming,
+explanation, mechanism choice, and rejection are model judgment, not schema
+matching.
 
 Then it writes:
 
@@ -275,7 +298,8 @@ python skills/sixloops/scripts/sixloops.py \
 ```
 
 `--rule-fallback` is for offline fixtures, synthetic evals, and
-host-AI-unavailable mode. It is not the main product path.
+host-AI-unavailable mode. It is not the product path and should not be
+presented as model-quality analysis.
 
 ## When A Loop Is Worth It
 
@@ -342,17 +366,21 @@ SECURITY.md
 docs/
   ARCHITECTURE.md
 
-skills/sixloops/
-  SKILL.md             # host-agent operating contract
-  agents/              # host integration metadata
-  references/          # policy, prompts, rubrics, and loop contracts
-  schemas/             # machine-readable JSON contracts
-  assets/templates/    # rendered artifact templates
-  scripts/             # public CLI entrypoints
-    sixloops/
-      core/            # shared contracts, modes, transcript adapters
-      pipeline/        # transcript discovery, redaction, packets, rendering
-      goals/           # direct goal design and adoption packets
+skills/
+  sixloops/            # shared core plus router skill
+    SKILL.md
+    agents/
+    references/
+    schemas/
+    assets/templates/
+    scripts/
+      sixloops/
+        core/
+        pipeline/
+        goals/
+  sixloops-mine/       # log/session mining skill
+  sixloops-design/     # current-goal loop design skill
+  sixloops-adopt/      # start/continue/shrink/reject skill
 
 examples/
   ci-babysitter/       # checked-in example output
@@ -361,6 +389,7 @@ examples/
 evals/
   fixtures/            # input transcript and evidence fixtures
   semantic-candidates/ # host-AI candidate fixtures
+  run_skill_collection_evals.py
   run_evals.py         # transcript pipeline evals
   run_goal_design_evals.py
 
@@ -374,9 +403,11 @@ dist/                  # generated release archives
 .sixloops/      # generated local run data
 ```
 
-The stable publishable boundary is `skills/sixloops/`. Repository
-support layers may depend on that package, but the skill package should remain
-portable after it is copied into a user or project skills directory. See
+The stable publishable boundary is the four-directory collection under
+`skills/`: `sixloops`, `sixloops-mine`, `sixloops-design`, and
+`sixloops-adopt`. Repository support layers may depend on that collection, but
+the installed skills should remain portable after they are copied into a user
+or project skills directory. See
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full layer map, dependency
 direction, and placement rules.
 
@@ -393,7 +424,7 @@ dist/sixloops-skill.zip
 ```
 
 Unzip it into `~/.agents/skills/`, `~/.claude/skills/`, or the matching project
-skills directory.
+skills directory. The archive contains the full four-skill collection.
 
 ## Development
 
@@ -401,6 +432,7 @@ Validate the skill:
 
 ```bash
 python C:/Users/Administrator/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/sixloops
+python evals/run_skill_collection_evals.py
 ```
 
 Run transcript evals:

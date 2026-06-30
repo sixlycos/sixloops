@@ -37,8 +37,8 @@ UI = {
         "summary": "Recommended {count} startable loop plan(s). Choose a mode, shrink the idea, reject it, or rerun with narrower evidence.",
         "no_proposal": "No loop proposal is ready. The useful outcome is to keep the rejected findings as context and gather better session evidence.",
         "no_proposal_next": "Recommended next step: run a narrower transcript analysis or keep these as rejected context.",
-        "overview_header": "| Rank | Plan | Judgment | Why ranked here | Cost/Risk | Direct reply |\n| --- | --- | --- | --- | --- | --- |",
-        "overview_empty": "| - | No startable candidate | Rerun or reject | Current evidence does not justify a loop | - | `rerun with narrower evidence` |",
+        "overview_header": "| Rank | Plan | What it does for you | Judgment | Why ranked here | Cost/Risk | Direct reply |\n| --- | --- | --- | --- | --- | --- | --- |",
+        "overview_empty": "| - | No startable candidate | - | Rerun or reject | Current evidence does not justify a loop | - | `rerun with narrower evidence` |",
         "proposal_title": "### {index}. {name}",
         "top_judgment": "best first start",
         "conditional_judgment": "worth trying, with conditions",
@@ -114,8 +114,8 @@ UI = {
         "summary": "建议 {count} 个可启动方案。你可以直接启动、收缩成更小做法、拒绝，或缩小证据范围后重跑。",
         "no_proposal": "当前没有足够成熟的方案。更有用的下一步是保留拒绝项作为上下文，或收集更窄、更强的会话证据。",
         "no_proposal_next": "建议下一步：缩小证据范围后重跑分析，或把这些结论保留为已拒绝上下文。",
-        "overview_header": "| 推荐 | 计划 | 判断 | 为什么排这里 | 成本/风险 | 直接回复 |\n| --- | --- | --- | --- | --- | --- |",
-        "overview_empty": "| - | 无可启动候选 | 重跑或拒绝 | 当前证据不足以支撑自动运行 | - | `rerun with narrower evidence` |",
+        "overview_header": "| 推荐 | 计划 | 会替你做什么 | 判断 | 为什么排这里 | 成本/风险 | 直接回复 |\n| --- | --- | --- | --- | --- | --- | --- |",
+        "overview_empty": "| - | 无可启动候选 | - | 重跑或拒绝 | 当前证据不足以支撑自动运行 | - | `rerun with narrower evidence` |",
         "proposal_title": "### {index}. {name}",
         "top_judgment": "最值得先做",
         "conditional_judgment": "值得做，但有条件",
@@ -298,8 +298,6 @@ def localized_text(value: object, language: str, zh_fallback: str, en_fallback: 
     text = str(value or "").strip()
     if not text:
         return zh_fallback if language == "zh" else en_fallback
-    if needs_localization(text, language):
-        return zh_fallback
     return text
 
 
@@ -308,7 +306,7 @@ def localized_items(items: object, language: str, zh_fallback: list[str], en_fal
     if language != "zh":
         return values or (en_fallback or [])
     localized = [str(item) for item in values if str(item).strip() and not needs_localization(item, language)]
-    return localized or zh_fallback
+    return localized or values or zh_fallback
 
 
 def candidate_display_name(candidate: dict, language: str) -> str:
@@ -328,6 +326,24 @@ def candidate_reason(candidate: dict, managed_loop: dict, language: str) -> str:
     raw = candidate.get("why_this_loop") or managed_loop.get("objective") or candidate.get("summary")
     zh_fallback = "它具备可观察状态、可重复动作、验证方式和停止条件，因此值得交给智能体试运行。"
     return localized_text(raw, language, zh_fallback, "No reason recorded.")
+
+
+def candidate_user_value(candidate: dict, managed_loop: dict, language: str = "en") -> str:
+    raw_claims = candidate.get("raw_ai_claims") if isinstance(candidate.get("raw_ai_claims"), dict) else {}
+    raw = (
+        candidate.get("user_value")
+        or candidate.get("value_to_user")
+        or candidate.get("plain_language_value")
+        or raw_claims.get("user_value")
+        or raw_claims.get("value_to_user")
+        or raw_claims.get("plain_language_value")
+    )
+    fallback = (
+        "需要先由模型写出 user_value；当前候选还没有足够的语义说明。"
+        if language == "zh"
+        else "Needs model-authored user_value before this candidate is useful to present."
+    )
+    return localized_text(raw, language, fallback, fallback)
 
 
 def cycle_steps(candidate: dict, managed_loop: dict, language: str) -> list[str]:
@@ -920,6 +936,17 @@ def rank_reason(candidate: dict, contract: dict, language: str = "en") -> str:
     return f"{evidence_basis(candidate, language)}; {verifier}; {reason}"
 
 
+def compact_will_do(candidate: dict, managed_loop: dict, language: str = "en") -> str:
+    value = candidate_user_value(candidate, managed_loop, language)
+    if value and value != ui(language, "none"):
+        return value
+    steps = [step.rstrip("。.") for step in cycle_steps(candidate, managed_loop, language)[:2]]
+    if not steps:
+        return ui(language, "none")
+    separator = "；" if language == "zh" else "; "
+    return separator.join(steps)
+
+
 def recommended_action_for(candidate: dict, language: str = "en") -> str:
     managed_loop = candidate.get("managed_loop", {}) if isinstance(candidate.get("managed_loop"), dict) else {}
     contract = managed_loop.get("completion_contract", {}) if isinstance(managed_loop.get("completion_contract"), dict) else {}
@@ -1014,6 +1041,7 @@ def proposal_overview(candidates: list[dict], language: str = "en") -> str:
         action = first_run_defaults(candidate, managed_loop, contract, card, language)["recommended_action"]
         rows.append(
             f"| {index} | {table_cell(plan_label(candidate, language))} | "
+            f"{table_cell(compact_will_do(candidate, managed_loop, language))} | "
             f"{table_cell(overview_judgment(candidate, action, index, language))} | "
             f"{table_cell(rank_reason(candidate, contract, language))} | "
             f"{table_cell(cost_risk_label(candidate, action, card, language))} | `{action}` |"
@@ -1063,7 +1091,13 @@ def render_loop_proposals(candidates: list[dict], language: str = "en") -> str:
                         "",
                         f"建议回复：`{first_run['recommended_action']}`",
                         "",
-                        f"会做：{candidate_objective(candidate, managed_loop, language)}",
+                        f"目标：{candidate_objective(candidate, managed_loop, language)}",
+                        "",
+                        f"用途：{candidate_user_value(candidate, managed_loop, language)}",
+                        "",
+                        f"启动后会：",
+                        "",
+                        bullet_block(cycle_steps(candidate, managed_loop, language)[:5], language),
                         "",
                         f"验证：{first_run['first_run_verify']}",
                         "",
@@ -1101,6 +1135,12 @@ def render_loop_proposals(candidates: list[dict], language: str = "en") -> str:
                     f"{ui(language, 'recommended_start')}{label_sep} `{first_run['recommended_action']}`",
                     "",
                     f"{goal_label}{label_sep} {candidate_objective(candidate, managed_loop, language)}",
+                    "",
+                    f"Why start it: {candidate_user_value(candidate, managed_loop, language)}",
+                    "",
+                    f"{ui(language, 'what_it_does')}:",
+                    "",
+                    bullet_block(cycle_steps(candidate, managed_loop, language)[:5], language),
                     "",
                     "Autopilot:" if language == "en" else "自动闭环：",
                     "",
@@ -1277,6 +1317,7 @@ def safe_candidate_summary(candidate: dict, language: str = "en") -> dict:
         "id": candidate.get("id"),
         "name": candidate_display_name(candidate, language),
         "summary": localized_text(candidate.get("summary"), language, "该候选用于处理重复出现、可验证、需要边界控制的问题。", candidate.get("summary", "")),
+        "user_value": candidate_user_value(candidate, managed_loop, language),
         "decision": candidate.get("decision"),
         "mechanisms": candidate.get("mechanisms", []),
         "confidence": candidate.get("confidence"),
@@ -1346,6 +1387,7 @@ def candidate_card(candidate: dict, scope: dict | None = None, language: str = "
         "recommended_action": first_run["recommended_action"],
         "mode_display": display_mode_label(mode, language),
         "start_options": start_options_text,
+        "user_value": candidate_user_value(candidate, managed_loop, language),
         "autopilot_contract": autopilot_contract(candidate, managed_loop, contract, language),
         "first_run_goal": first_run["first_run_goal"],
         "first_run_success_criteria": first_run["first_run_success_criteria"],

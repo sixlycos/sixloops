@@ -1,4 +1,4 @@
-"""Stable paths for the installed SixLoops skill package."""
+"""Stable paths for the installed SixLoops core skill."""
 
 from __future__ import annotations
 

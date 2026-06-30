@@ -2,6 +2,10 @@
 
 Use this reference when a candidate loop touches frontend, backend, full-stack architecture, task decomposition, review, verification, or delivery.
 
+This matrix routes model-authored candidates to the smallest useful skill or role prompt. It is not
+a classifier that should generate candidates from keywords. The host model must first understand the
+user's actual repeated friction, then use this matrix only to pick execution support.
+
 Do not load every related skill. Pick the smallest relevant skill only after the loop candidate or task domain is clear.
 
 Do not render one generic development loop for every task. Classify the task surface first, then

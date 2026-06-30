@@ -1,6 +1,8 @@
 # Scoring Rubric
 
-Score only after extracting concrete evidence. Prefer conservative recommendations when evidence is thin.
+Score only after the host model has extracted concrete evidence and written a candidate. This rubric
+reviews model-authored candidates; it must not generate candidates, replace semantic judgment, or
+turn keyword hits into loops. Prefer conservative recommendations when evidence is thin.
 
 ## Weighted Score
 

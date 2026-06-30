@@ -16,20 +16,24 @@
 
 {{first_run_goal}}
 
-### 2. 自动运行
+### 2. 它会替你做什么
+
+{{user_value}}
+
+启动后会：
+
+{{control_will_do}}
+
+### 3. 自动运行
 
 {{autopilot_contract}}
 
-### 3. 启动后怎么跑
+### 4. 启动后怎么跑
 
 1. 观察 / 决策：{{first_run_observe}}；{{first_run_decide}}。
 2. 执行：{{first_run_act}}。
 3. 验证：{{first_run_verify}}
 4. 交付 / 停止：更新 `{{managed_state_file}}`；停止于 {{first_run_stop_after}}；人审边界：{{first_run_human_gate}}
-
-### 4. 执行范围
-
-{{control_will_do}}
 
 ### 5. 不会做
 

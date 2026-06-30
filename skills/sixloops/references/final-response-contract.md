@@ -19,7 +19,8 @@ Do not start with:
 Start with:
 
 - A compact decision table before detailed cards. Its job is to help the user choose, not to document the runbook.
-- The table columns should make value obvious: rank, plan, judgment, why it is ranked there, cost/risk, and the exact reply.
+- The table columns should make value obvious: rank, plan, what it does for the user, judgment, why it is ranked there, cost/risk, and the exact reply.
+- "What it does for the user" should come from the AI-written `user_value` when present. It should read like a natural product promise, not a list of loop internals.
 - Recommended start: `start <candidate-id> as <mode>`, `shrink <candidate-id> to skill`, or `reject <candidate-id>`.
 - A short explanation of the top recommendation: why this one first, and why the others are not first.
 - A compact candidate summary: what it does, how it verifies, when it stops or returns for review.
@@ -30,7 +31,7 @@ For demand-driven goal design, lead with the generated start plan: objective, fi
 
 For each proposal in the first screen, include only:
 
-- Action overview row: rank, plan, judgment, why it is ranked there, cost/risk, and the exact next reply.
+- Action overview row: rank, plan, what it does for the user, judgment, why it is ranked there, cost/risk, and the exact next reply.
 - Start options: one recommended mode and exact reply strings such as `start ci-babysitter as low-risk edit`, `start ci-babysitter as worktree draft`, `shrink ci-babysitter to skill`, or `reject ci-babysitter`.
 - Name: short and action-oriented.
 - Run card: can start now, can confirm, can delegate, and next action.

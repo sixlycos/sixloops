@@ -4,14 +4,19 @@
 
 **把开发目标和编码证据，变成受控的 agent loop。**
 
-SixLoops 是一个面向 Codex 和 Claude Code 的开源 Agent Skill。你可以从一个新
-的开发目标、项目证据或本地会话日志开始；SixLoops 会为下一次推荐最小但真正有
-用的机制：规则、skill、hook、清单、审批门、eval case，或者一个可托管的 loop。
+SixLoops 是一个面向 Codex 和 Claude Code 的开源 Agent Skill 集合。你可以从一
+个新的开发目标、项目证据或本地会话日志开始；SixLoops 会为下一次推荐最小但真正
+有用的机制：规则、skill、hook、清单、审批门、eval case，或者一个可托管的 loop。
 
 它不是聊天记录总结器。它是给开发者使用的 loop engineering assistant，用来把
 agent 工作变得更可重复、可验证、可约束。
 
-产品名、仓库名和安装后的 skill 包名都统一为 `sixloops`。
+SixLoops 是模型主导的。Codex 或 Claude Code 通过 skill prompt 完成语义抽取、
+命名、判断和解释。Python pipeline 刻意保持无聊：发现狭窄输入、脱敏、打包
+packets、做安全降级，并渲染模型写出的产物。
+
+产品名和仓库名是 `sixloops`；安装后是一个小 skill 集合：`sixloops`、
+`sixloops-mine`、`sixloops-design`、`sixloops-adopt`。
 
 ![Let's loop meme](assets/readme/lets-loop-meme.png)
 
@@ -78,9 +83,9 @@ flowchart TD
   F -->|否| G["展示 inventory，并要求确认狭窄 scope"]
   G --> E
   F -->|是| H["脱敏、标准化，并构建 analysis-packets.jsonl"]
-  H --> I["宿主 AI 写入 semantic-candidates.json"]
+  H --> I["宿主 AI 使用 sixloops-mine<br/>写入 semantic-candidates.json"]
   I --> J["带 scope 和 semantic candidates 重新运行 sixloops.py"]
-  J --> K["应用 guardrails、候选打分，并渲染产物"]
+  J --> K["应用安全 guardrails，并渲染产物"]
   K --> L
 
   B -->|启动或继续已有 loop| M["读取最新 runbook 或 adoption packet"]
@@ -101,7 +106,7 @@ flowchart TD
 
 ## 快速开始
 
-把 GitHub URL 粘到 Codex 或 Claude 里并不会安装 skill。请先安装，然后启动新的
+把 GitHub URL 粘到 Codex 或 Claude 里并不会安装 skill 集合。请先安装，然后启动新的
 agent 会话，让 skill 索引刷新。
 
 ### 从本仓库安装
@@ -139,17 +144,24 @@ chmod +x scripts/install.sh
 git clone https://github.com/sixlycos/sixloops.git; cd sixloops; .\scripts\install.ps1 -Target codex
 ```
 
-手动安装：将 `skills/sixloops` 放到以下目录之一：
+手动安装：将下面四个目录一起放到同一个 skills 目录：
 
-- Codex 用户 skills：`~/.agents/skills/sixloops`
-- Claude Code 用户 skills：`~/.claude/skills/sixloops`
-- 项目 skills：`<repo>/.agents/skills/sixloops` 或
-  `<repo>/.claude/skills/sixloops`
+- `skills/sixloops`
+- `skills/sixloops-mine`
+- `skills/sixloops-design`
+- `skills/sixloops-adopt`
+
+目标目录：
+
+- Codex 用户 skills：`~/.agents/skills/`
+- Claude Code 用户 skills：`~/.claude/skills/`
+- 项目 skills：`<repo>/.agents/skills/` 或 `<repo>/.claude/skills/`
 
 ### 调用 SixLoops
 
 在 Codex 里优先使用产品名 SixLoops。如果你的 Codex 环境需要显式 skill 触发，
-再使用 skill id `$sixloops`。
+优先用窄 skill：日志和会话用 `$sixloops-mine`，当前目标设计用 `$sixloops-design`，
+启动或继续候选用 `$sixloops-adopt`，拿不准时用 `$sixloops`。
 
 Codex：
 
@@ -162,7 +174,7 @@ Reject weak patterns.
 Codex 显式触发：
 
 ```text
-Use $sixloops (SixLoops) to design a goal loop for this project.
+Use $sixloops-design to design a goal loop for this project.
 ```
 
 Claude Code：
@@ -245,13 +257,17 @@ python skills/sixloops/scripts/sixloops.py \
   --role-quota tool=40
 ```
 
-这会在 `.sixloops/private/` 下创建紧凑的 analysis packets。宿主 AI 会读取：
+这会在 `.sixloops/private/` 下创建紧凑的 analysis packets。宿主 AI 使用 `$sixloops-mine` 理解这些 packets，并写出模型生成的候选：
 
 ```text
+skills/sixloops-mine/SKILL.md
+skills/sixloops/references/mine-loop-opportunities.md
 skills/sixloops/references/semantic-analysis-prompt.md
 skills/sixloops/schemas/semantic-candidates.schema.json
 .sixloops/private/analysis-packets.jsonl
 ```
+
+schema 只是交接用的输出信封。候选抽取、命名、解释、机制选择和拒绝理由都应该来自模型判断，不是 schema 匹配。
 
 然后写入：
 
@@ -268,7 +284,7 @@ python skills/sixloops/scripts/sixloops.py \
   --semantic-candidates .sixloops/private/semantic-candidates.json
 ```
 
-`--rule-fallback` 只用于离线 fixtures、合成 evals 和 host AI 不可用的模式。它不是主要产品路径。
+`--rule-fallback` 只用于离线 fixtures、合成 evals 和 host AI 不可用的模式。它不是产品路径，也不应该被当作模型质量的分析结果展示。
 
 ## 什么样的 loop 值得做
 
@@ -328,17 +344,21 @@ SECURITY.md
 docs/
   ARCHITECTURE.md
 
-skills/sixloops/
-  SKILL.md             # 宿主 agent 的运行合同
-  agents/              # 宿主集成元数据
-  references/          # policy、prompts、rubrics 和 loop contracts
-  schemas/             # 机器可读 JSON contracts
-  assets/templates/    # 渲染产物模板
-  scripts/             # 公开 CLI 入口
-    sixloops/
-      core/            # 共享 contracts、modes、transcript adapters
-      pipeline/        # transcript discovery、redaction、packets、rendering
-      goals/           # direct goal design 和 adoption packets
+skills/
+  sixloops/            # 共享核心和总入口 skill
+    SKILL.md
+    agents/
+    references/
+    schemas/
+    assets/templates/
+    scripts/
+      sixloops/
+        core/
+        pipeline/
+        goals/
+  sixloops-mine/       # 日志和会话挖掘 skill
+  sixloops-design/     # 当前目标 loop 设计 skill
+  sixloops-adopt/      # 启动/继续/收缩/拒绝 skill
 
 examples/
   ci-babysitter/       # 已提交的示例输出
@@ -347,6 +367,7 @@ examples/
 evals/
   fixtures/            # 输入 transcript 和 evidence fixtures
   semantic-candidates/ # host-AI candidate fixtures
+  run_skill_collection_evals.py
   run_evals.py         # transcript pipeline evals
   run_goal_design_evals.py
 
@@ -360,9 +381,10 @@ dist/                  # 生成的 release archives
 .sixloops/      # 生成的本地运行数据
 ```
 
-稳定的可发布边界是 `skills/sixloops/`。仓库里的支持层可以依赖这个包，
-但 skill package 被放入用户或项目 skills 目录后，应该仍然保持可移植。完整的层级图、
-依赖方向和放置规则见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+稳定的可发布边界是 `skills/` 下这四个目录：`sixloops`、`sixloops-mine`、
+`sixloops-design`、`sixloops-adopt`。仓库里的支持层可以依赖这个集合，
+但 skill collection 被放入用户或项目 skills 目录后，应该仍然保持可移植。
+完整的层级图、依赖方向和放置规则见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ## 打包 release zip
 
@@ -377,6 +399,7 @@ dist/sixloops-skill.zip
 ```
 
 解压到 `~/.agents/skills/`、`~/.claude/skills/`，或匹配的项目 skills 目录。
+压缩包里包含完整的四 skill 集合。
 
 ## 开发
 
@@ -384,6 +407,7 @@ dist/sixloops-skill.zip
 
 ```bash
 python C:/Users/Administrator/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/sixloops
+python evals/run_skill_collection_evals.py
 ```
 
 运行 transcript evals：

@@ -6,12 +6,13 @@ Use these structures when producing machine-readable artifacts. Markdown reports
 
 - `work_shape`: `process-shaped`, `tool-assisted`, or `goal-driven`.
 - `loop_archetype`: short label such as `engineering-maintenance`, `frontend-verification`, `monitoring-research`, `document-batch`, or `delivery-governance`.
+- `user_value`: one natural sentence that tells the project owner what repeated work this removes, what the agent will inspect or change, what comes back, and where it stops.
 - `team_mode`: `none`, `phased`, or `subagent-team`.
 - `managed_loop.heartbeat`: `session`, `goal`, `scheduled`, or `event`.
 - `managed_loop.recommended_maturity`: `read-only`, `goal-loop`, `isolated-draft`, `verified-pr-draft`, `scheduled-readonly`, or `scheduled-draft`.
 - `decision_card`: user-facing readiness summary: `can_use_now`, `can_confirm`, `can_delegate`, `missing_before_delegate`, `next_action`, and `confirmation_options`.
 - User-facing mode names map onto internal maturity values through `scripts/sixloops/core/mode_policy.py`: `read-only` -> `read-only`, `low-risk edit` -> `goal-loop`, `worktree draft` -> `isolated-draft`, `PR draft` -> `verified-pr-draft`, `scheduled read-only` -> `scheduled-readonly`, and `scheduled draft` -> `scheduled-draft`.
-- `schemas/semantic-candidates.schema.json`: host AI output contract. Scripts consume this schema after packet selection; they do not use regex fallback as the primary loop-value judge.
+- `schemas/semantic-candidates.schema.json`: handoff envelope for host-AI output. Scripts may validate shape, but they must not use the schema, regex fallback, or defaults as the primary loop-value judge.
 - `raw_ai_claims`: private copy of the host AI candidate before deterministic guardrails normalize render fields.
 - `normalized_render_fields`: fields defaulted only so draft artifacts can render; defaults do not make a loop delegable.
 - `delegation_gate`: raw-AI-claims-only eligibility check for `can_delegate=yes`.
@@ -34,6 +35,7 @@ mechanism: "loop"
 work_shape: "goal-driven"
 loop_archetype: "engineering-maintenance"
 summary: "Diagnose failed CI, propose minimal fixes, and stop when CI is green or blocked."
+user_value: "When CI fails, it reads the failed job logs first, patches only the evidenced failure, runs the focused check, and returns before push or merge."
 evidence:
   - source: "session:2026-06-10#episode-2"
     kind: "repeated-verification"

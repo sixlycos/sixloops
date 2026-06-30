@@ -10,6 +10,14 @@ Goal:
 
 {{first_run_goal}}
 
+## What It Does For You
+
+{{user_value}}
+
+It will:
+
+{{control_will_do}}
+
 ## Autopilot
 
 {{autopilot_contract}}

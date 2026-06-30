@@ -11,17 +11,22 @@ param(
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$Source = Join-Path $RepoRoot "skills\sixloops"
+$SkillsRoot = Join-Path $RepoRoot "skills"
+$SkillNames = @("sixloops", "sixloops-mine", "sixloops-design", "sixloops-adopt")
 
-if (!(Test-Path $Source)) {
-  throw "Skill source not found: $Source"
+foreach ($SkillName in $SkillNames) {
+  $Source = Join-Path $SkillsRoot $SkillName
+  if (!(Test-Path $Source)) {
+    throw "Skill source not found: $Source"
+  }
 }
 
 function Copy-SixLoopsSkill {
-  param([string]$DestinationRoot)
+  param([string]$DestinationRoot, [string]$SkillName)
 
+  $Source = Join-Path $SkillsRoot $SkillName
   $DestinationRootFull = [System.IO.Path]::GetFullPath($DestinationRoot)
-  $Destination = Join-Path $DestinationRootFull "sixloops"
+  $Destination = Join-Path $DestinationRootFull $SkillName
   $DestinationFull = [System.IO.Path]::GetFullPath($Destination)
   $DestinationParent = [System.IO.Path]::GetFullPath((Split-Path -Parent $DestinationFull)).TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
   $ExpectedParent = $DestinationRootFull.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
@@ -41,27 +46,34 @@ function Copy-SixLoopsSkill {
   Get-ChildItem -LiteralPath $DestinationFull -File -Recurse -ErrorAction SilentlyContinue |
     Where-Object { $_.Extension -in ".pyc", ".pyo" } |
     Remove-Item -Force
-  Write-Output "Installed sixloops -> $DestinationFull"
+  Write-Output "Installed $SkillName -> $DestinationFull"
+}
+
+function Copy-SixLoopsCollection {
+  param([string]$DestinationRoot)
+  foreach ($SkillName in $SkillNames) {
+    Copy-SixLoopsSkill $DestinationRoot $SkillName
+  }
 }
 
 function Install-Codex {
   if ($Scope -eq "project") {
     $root = Join-Path $ProjectPath ".agents\skills"
-    Copy-SixLoopsSkill $root
+    Copy-SixLoopsCollection $root
     Write-Output "Codex project install uses the Agent Skills project folder: $root"
     return
   }
 
-  Copy-SixLoopsSkill (Join-Path $env:USERPROFILE ".agents\skills")
+  Copy-SixLoopsCollection (Join-Path $env:USERPROFILE ".agents\skills")
 }
 
 function Install-Claude {
   if ($Scope -eq "project") {
-    Copy-SixLoopsSkill (Join-Path $ProjectPath ".claude\skills")
+    Copy-SixLoopsCollection (Join-Path $ProjectPath ".claude\skills")
     return
   }
 
-  Copy-SixLoopsSkill (Join-Path $env:USERPROFILE ".claude\skills")
+  Copy-SixLoopsCollection (Join-Path $env:USERPROFILE ".claude\skills")
 }
 
 if ($Target -eq "codex" -or $Target -eq "both") {

@@ -12,6 +12,7 @@
       "require_can_delegate": {"ci-babysitter": "yes"},
       "require_private_evidence": true,
       "require_public_safe_summary": true,
+      "require_public_user_value": true,
       "redaction_required": true,
       "require_loop_exit_contract": true,
       "require_rendered_exit_contract": true,
