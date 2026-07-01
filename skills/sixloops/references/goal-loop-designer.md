@@ -103,14 +103,42 @@ Default team roles:
 
 ## Script
 
-Run:
+First write the host-model-authored semantic handoff. The script should receive
+the model's domain, team mode, level, Change Map, and rationale instead of
+inferring them from free text:
+
+```json
+{
+  "domain": "architecture",
+  "team_mode": "subagent-team",
+  "level": "isolated-draft",
+  "change_map": {
+    "current_x": "...",
+    "target_b": "...",
+    "user_perception": "...",
+    "transformation_thesis": "...",
+    "affected_surfaces": ["..."],
+    "regression_plan": ["..."],
+    "rollback_or_compatibility": ["..."],
+    "research_questions": ["..."],
+    "waves": ["..."],
+    "decision_packet_required_when": ["..."]
+  },
+  "rationale": {
+    "why_this_loop": "...",
+    "why_not_smaller": "...",
+    "why_not_more_autonomous": "...",
+    "fit_summary": "..."
+  }
+}
+```
+
+Then run:
 
 ```bash
 python skills/sixloops/scripts/design_goal_loop.py \
   --goal "<user goal>" \
-  --domain auto \
-  --team-mode auto \
-  --level auto \
+  --model-design-file <model-authored.json> \
   --out-dir .sixloops/goal-design
 ```
 
@@ -126,9 +154,12 @@ The script writes:
 - `goal-loop-design.json`
 - `manifest.json`
 
-Use `--domain frontend|backend|fullstack|architecture|review|delivery|maintenance|general` when the domain is obvious.
+Use explicit `--domain`, `--team-mode`, and `--level` only when the host model
+has already chosen those values. `auto` is fallback scaffolding for offline
+fixtures or host-model-unavailable mode, not a substitute for model judgment.
 
-Use `--team-mode subagent-team` only when team decomposition is useful. Use `--team-mode phased` when the same agent should run the roles sequentially.
+Use `subagent-team` only when team decomposition is useful. Use `phased` when
+the same agent should run the roles sequentially.
 
 Before presenting the result, check `loop-exit-contract.md`. The generated loop must explain when another cycle will add verified certainty and when it must return to the human. User-facing presentation should lead with the `GOAL.md` Change Map, then the execution contract and one recommended confirmation reply; `RUN.md`, `VERIFY.md`, and `STATE.json` are agent-facing harness files.
 

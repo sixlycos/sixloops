@@ -22,7 +22,9 @@ packet, verify, preserve state, and stop without repeated user prompting.
 3. Test whether the goal is actually loop-shaped: recurring or continuing
    work, observable inputs, objective rejection signal, bounded actions, hard
    stop, and explicit return points for high-impact actions.
-4. Run `../sixloops/scripts/design_goal_loop.py --goal "<goal>" --domain auto --team-mode auto --level auto --out-dir .sixloops/goal-design`
+4. Write a small model-authored design JSON with `domain`, `team_mode`, `level`,
+   `change_map`, and optional `rationale`; then run
+   `../sixloops/scripts/design_goal_loop.py --goal "<goal>" --model-design-file <json> --out-dir .sixloops/goal-design`
    only when an artifact packet is useful.
 5. Present the Change Map first, then the start plan: why the user would start
    it, first cycle, verifier, stop condition, return point, selected mode, and artifact

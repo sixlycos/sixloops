@@ -33,6 +33,18 @@ REQUIRED_SEMANTIC_CANDIDATE = {
     "approval_boundaries",
     "evidence",
 }
+REQUIRED_CHANGE_MAP_FIELDS = {
+    "current_x",
+    "target_b",
+    "user_perception",
+    "transformation_thesis",
+    "affected_surfaces",
+    "regression_plan",
+    "rollback_or_compatibility",
+    "research_questions",
+    "waves",
+    "decision_packet_required_when",
+}
 HIGH_IMPACT_TERMS = (
     "push",
     "merge",
@@ -145,6 +157,25 @@ def raw_completion_contract(raw: dict) -> dict:
     return managed_loop.get("completion_contract") if isinstance(managed_loop.get("completion_contract"), dict) else {}
 
 
+def raw_change_map(raw: dict) -> dict:
+    direct = raw.get("change_map")
+    if isinstance(direct, dict):
+        return direct
+    managed = raw_managed_loop(raw).get("change_map")
+    return managed if isinstance(managed, dict) else {}
+
+
+def has_change_map_value(value: Any) -> bool:
+    if isinstance(value, dict):
+        return False
+    return bool([item for item in strings(value) if item.strip()])
+
+
+def has_model_change_map(raw: dict) -> bool:
+    change_map = raw_change_map(raw)
+    return bool(change_map) and all(has_change_map_value(change_map.get(key)) for key in REQUIRED_CHANGE_MAP_FIELDS)
+
+
 def normalize_render_fields(raw: dict, normalized: dict) -> dict:
     source = raw_managed_loop(raw)
     return {
@@ -184,6 +215,7 @@ def delegation_gate(raw: dict, normalized: dict) -> dict:
             or managed_loop.get("max_iterations_per_run")
             or strings(safety.get("budget_caps"))
         ),
+        "has_change_map": has_model_change_map(raw),
         "has_human_gate": has_human_gate,
         "has_loop_exit_contract": exit_validation["valid"],
         "high_impact_has_approval": (not high_impact) or has_human_gate,

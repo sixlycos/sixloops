@@ -26,20 +26,50 @@ delegation is not justified.
    - bounded actions,
    - hard iteration cap,
    - explicit return points for high-impact work.
-4. Run the direct goal script when an artifact packet is useful:
+4. Write a model-authored design JSON before running the direct goal script.
+   The JSON is the semantic handoff; the script only normalizes and renders it:
+
+   ```json
+   {
+     "domain": "architecture",
+     "team_mode": "subagent-team",
+     "level": "isolated-draft",
+     "change_map": {
+       "current_x": "...",
+       "target_b": "...",
+       "user_perception": "...",
+       "transformation_thesis": "...",
+       "affected_surfaces": ["..."],
+       "regression_plan": ["..."],
+       "rollback_or_compatibility": ["..."],
+       "research_questions": ["..."],
+       "waves": ["..."],
+       "decision_packet_required_when": ["..."]
+     },
+     "rationale": {
+       "why_this_loop": "...",
+       "why_not_smaller": "...",
+       "why_not_more_autonomous": "...",
+       "fit_summary": "..."
+     }
+   }
+   ```
+
+5. Run the direct goal script when an artifact packet is useful:
 
    ```bash
    python skills/sixloops/scripts/design_goal_loop.py \
      --goal "<user goal>" \
-     --domain auto \
-     --team-mode auto \
-     --level auto \
+     --model-design-file <model-authored.json> \
      --out-dir .sixloops/goal-design
    ```
 
-5. Read generated `GOAL.md`, `STATE.json`, `RUN.md`, `VERIFY.md`, `TEAM.md`,
+   Do not use `auto` fields as semantic analysis when a capable host model is
+   available; they are fallback scaffolding only.
+
+6. Read generated `GOAL.md`, `STATE.json`, `RUN.md`, `VERIFY.md`, `TEAM.md`,
    `HANDOFF.md`, and `goal-loop-design.json`.
-6. Present the Change Map first, then the start plan:
+7. Present the Change Map first, then the start plan:
    - what X is,
    - what B is,
    - what it touches,

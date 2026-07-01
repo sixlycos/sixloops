@@ -1,5 +1,6 @@
 .sixloops/
 dist/
+/AGENTS.md
 
 __pycache__/
 *.py[cod]

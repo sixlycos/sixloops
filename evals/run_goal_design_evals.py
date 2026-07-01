@@ -150,10 +150,12 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
             ):
                 if not isinstance(change_map.get(list_key), list) or not change_map.get(list_key):
                     failures.append(f"empty change_map list: {list_key}")
-            change_map_text = json.dumps(change_map, ensure_ascii=False)
-            for marker in expected.get("change_map_contains", []):
-                if marker not in change_map_text:
-                    failures.append(f"change_map missing semantic marker {marker!r}")
+            for key, markers in expected.get("change_map_contains", {}).items():
+                marker_list = markers if isinstance(markers, list) else [markers]
+                rendered_value = json.dumps(change_map.get(key), ensure_ascii=False)
+                for marker in marker_list:
+                    if str(marker) not in rendered_value:
+                        failures.append(f"change_map.{key} missing model-authored marker {marker!r}")
 
         managed_change_map = design.get("managed_loop", {}).get("change_map")
         if not isinstance(managed_change_map, dict):
@@ -233,6 +235,20 @@ def assert_case(case: dict, case_dir: Path) -> list[str]:
 def run_case(case: dict, out_root: Path, keep_going: bool) -> tuple[bool, list[str]]:
     case_dir = out_root / str(case["id"])
     clean_case_dir(case_dir, out_root)
+    expected = case.get("expected", {})
+    model_design = {
+        key: value
+        for key, value in {
+            "domain": expected.get("domain"),
+            "team_mode": expected.get("team_mode"),
+            "level": expected.get("adoption_level"),
+        }.items()
+        if value
+    }
+    if isinstance(case.get("model_design"), dict):
+        model_design.update(case["model_design"])
+    model_design_path = case_dir / "model-design.json"
+    model_design_path.write_text(json.dumps(model_design, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     cmd = [
         sys.executable,
         str(DESIGNER),
@@ -244,6 +260,8 @@ def run_case(case: dict, out_root: Path, keep_going: bool) -> tuple[bool, list[s
         "auto",
         "--level",
         "auto",
+        "--model-design-file",
+        str(model_design_path),
         "--out-dir",
         str(case_dir),
         "--overwrite",

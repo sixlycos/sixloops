@@ -39,87 +39,6 @@ LEVELS = {
 TEAM_MODES = {"auto", "none", "phased", "subagent-team"}
 
 
-DOMAIN_KEYWORDS = {
-    "frontend": (
-        "frontend",
-        "ui",
-        "ux",
-        "route",
-        "component",
-        "browser",
-        "screenshot",
-        "responsive",
-        "i18n",
-        "copy",
-        "页面",
-        "前端",
-        "组件",
-        "浏览器",
-        "截图",
-        "文案",
-    ),
-    "backend": (
-        "backend",
-        "api",
-        "database",
-        "db",
-        "migration",
-        "provider",
-        "queue",
-        "auth",
-        "schema",
-        "relay",
-        "后端",
-        "接口",
-        "数据库",
-        "迁移",
-        "供应商",
-    ),
-    "fullstack": (
-        "fullstack",
-        "full-stack",
-        "end-to-end",
-        "integration",
-        "contract",
-        "frontend and backend",
-        "前后端",
-        "全栈",
-        "联调",
-        "集成",
-        "契约",
-    ),
-    "architecture": (
-        "architecture",
-        "design",
-        "plan",
-        "split",
-        "roadmap",
-        "refactor",
-        "boundary",
-        "semantics",
-        "blast radius",
-        "impact surface",
-        "worktree",
-        "rollout",
-        "架构",
-        "方案",
-        "拆分",
-        "重构",
-        "语义",
-        "边界",
-        "波及",
-        "回归",
-        "调研",
-        "挖掘",
-        "产品和技术",
-        "技术思路",
-    ),
-    "review": ("review", "audit", "self-review", "regression", "风险", "审查", "评审", "复查"),
-    "delivery": ("deploy", "release", "pr", "merge", "ci", "handoff", "交付", "发布", "上线", "合并"),
-    "maintenance": ("daily", "morning", "monitor", "todo", "logs", "triage", "每天", "早上", "巡检", "日志"),
-}
-
-
 BASE_STATE_SCHEMA = {
     "status": "pending, discovering, active, verifying, done, blocked, needs_human, budget_stopped",
     "objective_hash": "Stable hash of objective and success criteria.",
@@ -132,157 +51,6 @@ BASE_STATE_SCHEMA = {
     "human_queue": "Decisions, approvals, or missing context that require a human.",
     "budgets": "Item, iteration, time, token, or cost caps for the current run.",
     "next_cursor": "Where the next run should resume.",
-}
-
-
-CHANGE_MAP_PROFILES = {
-    "frontend": {
-        "current_x": "Current UI behavior, routes, states, copy, and browser-visible regressions are not yet mapped against the requested product outcome.",
-        "target_b": "Users can complete the intended path on the affected routes, with stable copy, layout, interaction, and locale behavior.",
-        "user_perception": "The user should feel the changed path works in the real browser, not just that files changed.",
-        "affected_surfaces": ["routes", "components", "state/data loading", "copy and i18n", "responsive layout", "browser console and network"],
-        "regression_plan": ["focused static check", "desktop/mobile browser pass", "console/network inspection", "i18n fallback check"],
-        "rollback_or_compatibility": ["keep route contracts stable", "avoid broad visual direction changes without review", "isolate local UI fixes"],
-        "waves": ["map changed routes", "fix obvious reversible UI regressions", "verify real browser paths", "package product/visual decisions for review"],
-    },
-    "backend": {
-        "current_x": "Current API, data, provider, auth, or queue behavior is not yet mapped against the requested backend outcome.",
-        "target_b": "The changed backend path has explicit contracts, stable data behavior, and focused verification evidence.",
-        "user_perception": "Operators and integrators should see predictable API behavior, not hidden contract drift.",
-        "affected_surfaces": ["API/controller contracts", "service/domain logic", "data model", "auth/permission boundary", "provider or queue behavior", "logs and CI"],
-        "regression_plan": ["focused unit/integration checks", "contract tests", "auth/data boundary checks", "log or CI evidence"],
-        "rollback_or_compatibility": ["preserve public fields until migration is approved", "avoid production config or data mutation without review"],
-        "waves": ["map contracts and data ownership", "draft reversible local fix", "verify focused behavior", "package migration or production decisions"],
-    },
-    "fullstack": {
-        "current_x": "Current product behavior crosses frontend, backend, contract, and delivery surfaces without one verified transformation map.",
-        "target_b": "The user-facing outcome, API contract, data behavior, and release path line up through an end-to-end verifier.",
-        "user_perception": "The user should experience one coherent product change, even though the implementation spans layers.",
-        "affected_surfaces": ["user journey", "frontend route/state", "API contract", "data model", "auth/session", "delivery and release checks"],
-        "regression_plan": ["per-layer focused checks", "contract verification", "integrated user-path check", "handoff risk review"],
-        "rollback_or_compatibility": ["sequence layers by dependency", "keep old contracts until compatibility is proven", "gate schema/release decisions"],
-        "waves": ["map user path and contracts", "draft first compatible slice", "verify per layer", "verify integrated path", "package release decisions"],
-    },
-    "architecture": {
-        "current_x": "Current product semantics, code boundaries, data ownership, and operation surfaces are not yet mapped into one transformation plan.",
-        "target_b": "The system reaches the target product behavior through ordered, compatible slices with known blast radius and regression checks.",
-        "user_perception": "The user should understand what changes from X to B, why the first slice matters, what it touches, and how it can be rolled back or verified.",
-        "affected_surfaces": ["product semantics", "data model and persistence", "service/domain helpers", "API/controller contracts", "admin or user UI", "tests, build, migration, and docs"],
-        "regression_plan": ["domain/helper tests", "contract/API tests", "admin or user-path smoke", "backward compatibility check", "migration/rename dry-run when applicable"],
-        "rollback_or_compatibility": ["prefer compatibility wrappers before deletion", "avoid schema/API migration before decision packet", "keep reversible worktree slices"],
-        "waves": ["build evidence map", "name and isolate boundaries", "draft first compatible code slice", "split UI/config surface", "package product/schema decisions", "prepare migration/release after approval"],
-    },
-    "review": {
-        "current_x": "Current implementation intent, diff, risk surface, and verifier evidence are not yet tied together.",
-        "target_b": "The handoff has a clear behavior map, highest-risk findings, focused verification, and explicit unresolved decisions.",
-        "user_perception": "The reviewer should see what changed, what could break, what was verified, and what still needs judgment.",
-        "affected_surfaces": ["intended behavior", "diff surface", "tests and build", "user paths", "data/auth/release risk", "handoff notes"],
-        "regression_plan": ["highest-risk diff review", "focused tests", "build or lint check", "manual risk checklist"],
-        "rollback_or_compatibility": ["do not hide unverified risk", "keep unrelated refactors out of review scope"],
-        "waves": ["map intent and diff", "rank risks", "patch evidenced issues when approved", "verify focused checks", "handoff remaining decisions"],
-    },
-    "delivery": {
-        "current_x": "Current release state, CI/build evidence, diff risk, and approval needs are not yet aligned.",
-        "target_b": "The change is ready for handoff or release review with explicit verification, risks, and approvals.",
-        "user_perception": "The project owner should know whether the change can move forward and exactly what blocks it.",
-        "affected_surfaces": ["diff", "CI", "build output", "test evidence", "release notes", "approval gates"],
-        "regression_plan": ["CI status", "focused build/test", "release checklist", "handoff risk review"],
-        "rollback_or_compatibility": ["do not push, merge, deploy, or release without approval", "keep rollback notes visible"],
-        "waves": ["map release state", "fix local reversible blockers", "verify delivery checks", "prepare PR/handoff draft", "return for release approval"],
-    },
-    "maintenance": {
-        "current_x": "Current recurring signals, logs, CI failures, TODOs, and user feedback are not yet triaged into a maintained system picture.",
-        "target_b": "The project has a current issue map, ranked next actions, verified fixes when reversible, and a durable next cursor.",
-        "user_perception": "The user should receive a useful maintenance pass, not a pile of raw logs.",
-        "affected_surfaces": ["recent errors", "CI failures", "TODOs", "user feedback", "state file", "low-risk code paths"],
-        "regression_plan": ["focused verifier per selected item", "repeat-signature detection", "before/after status summary"],
-        "rollback_or_compatibility": ["keep broad scans read-only until scoped", "attempt only reversible local fixes"],
-        "waves": ["collect bounded signals", "rank 1-3 items", "investigate causes", "fix reversible items", "verify and update next cursor"],
-    },
-    "general": {
-        "current_x": "Current situation, desired outcome, affected surfaces, and verifier path are not yet mapped.",
-        "target_b": "The goal becomes a sequence of evidenced, bounded actions with a clear verifier and return boundary.",
-        "user_perception": "The user should see what changes, why it matters, where it reaches, and how the loop proves progress.",
-        "affected_surfaces": ["user-visible outcome", "relevant files or systems", "state and assumptions", "verification path", "handoff surface"],
-        "regression_plan": ["focused project verifier", "before/after evidence", "manual check path when commands cannot decide"],
-        "rollback_or_compatibility": ["keep actions reversible until approval", "return decisions with options and impact"],
-        "waves": ["map X to B", "gather evidence", "choose first bounded item", "act or draft decision packet", "verify and update state"],
-    },
-}
-
-ZH_CHANGE_MAP_PROFILES = {
-    "frontend": {
-        "current_x": "当前 UI 行为、路由、状态、文案和浏览器可见问题还没有映射到目标产品结果。",
-        "target_b": "用户可以在受影响路由上完成目标路径，文案、布局、交互和多语言行为稳定。",
-        "user_perception": "用户感知到真实浏览器路径可用，而不是只看到文件被修改。",
-        "affected_surfaces": ["路由", "组件", "状态 / 数据加载", "文案和 i18n", "响应式布局", "浏览器控制台和网络"],
-        "regression_plan": ["聚焦静态检查", "桌面 / 移动浏览器验证", "控制台 / 网络检查", "i18n fallback 检查"],
-        "rollback_or_compatibility": ["保持路由契约稳定", "没有审查前不改变整体视觉方向", "隔离局部 UI 修复"],
-        "waves": ["映射变更路由", "修复明显可回退 UI 回归", "验证真实浏览器路径", "把产品 / 视觉判断打包交还用户"],
-    },
-    "backend": {
-        "current_x": "当前 API、数据、供应商、认证或队列行为还没有映射到目标后端结果。",
-        "target_b": "变更后的后端路径有明确契约、稳定数据行为和聚焦验证证据。",
-        "user_perception": "运营者和集成方看到的是可预测的 API 行为，而不是隐藏的契约漂移。",
-        "affected_surfaces": ["API / controller 契约", "service / domain 逻辑", "数据模型", "认证 / 权限边界", "供应商或队列行为", "日志和 CI"],
-        "regression_plan": ["聚焦单元 / 集成检查", "契约测试", "认证 / 数据边界检查", "日志或 CI 证据"],
-        "rollback_or_compatibility": ["迁移批准前保留公开字段", "没有审查前不改生产配置或真实数据"],
-        "waves": ["映射契约和数据归属", "草拟可回退本地修复", "验证聚焦行为", "把迁移或生产决策打包交还用户"],
-    },
-    "fullstack": {
-        "current_x": "当前产品行为跨前端、后端、契约和交付面，但还没有一张已验证的转换图。",
-        "target_b": "用户路径、API 契约、数据行为和发布路径通过端到端验证对齐。",
-        "user_perception": "用户感知到一个连贯的产品变化，即使实现跨多个层。",
-        "affected_surfaces": ["用户路径", "前端路由 / 状态", "API 契约", "数据模型", "认证 / 会话", "交付和发布检查"],
-        "regression_plan": ["分层聚焦检查", "契约验证", "集成用户路径检查", "交接风险审查"],
-        "rollback_or_compatibility": ["按依赖顺序推进各层", "兼容性验证前保留旧契约", "schema / 发布决策进入返回点"],
-        "waves": ["映射用户路径和契约", "草拟第一个兼容切片", "分层验证", "验证集成路径", "打包发布决策"],
-    },
-    "architecture": {
-        "current_x": "当前产品语义、代码边界、数据归属和运营入口还没有形成一张统一改造图。",
-        "target_b": "系统通过有顺序、可兼容的切片抵达目标产品行为，并且波及面和回归检查清楚。",
-        "user_perception": "用户能看懂 X 如何变成 B、第一刀为什么重要、会碰到哪里，以及如何回滚或验证。",
-        "affected_surfaces": ["产品语义", "数据模型和持久化", "service / domain helper", "API / controller 契约", "管理端或用户端 UI", "测试、构建、迁移和文档"],
-        "regression_plan": ["domain / helper 测试", "契约 / API 测试", "管理端或用户路径 smoke", "向后兼容检查", "适用时做迁移 / rename dry run"],
-        "rollback_or_compatibility": ["删除前优先保留兼容 wrapper", "决策包前不做 schema / API 迁移", "使用可回退 worktree 切片"],
-        "waves": ["建立证据地图", "命名并隔离边界", "草拟第一个兼容代码切片", "拆分 UI / 配置入口", "打包产品 / schema 决策", "批准后准备迁移 / 发布"],
-    },
-    "review": {
-        "current_x": "当前实现意图、diff、风险面和验证证据还没有串成一张图。",
-        "target_b": "交接材料能清楚说明行为变化、高风险发现、聚焦验证和待决事项。",
-        "user_perception": "审查者能看到改了什么、可能坏在哪里、验证了什么、还需要判断什么。",
-        "affected_surfaces": ["预期行为", "diff 表面", "测试和构建", "用户路径", "数据 / 认证 / 发布风险", "交接说明"],
-        "regression_plan": ["最高风险 diff 审查", "聚焦测试", "构建或 lint 检查", "人工风险清单"],
-        "rollback_or_compatibility": ["不隐藏未验证风险", "不把无关重构塞进审查范围"],
-        "waves": ["映射意图和 diff", "排序风险", "在批准范围内修复有证据的问题", "验证聚焦检查", "交接剩余决策"],
-    },
-    "delivery": {
-        "current_x": "当前发布状态、CI / build 证据、diff 风险和审批需求还没有对齐。",
-        "target_b": "变更可以进入交接或发布审查，并带有明确验证、风险和审批状态。",
-        "user_perception": "项目 owner 能判断是否能继续推进，以及具体卡在哪里。",
-        "affected_surfaces": ["diff", "CI", "build 输出", "测试证据", "发布说明", "明确批准点"],
-        "regression_plan": ["CI 状态", "聚焦构建 / 测试", "发布清单", "交接风险审查"],
-        "rollback_or_compatibility": ["没有批准前不 push、不 merge、不 deploy、不 release", "保持回滚说明可见"],
-        "waves": ["映射发布状态", "修复本地可回退阻塞", "验证交付检查", "准备 PR / handoff 草稿", "返回发布审批"],
-    },
-    "maintenance": {
-        "current_x": "当前周期性信号、日志、CI 失败、TODO 和用户反馈还没有被分诊成维护图景。",
-        "target_b": "项目拥有当前问题地图、排序后的下一步、可回退时的验证修复，以及可恢复的 next cursor。",
-        "user_perception": "用户收到的是有用维护推进，而不是一堆原始日志。",
-        "affected_surfaces": ["最近错误", "CI 失败", "TODO", "用户反馈", "状态文件", "低风险代码路径"],
-        "regression_plan": ["每个事项的聚焦验证", "重复签名检测", "前后状态摘要"],
-        "rollback_or_compatibility": ["宽泛扫描默认只读直到收窄", "只尝试可回退本地修复"],
-        "waves": ["收集已限定信号", "排序 1-3 个事项", "调查原因", "修复可回退事项", "验证并更新 next cursor"],
-    },
-    "general": {
-        "current_x": "当前情况、目标结果、波及面和验证路径还没有建图。",
-        "target_b": "目标被拆成有证据、范围清楚、有验证路径的连续动作。",
-        "user_perception": "用户能看到改什么、为什么重要、会影响哪里、loop 如何证明进展。",
-        "affected_surfaces": ["用户可见结果", "相关文件或系统", "状态和假设", "验证路径", "交接表面"],
-        "regression_plan": ["聚焦项目验证", "前后证据", "命令无法判断时的手动检查路径"],
-        "rollback_or_compatibility": ["批准前保持动作可回退", "带选项和影响返回决策"],
-        "waves": ["映射 X 到 B", "收集证据", "选择第一个范围清楚事项", "行动或草拟决策包", "验证并更新状态"],
-    },
 }
 
 
@@ -541,66 +309,35 @@ def read_goal(args: argparse.Namespace) -> str:
     raise ValueError("Pass --goal or --goal-file.")
 
 
+def read_model_design(path: str | None) -> dict:
+    if not path:
+        return {}
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("--model-design-file must be a JSON object.")
+    return data
+
+
+def model_choice(model_design: dict, key: str, allowed: set[str]) -> str:
+    value = str(model_design.get(key, "")).strip()
+    return value if value in allowed and value != "auto" else ""
+
+
 def infer_domain(goal: str, requested: str) -> str:
     if requested != "auto":
         return requested
-    lowered = goal.lower()
-    scores = {
-        domain: sum(1 for keyword in keywords if keyword in lowered)
-        for domain, keywords in DOMAIN_KEYWORDS.items()
-    }
-    best_domain, best_score = max(scores.items(), key=lambda item: (item[1], item[0]))
-    return best_domain if best_score > 0 else "general"
-
-
-HIGH_IMPACT_GOAL_TERMS = (
-    "deploy",
-    "production",
-    "prod",
-    "migration",
-    "schema",
-    "credential",
-    "secret",
-    "permission",
-    "billing",
-    "release",
-    "上线",
-    "生产",
-    "部署",
-    "迁移",
-    "密钥",
-    "权限",
-)
-
-
-def has_enough_goal_detail(goal: str) -> bool:
-    ascii_words = re.findall(r"[A-Za-z0-9_]+", goal)
-    cjk_chars = re.findall(r"[\u4e00-\u9fff]", goal)
-    return len(ascii_words) >= 6 or len(cjk_chars) >= 12
+    return "general"
 
 
 def resolve_level(goal: str, requested: str) -> str:
     if requested != "auto":
         return requested
-    lowered = goal.lower()
-    if any(term in lowered for term in HIGH_IMPACT_GOAL_TERMS):
-        return "read-only"
-    if not has_enough_goal_detail(goal):
-        return "read-only"
-    edit_terms = re.search(r"\b(apply|fix|patch|implement|change|worktree|draft)\b", lowered)
-    if edit_terms or any(term in lowered for term in ("修", "改", "实现", "尝试修复", "草稿")):
-        return "isolated-draft"
-    return "goal-loop"
+    return "read-only"
 
 
 def resolve_team_mode(domain: str, requested: str, goal: str) -> str:
     if requested != "auto":
         return requested
-    lowered = goal.lower()
-    if any(term in lowered for term in ("subagent", "team", "parallel", "multi-agent", "子代理", "团队", "并行")):
-        return "subagent-team"
-    if domain in {"fullstack", "architecture", "delivery"}:
-        return "subagent-team"
     return "phased"
 
 
@@ -762,68 +499,54 @@ def base_profile(domain: str) -> dict:
     return profiles.get(domain, profiles["general"])
 
 
-def goal_change_map_overrides(goal: str, is_zh: bool) -> dict[str, str]:
-    if is_zh:
-        # ponytail: narrow phrase parser; replace with model-authored X/B when goal design accepts structured fields.
-        match = re.search(r"把(.+?)从(.+?)(?:上)?拆开", goal)
-        if match:
-            subject = compact(match.group(1), 90)
-            surfaces = compact(match.group(2), 90)
-            return {
-                "current_x": f"{subject}在{surfaces}上仍然混在一起或边界不清。",
-                "target_b": f"{subject}在{surfaces}上被拆成清晰、可验证、可回归的边界。",
-            }
-    return {}
-
-
-def build_change_map(goal: str, domain: str, profile: dict, verifier_commands: list[str]) -> dict:
-    is_zh = contains_cjk_text(goal)
-    profile_set = ZH_CHANGE_MAP_PROFILES if is_zh else CHANGE_MAP_PROFILES
-    defaults = profile_set.get(domain, profile_set["general"])
-    overrides = goal_change_map_overrides(goal, is_zh)
-    verification = verifier_commands or profile.get("verification", [])
+def missing_change_map(language: str) -> dict:
+    if language == "zh":
+        return {
+            "current_x": "缺少模型写入的 current_x。",
+            "target_b": "缺少模型写入的 target_b。",
+            "user_perception": "缺少模型写入的 user_perception。",
+            "transformation_thesis": "缺少模型写入的 transformation_thesis。",
+            "affected_surfaces": ["缺少模型写入的 affected_surfaces。"],
+            "regression_plan": ["缺少模型写入的 regression_plan。"],
+            "rollback_or_compatibility": ["缺少模型写入的 rollback_or_compatibility。"],
+            "research_questions": ["缺少模型写入的 research_questions。"],
+            "waves": ["缺少模型写入的 waves。"],
+            "decision_packet_required_when": ["缺少模型写入的 decision_packet_required_when。"],
+        }
     return {
-        "current_x": overrides.get("current_x", defaults["current_x"]),
-        "target_b": overrides.get("target_b", defaults["target_b"]),
-        "user_perception": defaults["user_perception"],
-        "transformation_thesis": (
-            f"把用户目标转成明确的 X→B 改造路径：{compact(goal, 180)}"
-            if is_zh
-            else f"Turn the requested goal into an explicit X-to-B path: {compact(goal, 180)}"
-        ),
-        "affected_surfaces": defaults["affected_surfaces"],
-        "regression_plan": list(dict.fromkeys(defaults["regression_plan"] + verification)),
-        "rollback_or_compatibility": defaults["rollback_or_compatibility"],
-        "research_questions": (
-            [
-                "哪些文件、路由、命令、日志或文档能证明当前 X？",
-                "哪些产品或技术面必须变化，B 才算真实发生？",
-                "哪些检查能证明 B，而不是依赖 agent 自我判断？",
-                "哪些决策只有在选项、影响和回归证据存在后才需要交给人？",
-            ]
-            if is_zh
-            else [
-                "Which files, routes, commands, logs, or docs prove the current X?",
-                "Which product or technical surfaces must change for B to be real?",
-                "Which checks prove B without relying on the agent's opinion?",
-                "Which decisions need a human only after options, impact, and regression evidence exist?",
-            ]
-        ),
-        "waves": defaults["waves"],
-        "decision_packet_required_when": (
-            [
-                "证据建图后，产品语义仍然不明确。",
-                "下一步需要 schema、API、数据、计费、权限、生产、发布或不可逆动作。",
-                "仍存在多条可行路径，且选择会改变用户体验、运营方式或架构。",
-            ]
-            if is_zh
-            else [
-                "Product semantics are ambiguous after evidence is mapped.",
-                "Schema, API, data, billing, permission, production, release, or irreversible action is required.",
-                "Multiple viable paths remain and the choice changes user experience, operations, or architecture.",
-            ]
-        ),
+        "current_x": "Model-authored current_x was not supplied.",
+        "target_b": "Model-authored target_b was not supplied.",
+        "user_perception": "Model-authored user_perception was not supplied.",
+        "transformation_thesis": "Model-authored transformation_thesis was not supplied.",
+        "affected_surfaces": ["Model-authored affected_surfaces was not supplied."],
+        "regression_plan": ["Model-authored regression_plan was not supplied."],
+        "rollback_or_compatibility": ["Model-authored rollback_or_compatibility was not supplied."],
+        "research_questions": ["Model-authored research_questions was not supplied."],
+        "waves": ["Model-authored waves was not supplied."],
+        "decision_packet_required_when": ["Model-authored decision_packet_required_when was not supplied."],
     }
+
+
+def normalize_change_map(raw: object, language: str) -> dict:
+    fallback = missing_change_map(language)
+    source = raw if isinstance(raw, dict) else {}
+    return {
+        "current_x": str(source.get("current_x") or fallback["current_x"]),
+        "target_b": str(source.get("target_b") or fallback["target_b"]),
+        "user_perception": str(source.get("user_perception") or fallback["user_perception"]),
+        "transformation_thesis": str(source.get("transformation_thesis") or fallback["transformation_thesis"]),
+        "affected_surfaces": strings(source.get("affected_surfaces")) or fallback["affected_surfaces"],
+        "regression_plan": strings(source.get("regression_plan")) or fallback["regression_plan"],
+        "rollback_or_compatibility": strings(source.get("rollback_or_compatibility")) or fallback["rollback_or_compatibility"],
+        "research_questions": strings(source.get("research_questions")) or fallback["research_questions"],
+        "waves": strings(source.get("waves")) or fallback["waves"],
+        "decision_packet_required_when": strings(source.get("decision_packet_required_when")) or fallback["decision_packet_required_when"],
+    }
+
+
+def build_change_map(goal: str, model_design: dict) -> dict:
+    is_zh = contains_cjk_text(goal)
+    return normalize_change_map(model_design.get("change_map"), "zh" if is_zh else "en")
 
 
 def change_map_cycle_steps(profile: dict) -> list[str]:
@@ -890,24 +613,28 @@ Decision packet triggers:
 """
 
 
-def build_rationale(goal: str, domain: str, profile: dict, level: str, team_mode: str) -> dict:
+def build_rationale(goal: str, domain: str, profile: dict, level: str, team_mode: str, model_design: dict) -> dict:
+    raw = model_design.get("rationale") if isinstance(model_design.get("rationale"), dict) else {}
+    def supplied(key: str, fallback: str) -> str:
+        return str(raw.get(key) or model_design.get(key) or fallback)
+
     source_summary = ", ".join(profile["discovery_sources"][:3])
     trigger_summary = "; ".join(item.rstrip(".") for item in profile["trigger"][:2])
     mode = level_to_mode(level)
     return {
-        "why_this_loop": (
+        "why_this_loop": supplied("why_this_loop",
             f"This goal is loop-shaped because each cycle must discover inputs such as {source_summary}; "
             "then select only a few high-value items, verify the result, update state, and stop at explicit review boundaries."
         ),
-        "why_not_smaller": (
+        "why_not_smaller": supplied("why_not_smaller",
             "A checklist can remind an agent what to do, but it cannot preserve item state, verifier evidence, "
             "failure signatures, and the next cursor across repeated runs."
         ),
-        "why_not_more_autonomous": (
+        "why_not_more_autonomous": supplied("why_not_more_autonomous",
             f"Start as {mode} because the trigger is {trigger_summary or 'user delegation'}; higher-impact actions "
             "still need the recorded approval points before scope expansion, irreversible changes, or production work."
         ),
-        "fit_summary": (
+        "fit_summary": supplied("fit_summary",
             f"Domain `{domain}` with `{team_mode}` team mode and `{level}` internal level; promote only after accepted "
             "runs produce reliable verifier evidence."
         ),
@@ -975,13 +702,14 @@ def role_prompt(role_id: str, goal: str, domain: str) -> dict:
 
 def build_design(args: argparse.Namespace) -> dict:
     goal = read_goal(args)
-    domain = infer_domain(goal, args.domain)
+    model_design = read_model_design(args.model_design_file)
+    domain = args.domain if args.domain != "auto" else model_choice(model_design, "domain", DOMAINS) or infer_domain(goal, args.domain)
     profile = base_profile(domain)
-    team_mode = resolve_team_mode(domain, args.team_mode, goal)
-    loop_id = args.loop_id or slug(f"{domain}-{compact(goal, 40)}-{short_hash(goal)}")
-    name = args.name or f"{profile['archetype'].replace('-', ' ').title()} Loop"
-    level = resolve_level(goal, args.level)
-    rationale = build_rationale(goal, domain, profile, level, team_mode)
+    team_mode = args.team_mode if args.team_mode != "auto" else model_choice(model_design, "team_mode", TEAM_MODES) or resolve_team_mode(domain, args.team_mode, goal)
+    loop_id = args.loop_id or str(model_design.get("loop_id") or "").strip() or slug(f"{domain}-{compact(goal, 40)}-{short_hash(goal)}")
+    name = args.name or str(model_design.get("name") or "").strip() or f"{profile['archetype'].replace('-', ' ').title()} Loop"
+    level = args.level if args.level != "auto" else model_choice(model_design, "level", LEVELS) or resolve_level(goal, args.level)
+    rationale = build_rationale(goal, domain, profile, level, team_mode, model_design)
     max_items = max(1, args.max_items)
     max_iterations = max(1, args.max_iterations)
     team_roles = [role_prompt(role_id, goal, domain) for role_id in profile["team"]]
@@ -989,7 +717,7 @@ def build_design(args: argparse.Namespace) -> dict:
     approval_boundary = list(dict.fromkeys(profile["approval"] + ["scope expansion", "irreversible changes"]))
     success_criteria = args.success_criteria or profile["verification"]
     verifier_commands = args.verifier or profile["verification"]
-    change_map = build_change_map(goal, domain, profile, verifier_commands)
+    change_map = build_change_map(goal, model_design)
     reject_conditions = profile.get(
         "reject_conditions",
         [
@@ -1947,9 +1675,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--goal-file", default=None, help="Path to a text file containing the user objective.")
     parser.add_argument("--name", default=None, help="Human-readable loop name.")
     parser.add_argument("--loop-id", default=None, help="Stable loop id. Defaults to a slug from domain and goal hash.")
-    parser.add_argument("--domain", choices=sorted(DOMAINS), default="auto", help="Task domain. Default: auto.")
-    parser.add_argument("--level", choices=sorted(LEVELS), default="auto", help="Starting adoption level. Default: auto.")
-    parser.add_argument("--team-mode", choices=sorted(TEAM_MODES), default="auto", help="Team design mode. Default: auto.")
+    parser.add_argument("--domain", choices=sorted(DOMAINS), default="auto", help="Task domain. Use explicit/model-design values for real runs; auto is fallback scaffolding.")
+    parser.add_argument("--level", choices=sorted(LEVELS), default="auto", help="Starting adoption level. Use explicit/model-design values for real runs; auto is fallback scaffolding.")
+    parser.add_argument("--team-mode", choices=sorted(TEAM_MODES), default="auto", help="Team design mode. Use explicit/model-design values for real runs; auto is fallback scaffolding.")
+    parser.add_argument("--model-design-file", default=None, help="Host-model-authored JSON with domain, level, team_mode, change_map, and rationale. Without it, auto fields are fallback scaffolding only.")
     parser.add_argument("--project-root", default=".", help="Project root for metadata only. Default: current directory.")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR), help=f"Output root. Default: {DEFAULT_OUT_DIR}")
     parser.add_argument("--max-items", type=int, default=3, help="Maximum items per cycle. Default: 3.")

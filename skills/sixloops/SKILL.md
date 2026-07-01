@@ -72,14 +72,15 @@ Use the bundled scripts only when they reduce mechanical work:
 
 - `scripts/sixloops.py --input <file-or-dir>` prepares scoped, redacted
   packets and an `analysis-run.json` handoff.
-- `scripts/design_goal_loop.py --goal "<goal>" --domain auto --team-mode auto --level auto --out-dir <dir>`
-  creates a direct goal loop packet.
+- `scripts/design_goal_loop.py --goal "<goal>" --model-design-file <model-authored.json> --out-dir <dir>`
+  renders a direct goal loop packet from a model-authored Change Map, domain,
+  level, team mode, and rationale.
 - `scripts/adopt_candidate.py --candidates <candidates.json> --candidate-id <id> --mode "<mode>" --out-dir <dir>`
   creates a stateful adoption packet when reuse is needed.
 
-`--rule-fallback` is only for offline fixtures, synthetic evals, or
-host-model-unavailable mode. Do not present fallback output as model-quality
-analysis.
+`--rule-fallback` and `auto` field fallback are only for offline fixtures,
+synthetic evals, or host-model-unavailable mode. Do not present fallback output
+as model-quality analysis.
 
 ## Output Contract
 

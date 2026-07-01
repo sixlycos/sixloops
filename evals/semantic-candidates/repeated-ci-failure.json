@@ -65,6 +65,18 @@
         "objective": "Keep CI failures moving toward a verified fix without guessing.",
         "cadence_or_trigger": ["When CI is pending or failed on the current branch."],
         "state_file": ".sixloops/state/ci-babysitter.json",
+        "change_map": {
+          "current_x": "CI failures are handled ad hoc; agents may patch before reading the failed job logs.",
+          "target_b": "Each CI failure run starts from the failed log, patches only evidenced failures, verifies locally, and stops before push or merge.",
+          "user_perception": "The user sees less guessing and a clear verified next step for each red CI run.",
+          "transformation_thesis": "A bounded loop can turn repeated CI triage into a stateful observe-patch-verify cycle without crossing push or merge approvals.",
+          "affected_surfaces": ["CI status", "failed job logs", "current git diff", "focused local verifier", "state file"],
+          "regression_plan": ["confirm failed job log was read", "run focused local verification", "record whether CI is green or blocked"],
+          "rollback_or_compatibility": ["keep fixes local until approved", "do not push or merge automatically"],
+          "research_questions": ["Which CI job failed?", "Which log line proves the actionable failure?", "Which focused verifier rejects a bad patch?"],
+          "waves": ["read CI status and previous state", "inspect failed logs", "patch one evidenced failure", "run focused verification", "update state and return before push or merge"],
+          "decision_packet_required_when": ["push is required", "merge is required", "same failure repeats twice", "verifier is unavailable or ambiguous"]
+        },
         "cycle_steps": [
           "Read the previous state file if it exists.",
           "Inspect CI status, failed logs, and current git diff.",

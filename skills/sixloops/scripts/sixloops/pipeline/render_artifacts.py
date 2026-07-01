@@ -228,6 +228,51 @@ def as_list(value: object) -> list[str]:
     return [str(value)]
 
 
+def missing_change_map(language: str = "en") -> dict:
+    if language == "zh":
+        return {
+            "current_x": "缺少模型写入的 current_x。",
+            "target_b": "缺少模型写入的 target_b。",
+            "user_perception": "缺少模型写入的 user_perception。",
+            "transformation_thesis": "缺少模型写入的 transformation_thesis。",
+            "affected_surfaces": ["缺少模型写入的 affected_surfaces。"],
+            "regression_plan": ["缺少模型写入的 regression_plan。"],
+            "rollback_or_compatibility": ["缺少模型写入的 rollback_or_compatibility。"],
+            "research_questions": ["缺少模型写入的 research_questions。"],
+            "waves": ["缺少模型写入的 waves。"],
+            "decision_packet_required_when": ["缺少模型写入的 decision_packet_required_when。"],
+        }
+    return {
+        "current_x": "Model-authored current_x was not supplied.",
+        "target_b": "Model-authored target_b was not supplied.",
+        "user_perception": "Model-authored user_perception was not supplied.",
+        "transformation_thesis": "Model-authored transformation_thesis was not supplied.",
+        "affected_surfaces": ["Model-authored affected_surfaces was not supplied."],
+        "regression_plan": ["Model-authored regression_plan was not supplied."],
+        "rollback_or_compatibility": ["Model-authored rollback_or_compatibility was not supplied."],
+        "research_questions": ["Model-authored research_questions was not supplied."],
+        "waves": ["Model-authored waves was not supplied."],
+        "decision_packet_required_when": ["Model-authored decision_packet_required_when was not supplied."],
+    }
+
+
+def normalize_change_map(raw: object, language: str = "en") -> dict:
+    fallback = missing_change_map(language)
+    source = raw if isinstance(raw, dict) else {}
+    return {
+        "current_x": str(source.get("current_x") or fallback["current_x"]),
+        "target_b": str(source.get("target_b") or fallback["target_b"]),
+        "user_perception": str(source.get("user_perception") or fallback["user_perception"]),
+        "transformation_thesis": str(source.get("transformation_thesis") or fallback["transformation_thesis"]),
+        "affected_surfaces": as_list(source.get("affected_surfaces")) or fallback["affected_surfaces"],
+        "regression_plan": as_list(source.get("regression_plan")) or fallback["regression_plan"],
+        "rollback_or_compatibility": as_list(source.get("rollback_or_compatibility")) or fallback["rollback_or_compatibility"],
+        "research_questions": as_list(source.get("research_questions")) or fallback["research_questions"],
+        "waves": as_list(source.get("waves")) or fallback["waves"],
+        "decision_packet_required_when": as_list(source.get("decision_packet_required_when")) or fallback["decision_packet_required_when"],
+    }
+
+
 def mapping_block(value: dict, language: str = "en") -> str:
     if not value:
         return ui(language, "none")
@@ -237,25 +282,14 @@ def mapping_block(value: dict, language: str = "en") -> str:
     )
 
 
-def change_map_for_candidate(candidate: dict, managed_loop: dict) -> dict:
+def change_map_for_candidate(candidate: dict, managed_loop: dict, language: str = "en") -> dict:
     raw = candidate.get("change_map") if isinstance(candidate.get("change_map"), dict) else {}
     raw = raw or managed_loop.get("change_map") if isinstance(managed_loop.get("change_map"), dict) else raw
-    return {
-        "current_x": raw.get("current_x") or candidate.get("summary") or managed_loop.get("objective") or "Current state is not mapped yet.",
-        "target_b": raw.get("target_b") or managed_loop.get("objective") or candidate.get("summary") or "Target outcome is not mapped yet.",
-        "user_perception": raw.get("user_perception") or candidate.get("user_value") or "The user should see a concrete change with verifier evidence.",
-        "transformation_thesis": raw.get("transformation_thesis") or candidate.get("why_this_loop") or "Use a bounded loop to turn observed evidence into verified progress.",
-        "affected_surfaces": as_list(raw.get("affected_surfaces") or candidate.get("inputs") or managed_loop.get("discovery_sources")),
-        "regression_plan": as_list(raw.get("regression_plan") or candidate.get("verification") or managed_loop.get("completion_contract", {}).get("verifier_commands")),
-        "rollback_or_compatibility": as_list(raw.get("rollback_or_compatibility") or [managed_loop.get("change_policy")]),
-        "research_questions": as_list(raw.get("research_questions") or ["What evidence proves current X?", "Which surfaces must change for target B?", "Which verifier rejects a bad result?"]),
-        "waves": as_list(raw.get("waves") or managed_loop.get("cycle_steps")),
-        "decision_packet_required_when": as_list(raw.get("decision_packet_required_when") or candidate.get("approval_boundaries") or candidate.get("safety", {}).get("requires_approval_for")),
-    }
+    return normalize_change_map(raw, language)
 
 
 def change_map_block(candidate: dict, managed_loop: dict, language: str = "en") -> str:
-    change_map = change_map_for_candidate(candidate, managed_loop)
+    change_map = change_map_for_candidate(candidate, managed_loop, language)
     if language == "zh":
         return "\n".join(
             [

@@ -2,6 +2,20 @@
   {
     "id": "architecture-user-resource-group-split",
     "goal": "为 snolaxmeow-api 设计一个 loop：扫描项目并把用户身份组和资源/渠道组从产品语义、代码边界、UI配置、订阅语义和回归验证上拆开。用户需要先看到 X 如何通过产品和技术思路变成 B，波及面是多少，如何回归，再推进 worktree 草稿。",
+    "model_design": {
+      "change_map": {
+        "current_x": "用户身份组和资源/渠道组在产品语义、代码边界、UI 配置、订阅语义和验证路径里混在一起。",
+        "target_b": "身份归属、资源/渠道归属和订阅配置形成清晰边界，并能通过兼容切片进入 worktree 草稿。",
+        "user_perception": "用户先看到 X 如何变成 B、会影响哪些面、如何回归，再决定是否推进草稿。",
+        "transformation_thesis": "先用 Change Map 固定语义边界和回归路径，再用小切片验证拆分，不让脚本代替产品判断。",
+        "affected_surfaces": ["产品语义", "代码边界", "UI 配置", "订阅语义", "回归验证"],
+        "regression_plan": ["语义边界审查", "契约/API 检查", "UI 配置路径检查", "订阅兼容检查"],
+        "rollback_or_compatibility": ["schema 或公开契约变化前先出决策包", "优先兼容 wrapper 和可回退 worktree 切片"],
+        "research_questions": ["用户身份组和资源/渠道组的当前 X 分别是什么？", "哪些订阅语义必须保持兼容？", "第一轮草稿能验证哪一个最小边界？"],
+        "waves": ["扫描并命名现有边界", "绘制语义与代码波及面", "提出兼容切片", "推进 worktree 草稿", "汇总需要用户判断的决策包"],
+        "decision_packet_required_when": ["产品语义取舍", "schema migration", "public API change", "large refactor"]
+      }
+    },
     "expected": {
       "domain": "architecture",
       "team_mode": "subagent-team",
@@ -12,7 +26,12 @@
       "require_learning_fields": true,
       "require_handoff_exit_contract": true,
       "require_change_map": true,
-      "change_map_contains": ["用户身份组", "资源/渠道组"],
+      "change_map_contains": {
+        "current_x": ["用户身份组", "资源/渠道组"],
+        "target_b": ["订阅配置", "worktree 草稿"],
+        "affected_surfaces": ["产品语义", "UI 配置"],
+        "decision_packet_required_when": ["schema migration", "public API change"]
+      },
       "must_include": ["GOAL.md", "STATE.json", "RUN.md", "VERIFY.md", "TEAM.md", "HANDOFF.md"]
     }
   },

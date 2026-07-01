@@ -59,6 +59,51 @@ def language_for_candidate(candidate: dict) -> str:
     return "zh" if re.search(r"[\u3400-\u9fff]", json.dumps(candidate, ensure_ascii=False)) else "en"
 
 
+def missing_change_map(language: str = "en") -> dict:
+    if language == "zh":
+        return {
+            "current_x": "缺少模型写入的 current_x。",
+            "target_b": "缺少模型写入的 target_b。",
+            "user_perception": "缺少模型写入的 user_perception。",
+            "transformation_thesis": "缺少模型写入的 transformation_thesis。",
+            "affected_surfaces": ["缺少模型写入的 affected_surfaces。"],
+            "regression_plan": ["缺少模型写入的 regression_plan。"],
+            "rollback_or_compatibility": ["缺少模型写入的 rollback_or_compatibility。"],
+            "research_questions": ["缺少模型写入的 research_questions。"],
+            "waves": ["缺少模型写入的 waves。"],
+            "decision_packet_required_when": ["缺少模型写入的 decision_packet_required_when。"],
+        }
+    return {
+        "current_x": "Model-authored current_x was not supplied.",
+        "target_b": "Model-authored target_b was not supplied.",
+        "user_perception": "Model-authored user_perception was not supplied.",
+        "transformation_thesis": "Model-authored transformation_thesis was not supplied.",
+        "affected_surfaces": ["Model-authored affected_surfaces was not supplied."],
+        "regression_plan": ["Model-authored regression_plan was not supplied."],
+        "rollback_or_compatibility": ["Model-authored rollback_or_compatibility was not supplied."],
+        "research_questions": ["Model-authored research_questions was not supplied."],
+        "waves": ["Model-authored waves was not supplied."],
+        "decision_packet_required_when": ["Model-authored decision_packet_required_when was not supplied."],
+    }
+
+
+def normalize_change_map(raw: object, language: str = "en") -> dict:
+    fallback = missing_change_map(language)
+    source = raw if isinstance(raw, dict) else {}
+    return {
+        "current_x": str(source.get("current_x") or fallback["current_x"]),
+        "target_b": str(source.get("target_b") or fallback["target_b"]),
+        "user_perception": str(source.get("user_perception") or fallback["user_perception"]),
+        "transformation_thesis": str(source.get("transformation_thesis") or fallback["transformation_thesis"]),
+        "affected_surfaces": strings(source.get("affected_surfaces")) or fallback["affected_surfaces"],
+        "regression_plan": strings(source.get("regression_plan")) or fallback["regression_plan"],
+        "rollback_or_compatibility": strings(source.get("rollback_or_compatibility")) or fallback["rollback_or_compatibility"],
+        "research_questions": strings(source.get("research_questions")) or fallback["research_questions"],
+        "waves": strings(source.get("waves")) or fallback["waves"],
+        "decision_packet_required_when": strings(source.get("decision_packet_required_when")) or fallback["decision_packet_required_when"],
+    }
+
+
 def join_items(items: list[str], language: str) -> str:
     return ("、" if language == "zh" else ", ").join(items)
 
@@ -157,22 +202,10 @@ def candidate_contract(candidate: dict) -> tuple[dict, dict]:
     return managed_loop, contract
 
 
-def change_map_for_candidate(candidate: dict, managed_loop: dict, contract: dict) -> dict:
+def change_map_for_candidate(candidate: dict, managed_loop: dict, contract: dict, language: str = "en") -> dict:
     raw = candidate.get("change_map") if isinstance(candidate.get("change_map"), dict) else {}
     raw = raw or managed_loop.get("change_map") if isinstance(managed_loop.get("change_map"), dict) else raw
-    verifiers = strings(contract.get("verifier_commands") or candidate.get("verification"))
-    return {
-        "current_x": raw.get("current_x") or candidate.get("summary") or managed_loop.get("objective") or "Current state is not mapped yet.",
-        "target_b": raw.get("target_b") or managed_loop.get("objective") or candidate.get("summary") or "Target outcome is not mapped yet.",
-        "user_perception": raw.get("user_perception") or candidate.get("user_value") or "The user should see a concrete change with verifier evidence.",
-        "transformation_thesis": raw.get("transformation_thesis") or candidate.get("why_this_loop") or "Turn observed evidence into verified progress.",
-        "affected_surfaces": strings(raw.get("affected_surfaces") or candidate.get("inputs") or managed_loop.get("discovery_sources")),
-        "regression_plan": strings(raw.get("regression_plan") or verifiers),
-        "rollback_or_compatibility": strings(raw.get("rollback_or_compatibility") or managed_loop.get("change_policy")),
-        "research_questions": strings(raw.get("research_questions") or ["What evidence proves current X?", "Which surfaces must change for target B?", "Which verifier rejects a bad result?"]),
-        "waves": strings(raw.get("waves") or managed_loop.get("cycle_steps")),
-        "decision_packet_required_when": strings(raw.get("decision_packet_required_when") or candidate.get("approval_boundaries") or (candidate.get("safety") or {}).get("requires_approval_for")),
-    }
+    return normalize_change_map(raw, language)
 
 
 def render_change_map(change_map: dict, language: str) -> str:
@@ -268,7 +301,7 @@ def rationale(candidate: dict, managed_loop: dict, level: str) -> dict:
 def build_state(candidate: dict, level: str, artifact_dir: Path) -> dict:
     managed_loop, contract = candidate_contract(candidate)
     safety = candidate.get("safety") if isinstance(candidate.get("safety"), dict) else {}
-    change_map = change_map_for_candidate(candidate, managed_loop, contract)
+    change_map = change_map_for_candidate(candidate, managed_loop, contract, language_for_candidate(candidate))
     return {
         "version": 1,
         "loop_id": candidate.get("id"),
@@ -311,7 +344,8 @@ def build_state(candidate: dict, level: str, artifact_dir: Path) -> dict:
 def render_goal(candidate: dict, level: str) -> str:
     managed_loop, contract = candidate_contract(candidate)
     exits = exit_contract(candidate)
-    change_map = change_map_for_candidate(candidate, managed_loop, contract)
+    language = language_for_candidate(candidate)
+    change_map = change_map_for_candidate(candidate, managed_loop, contract, language)
     candidate_id = str(candidate.get("id"))
     state_file = "STATE.json"
     suggested_state = managed_loop.get("state_file", f".sixloops/state/{candidate_id}.json")
@@ -326,7 +360,6 @@ def render_goal(candidate: dict, level: str) -> str:
     max_iterations = managed_loop.get("max_iterations_per_run", 8)
     mode = level_to_mode(level)
     reasons = rationale(candidate, managed_loop, level)
-    language = language_for_candidate(candidate)
     if language == "zh":
         return f"""# {candidate.get("name", candidate_id)} 执行包
 
@@ -509,11 +542,11 @@ or has enough accepted output to keep its current autonomy level.
 def render_handoff(candidate: dict, level: str, artifact_dir: Path) -> str:
     managed_loop, contract = candidate_contract(candidate)
     exits = exit_contract(candidate)
-    change_map = change_map_for_candidate(candidate, managed_loop, contract)
+    language = language_for_candidate(candidate)
+    change_map = change_map_for_candidate(candidate, managed_loop, contract, language)
     candidate_id = str(candidate.get("id"))
     mode = level_to_mode(level)
     reasons = rationale(candidate, managed_loop, level)
-    language = language_for_candidate(candidate)
     if language == "zh":
         return f"""# {candidate.get("name", candidate_id)} 交接说明
 
