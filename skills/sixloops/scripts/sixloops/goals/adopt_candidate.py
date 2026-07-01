@@ -24,7 +24,12 @@ ALLOWED_LEVELS = set(INTERNAL_TO_MODE)
 
 LEVEL_POLICIES = {
     "read-only": "Read evidence and produce recommendations only. Do not edit project files.",
-    "goal-loop": "Run as a delegated goal loop. Ask before edits unless the user explicitly grants edit scope.",
+    "goal-loop": (
+        "Run as a delegated goal loop. The low-risk edit start string authorizes bounded, local, "
+        "reversible edits with direct evidence and a focused verifier. Ask before push, merge, "
+        "deploy, production calls, data mutation, credentials, billing, dependency changes, "
+        "schema changes, or scope expansion."
+    ),
     "isolated-draft": "Use an isolated branch or worktree for reversible draft changes. Do not push or merge.",
     "verified-pr-draft": "Prepare a verified patch or PR draft when checks pass. Do not push, merge, or deploy without approval.",
     "scheduled-readonly": "Use only as a scheduled read-only report until separate automation setup is approved.",
@@ -32,7 +37,10 @@ LEVEL_POLICIES = {
 }
 ZH_LEVEL_POLICIES = {
     "read-only": "只读证据并给出建议，不改项目文件。",
-    "goal-loop": "按已委托目标循环运行；除非用户明确授权改动，否则修改前先询问。",
+    "goal-loop": (
+        "按已委托目标循环运行；low-risk edit 启动语句已授权有直接证据、可回退、本地且有边界的改动。"
+        "push、merge、deploy、生产调用、数据变更、凭证、计费、依赖、schema 或扩范围前仍需询问。"
+    ),
     "isolated-draft": "使用隔离分支或 worktree 进行可回退草稿改动；不 push、不 merge。",
     "verified-pr-draft": "检查通过后准备补丁或 PR 草稿；未获批准前不 push、不 merge、不部署。",
     "scheduled-readonly": "只作为定时只读报告使用；自动化设置需要另行批准。",

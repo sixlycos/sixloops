@@ -14,12 +14,18 @@ downgrade unsafe candidates, and render model-authored output.
 1. Read the shared workflow in `../sixloops/references/mine-loop-opportunities.md`.
 2. Scope evidence narrowly. Ask once before reading real transcript bodies if
    files, roles, snippet policy, or output visibility are unclear.
-3. Run `../sixloops/scripts/sixloops.py --input <file-or-dir>` when packet
-   preparation is useful.
-4. Analyze packets with `../sixloops/references/semantic-analysis-prompt.md`.
+3. If the input is repo or project evidence rather than JSONL transcripts, read
+   bounded project surfaces first: `README*`, `docs/`, `examples/*/README.md`,
+   existing loop artifacts, and explicitly named files. Do not force this path
+   through transcript packet preparation.
+4. Run `../sixloops/scripts/sixloops.py --input <file-or-dir>` when transcript
+   packet preparation is useful.
+5. Before recommending a managed loop, read
+   `../sixloops/references/loop-foundations.md`.
+6. Analyze packets with `../sixloops/references/semantic-analysis-prompt.md`.
    Use `../sixloops/schemas/semantic-candidates.schema.json` only as the
    handoff envelope.
-5. Present concrete Start Plans first: user value, progression rhythm, verifier,
+7. Present concrete Start Plans first: user value, progression rhythm, verifier,
    stop/review boundary, and exact reply strings.
 
 ## Hard Rules

@@ -243,19 +243,59 @@ Expected actions include:
 - `shrink ci-babysitter to skill`
 - `reject ci-babysitter`
 
+## Analyze Project Evidence
+
+For requests like "find the first loop in this repo worth trying," the host
+model should inspect bounded project evidence first: `README*`, `docs/`,
+`examples/*/README.md`, existing SixLoops artifacts, and explicitly named files.
+Do not force repo evidence through the JSONL transcript pipeline. Use the packet
+pipeline only for session logs, JSONL transcripts, or other packetable run
+evidence.
+
 ## Design A Loop From A Goal
 
 You do not need session logs to start. Give SixLoops a goal:
 
+For the real product path, the host model first writes a small semantic design
+handoff, then the script renders artifacts from that model-authored input:
+
+```json
+{
+  "domain": "frontend",
+  "team_mode": "subagent-team",
+  "level": "goal-loop",
+  "change_map": {
+    "current_x": "Frontend changes rely on manual route checks.",
+    "target_b": "Changed routes are verified with browser evidence before review.",
+    "user_perception": "Reviewers see screenshots, focused fixes, and clear return points.",
+    "transformation_thesis": "Route discovery plus browser verification turns vague UI checking into a bounded loop.",
+    "affected_surfaces": ["changed routes", "browser console", "screenshots"],
+    "regression_plan": ["open changed routes", "capture screenshots", "check console errors"],
+    "rollback_or_compatibility": ["fix only low-risk local regressions"],
+    "research_questions": ["which routes changed", "which states need screenshots"],
+    "waves": ["discover routes", "verify in browser", "fix evidenced regressions"],
+    "decision_packet_required_when": ["visual or product judgment is needed"]
+  },
+  "rationale": {
+    "why_this_loop": "The work repeats after frontend changes and has browser evidence.",
+    "why_not_smaller": "A checklist does not preserve state or verifier evidence.",
+    "why_not_more_autonomous": "Visual and product judgment must return to the user.",
+    "fit_summary": "Start as low-risk edit with browser verification and clear stop points."
+  }
+}
+```
+
 ```bash
 python skills/sixloops/scripts/design_goal_loop.py \
   --goal "After frontend changes, verify changed routes with browser screenshots, fix low-risk regressions, and stop when review or product judgment is needed." \
-  --domain frontend \
-  --team-mode auto \
-  --level auto \
+  --model-design-file .sixloops/tmp/frontend-goal/model-design.json \
   --out-dir .sixloops/tmp/frontend-goal \
   --overwrite
 ```
+
+`--domain`, `--team-mode auto`, and `--level auto` without a model design file
+are fallback scaffolding for demos and host-AI-unavailable runs, not the
+model-led product path.
 
 The output folder contains `GOAL.md`, `TEAM.md`, `STATE.json`, `HANDOFF.md`, and
 `AGENTS-snippet.md`.
@@ -334,6 +374,20 @@ presented as model-quality analysis.
 
 A loop is a controlled state machine: it finds work, hands it to an agent,
 checks the result, writes state, and decides the next move.
+
+For software product work, treat loops as nested cadences: an **agentic coding
+loop** runs in minutes from a spec and evals; a **developer feedback loop** runs
+in tens of minutes to hours to steer product and spec decisions; an **external
+feedback loop** runs over hours, days, or weeks through users, telemetry, A/B
+tests, support feedback, or competitive signals. SixLoops mostly designs the
+inner loop and the return points where slower human or external judgment feeds
+the next spec.
+
+The inner agent may collect and summarize external feedback, draft spec or eval
+updates, and prepare a decision packet. It must not mark product vision, market
+fit, user-context tradeoffs, support themes, A/B interpretation, competitive
+judgment, visual taste, copy direction, or translation quality as `DONE` unless
+the user supplied objective acceptance criteria.
 
 Use a loop only when the work has:
 

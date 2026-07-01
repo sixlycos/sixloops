@@ -1,6 +1,6 @@
 ---
 name: sixloops-adopt
-description: Use when the user replies start, continue, run, adopt, shrink, or reject for an existing SixLoops candidate, or asks to execute one stateful loop cycle.
+description: Use when the user replies start, continue, run, adopt, shrink, or reject for an existing SixLoops candidate or exact SixLoops start string, or asks to execute one stateful loop cycle.
 ---
 
 # SixLoops Adopt
@@ -18,6 +18,9 @@ resume naturally.
 3. Read the latest card or adoption packet. Create one with
    `../sixloops/scripts/adopt_candidate.py` only when stateful reuse is needed.
 4. Run at most one stateful cycle inside the approved mode.
+   - `as low-risk edit` authorizes bounded, local, reversible edits with direct
+     evidence and a focused verifier. It does not authorize push, merge, deploy,
+     production calls, data mutation, credentials, billing, or scope expansion.
    - Refresh the Change Map before choosing work.
    - Pick work by wave order, impact, verifier evidence, and reversibility.
    - Before returning `CONTINUE`, record `next_cursor`,

@@ -1,6 +1,6 @@
 ---
 name: sixloops
-description: Use as the SixLoops router when the user asks about mining logs, designing agent loops, or starting, continuing, shrinking, rejecting, or packaging an existing SixLoops candidate and no narrower sixloops-* skill is already selected.
+description: Use as the SixLoops router when the user asks for SixLoops generally, asks for loop engineering but the route is unclear, or no narrower sixloops-* skill already matches.
 ---
 
 # SixLoops
@@ -38,6 +38,19 @@ If both a direct goal and transcript evidence are available, design from the
 goal first, then use evidence to refine the Change Map, choose a smaller
 mechanism, or reject.
 
+## Reference Map
+
+Load references only when they match the route:
+
+- Before recommending or continuing a managed loop: `references/loop-foundations.md`.
+- Before presenting user-facing proposals: `references/final-response-contract.md`.
+- For frontend, backend, full-stack, review, verification, or delivery loops:
+  `references/skill-routing-matrix.md`.
+- For mined candidates: `references/mine-loop-opportunities.md` and then
+  `references/semantic-analysis-prompt.md`.
+- For fresh goals: `references/design-managed-loop.md`.
+- For existing start strings or adoption packets: `references/adopt-loop-runbook.md`.
+
 ## Hard Rules
 
 - Do not scan broad home directories by default. Use explicit files or narrow
@@ -63,6 +76,10 @@ mechanism, or reject.
   stop. First create a decision packet with options, impact, affected surfaces,
   regression path, and a recommendation. Return to the user only when the
   decision itself or a higher-impact action cannot be delegated.
+- For product-building work, separate the inner agentic coding loop from the
+  slower developer feedback loop and external feedback loop. The agent can
+  gather evidence and update specs or evals, but product vision and user-context
+  judgment remain return points unless the user has supplied objective criteria.
 - Keep the first user-facing screen concrete: what this will do for the user,
   how it verifies, when it stops, and the exact reply string.
 

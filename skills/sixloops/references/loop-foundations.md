@@ -71,6 +71,30 @@ The six parts that usually realize those moves are:
 - Sub-agent or evaluator: a skeptical checker separate from the generator.
 - Memory: state on disk, in a board, or in another durable store.
 
+## Three Product-Building Loops
+
+Andrew Ng's June 26, 2026 letter "Three Key Loops for Building Great Software"
+frames 0-to-1 software building as three nested feedback loops. Use this as a
+cadence and authority model, not as a reason to weaken SixLoops gates:
+
+- Agentic coding loop: minutes. The coding agent implements from a product
+  spec and optional evals, tests or inspects what it built, and iterates until
+  the verifier passes, rejects, or the run hits a cap.
+- Developer feedback loop: tens of minutes to hours. The developer reviews the
+  current product, steers the spec, makes product or UI tradeoffs, and adds
+  evals when repeated failures appear.
+- External feedback loop: hours to weeks. Friends, alpha users, production
+  telemetry, A/B tests, customer feedback, support tickets, or competitive
+  analysis reshape the product vision that feeds the developer loop.
+
+Do not ask the inner coding loop to automate outer-loop judgment. Product
+taste, market fit, user context, and strategy belong in slower human or
+external feedback loops. A managed loop can gather evidence, summarize feedback,
+draft options, update evals, and prepare decision packets, but it should return
+when the next step depends on context the agent does not have. The inner loop
+earns autonomy only where a spec, eval, check, or other verifier can reject bad
+output.
+
 ## Work Shape Triage
 
 Classify the work before recommending a loop:

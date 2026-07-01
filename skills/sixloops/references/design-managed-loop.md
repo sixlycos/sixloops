@@ -11,7 +11,7 @@ delegation is not justified.
 
 ## Workflow
 
-1. Read `goal-loop-designer.md`.
+1. Read `loop-foundations.md`, then `goal-loop-designer.md`.
 2. Draft the Change Map before judging the mechanism:
    - current X and target B,
    - how the user or operator perceives the transformation,
@@ -23,6 +23,9 @@ delegation is not justified.
      `next_expected_evidence`, `next_verifier`, and `human_friction_delta`.
    - autonomy policy: model chooses the next bounded shot, controls necessary
      roles, and asks the user only for true human judgment or stronger approval.
+   - for software product work, the cadence boundary between agentic coding
+     loops, developer feedback loops, and external feedback loops only when it
+     affects execution authority, verifier choice, or return point.
 3. Decide whether the goal is loop-shaped:
    - continued or recurring work,
    - observable inputs,

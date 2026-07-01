@@ -72,6 +72,11 @@ For each candidate, decide:
 - Whether the loop has a progression contract: each cycle records what changed, the one selected next cursor, non-selected candidate next items, what new evidence it expects, which verifier can reject it, whether a blocking human queue exists, and whether user friction was reduced or increased.
 - Whether the loop has an autonomy contract: the model ranks plausible next actions, chooses the best non-blocking bounded shot, controls subagent start/stop, and returns to the user only for real human judgment or stronger approval.
 - Whether the loop has a Change Map: current X, target B, user perception, affected product/technical surfaces, regression or compatibility path, rollout waves, and decision packet triggers.
+- For product-building candidates, which feedback cadence controls the next
+  decision when it matters: agentic coding, developer feedback, or external
+  feedback. Treat external product, user, market, A/B, support, or competitive
+  feedback as evidence or a return point, not as an inner-loop verifier, unless
+  the user supplied objective acceptance criteria.
 
 ## Loop Standard
 
@@ -94,6 +99,13 @@ model judgment to choose the next bounded shot from evidence, verifier availabil
 risk, and approved mode. Return to the user only when the remaining choice requires product,
 architecture, release, security, data, billing, permission, production, irreversible, or
 scope-expanding judgment, or when explicit approval is required.
+
+Do not mark product vision, market fit, user-context tradeoffs, support themes,
+A/B results, competitor analysis, visual taste, copy direction, or translation
+quality as `DONE` just because the agent summarized them. The loop can collect
+and summarize that evidence, update specs or eval proposals, and prepare a
+decision packet; the acceptance gate must remain human or objective criteria
+provided by the user.
 
 If a candidate has repeated steps but no acceptance contract, state schema, progression contract,
 resume policy, verification, stop condition, budget cap, or explicit return point, recommend `skill`

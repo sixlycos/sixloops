@@ -42,6 +42,11 @@ Every goal loop must include:
 - Run protocol and verifier protocol.
 - Review boundary and the mode required for higher-impact actions.
 - Optional subagent team roles.
+- For product-building goals, place work in the right feedback cadence only
+  when it changes execution authority, verifier choice, or return point:
+  agentic coding loop in minutes, developer feedback loop in tens of minutes to
+  hours, and external feedback loop in hours to weeks. Do not treat slower
+  product, user, or market judgment as an inner-loop verifier.
 
 If the goal is vague, design a read-only or planning loop first. If the user grants edit, worktree, or PR-draft authority, make the first cycle runnable in that mode.
 

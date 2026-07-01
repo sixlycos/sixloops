@@ -6,6 +6,17 @@ Use this as a SixLoops run packet.
 
 After frontend route or i18n changes, verify browser screenshots, fix low-risk UI regressions, and stop when product or visual judgment is needed.
 
+## Change Map
+
+- Current X: Frontend route, layout, or i18n changes rely on manual review and ad hoc browser checks.
+- Target B: The loop identifies the smallest changed route/state/locale set, captures browser evidence, fixes only obvious local regressions, and returns before product or visual judgment.
+- User perception: reviewers receive route lists, screenshots or snapshots, console/network notes, i18n findings, and a clear status instead of another vague UI pass.
+- Transformation thesis: browser evidence plus a bounded fix policy turns repeated frontend verification into a stateful loop without delegating taste.
+- Affected surfaces: route rendering, responsive layout, i18n keys, copy fallback, browser console, network behavior, screenshots, and local UI fixes.
+- Regression path: static checks, changed route discovery, desktop/mobile browser checks, screenshot or snapshot review, console/network inspection, and i18n fallback checks.
+- Rollout waves: discover changed surfaces, verify visible states, fix evidenced low-risk regressions, package unresolved product or visual calls for review.
+- Decision packet required when: visual direction, product copy, translation tone, route behavior, auth/data fixtures, or scope expansion needs judgment.
+
 ## Loop Shape
 
 - Domain: `frontend`

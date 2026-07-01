@@ -1,6 +1,6 @@
 ---
 name: sixloops-design
-description: Use when the user gives a current development goal and asks to design a stateful agent loop, team loop, or subagent workflow, or to decide whether it should shrink to a skill or checklist.
+description: Use when the user gives a fresh or current development goal and asks to design a stateful agent loop, team loop, or subagent workflow. Do not use for existing candidate start/continue/shrink/reject replies.
 ---
 
 # SixLoops Design
@@ -22,6 +22,8 @@ packet, verify, preserve state, and stop without repeated user prompting.
    - progression contract: next cursor, expected evidence, next verifier, and
      human-friction delta required before `CONTINUE`; `next_cursor` must be one
      selected path, with alternatives stored separately.
+   - for product-building goals, the feedback cadence boundary only when it
+     changes execution authority, verifier choice, or return point.
 3. Test whether the goal is actually loop-shaped: recurring or continuing
    work, observable inputs, objective rejection signal, bounded actions, hard
    stop, and explicit return points for high-impact actions.

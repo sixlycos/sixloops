@@ -231,19 +231,55 @@ python skills/sixloops/scripts/sixloops.py \
 - `shrink ci-babysitter to skill`
 - `reject ci-babysitter`
 
+## 分析项目证据
+
+对于 “find the first loop in this repo worth trying” 这类请求，宿主模型应该先检查有边界的项目证据：
+`README*`、`docs/`、`examples/*/README.md`、已有 SixLoops artifacts，以及用户明确点名的文件。
+不要把 repo evidence 强行塞进 JSONL transcript pipeline。只有会话日志、JSONL transcripts
+或其他可 packetize 的运行证据才走 packet pipeline。
+
 ## 从目标设计一个 loop
 
 你不需要先准备会话日志。直接给 SixLoops 一个目标：
 
+真实产品路径里，宿主模型先写一个小的语义 handoff，再由脚本把这个模型写出的输入渲染成 artifacts：
+
+```json
+{
+  "domain": "frontend",
+  "team_mode": "subagent-team",
+  "level": "goal-loop",
+  "change_map": {
+    "current_x": "Frontend changes rely on manual route checks.",
+    "target_b": "Changed routes are verified with browser evidence before review.",
+    "user_perception": "Reviewers see screenshots, focused fixes, and clear return points.",
+    "transformation_thesis": "Route discovery plus browser verification turns vague UI checking into a bounded loop.",
+    "affected_surfaces": ["changed routes", "browser console", "screenshots"],
+    "regression_plan": ["open changed routes", "capture screenshots", "check console errors"],
+    "rollback_or_compatibility": ["fix only low-risk local regressions"],
+    "research_questions": ["which routes changed", "which states need screenshots"],
+    "waves": ["discover routes", "verify in browser", "fix evidenced regressions"],
+    "decision_packet_required_when": ["visual or product judgment is needed"]
+  },
+  "rationale": {
+    "why_this_loop": "The work repeats after frontend changes and has browser evidence.",
+    "why_not_smaller": "A checklist does not preserve state or verifier evidence.",
+    "why_not_more_autonomous": "Visual and product judgment must return to the user.",
+    "fit_summary": "Start as low-risk edit with browser verification and clear stop points."
+  }
+}
+```
+
 ```bash
 python skills/sixloops/scripts/design_goal_loop.py \
   --goal "After frontend changes, verify changed routes with browser screenshots, fix low-risk regressions, and stop when review or product judgment is needed." \
-  --domain frontend \
-  --team-mode auto \
-  --level auto \
+  --model-design-file .sixloops/tmp/frontend-goal/model-design.json \
   --out-dir .sixloops/tmp/frontend-goal \
   --overwrite
 ```
+
+不带 model design file 的 `--domain`、`--team-mode auto`、`--level auto` 只是
+demo 和宿主模型不可用时的 fallback scaffolding，不是 model-led 产品路径。
 
 输出目录会包含 `GOAL.md`、`TEAM.md`、`STATE.json`、`HANDOFF.md` 和
 `AGENTS-snippet.md`。
@@ -313,6 +349,17 @@ python skills/sixloops/scripts/sixloops.py \
 ## 什么样的 loop 值得做
 
 loop 是一个受控状态机：它找到工作，把工作交给 agent，检查结果，写入状态，并决定下一步。
+
+对于软件产品工作，把 loop 看成三层节奏：**agentic coding loop** 在分钟级根据
+spec 和 evals 写、测、改；**developer feedback loop** 在几十分钟到数小时内由
+开发者检查当前产品，并调整产品判断和 spec；**external feedback loop** 在数小时、
+数天或数周内通过用户、生产数据、A/B 测试、客服反馈或竞品信号更新产品愿景。
+SixLoops 主要设计内层执行 loop，以及外层人类或真实用户判断回流到下一版 spec 的
+return point。
+
+内层 agent 可以收集和摘要外部反馈，草拟 spec / eval 更新，准备 decision packet。
+但除非用户已经给出客观验收标准，它不能把产品愿景、市场契合、用户语境取舍、客服主题、
+A/B 解读、竞品判断、视觉品味、文案方向或翻译质量标记为 `DONE`。
 
 只有当工作满足以下条件时，才使用 loop：
 

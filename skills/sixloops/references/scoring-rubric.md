@@ -44,6 +44,11 @@ Verifiability:
 - Medium: can be checked with a human-readable checklist.
 - Low: mostly subjective.
 - A managed loop needs an objective rejection signal. A model-only reviewer can support the gate, but it should not be the only reason a loop is allowed to continue.
+- If pass/fail depends on product vision, user context, market fit, A/B
+  interpretation, support themes, competitive judgment, visual taste, copy
+  direction, or translation quality, treat that as `needs-human`, a read-only
+  evidence loop, or a decision packet unless the user supplied objective
+  acceptance criteria.
 
 Reversibility / execution authority:
 
@@ -89,6 +94,9 @@ Project-person fit:
 - If it appears only in project auxiliary evidence, keep the result as `draft` and explain that it is weaker than repeated user transcript evidence.
 - If there is no observable feedback signal, do not recommend a loop.
 - If the only verifier is the same agent's judgment, do not recommend a managed loop.
+- If external product, user, or market feedback is the success condition, do
+  not recommend a managed loop that claims `DONE`; recommend evidence gathering,
+  spec or eval drafting, or a decision packet with a human return point.
 - If the agent cannot run or inspect the changed system, require read-only or draft level until a reproduction path exists.
 - If it lacks state persistence, resume policy, verification, hard iteration cap, or stop conditions, do not recommend a loop.
 - If it is only a stable preference, recommend a rule or memory.

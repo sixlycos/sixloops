@@ -13,24 +13,34 @@ to: "What repeated work should I stop manually re-explaining to agents?"
 
 1. Scope evidence narrowly.
    - Use explicit files or narrow directories only.
+   - If the user asks for loops "in this repo" or gives project evidence rather
+     than JSONL transcripts, inspect bounded project surfaces first: `README*`,
+     `docs/`, `examples/*/README.md`, existing SixLoops artifacts, and
+     explicitly named files.
    - For real transcripts, ask once before reading bodies if scope is not
      already approved: files, roles, snippet policy, and output visibility.
    - Do not scan broad home directories.
 
 2. Prepare packets with the script when useful.
-   - Run `scripts/sixloops.py --input <file-or-dir>`.
+   - Run `scripts/sixloops.py --input <file-or-dir>` for JSONL logs,
+     transcripts, or packetable session evidence.
    - If it creates a scope proposal, get confirmation and rerun with
      `--approve` or `--scope <analysis-scope.json>`.
    - Read `analysis-run.json`, the selected `analysis-packets.jsonl`, and
      `analysis-packets-index.json`.
 
 3. Analyze with the model, not the schema.
+   - Read `loop-foundations.md` before recommending a managed loop.
    - Read `semantic-analysis-prompt.md`.
    - Treat user packets as primary evidence and tool packets as support.
    - Write `semantic-candidates.json` as model-authored output.
    - Include `user_value`, `summary`, `why_this_loop`, concrete cycle steps,
      progression contract, verifier, stop condition, return point, and source
      limitations.
+   - For product-building candidates, distinguish agentic coding, developer
+     feedback, and external feedback cadences when they affect delegation.
+     External feedback can be evidence or a return point; it is not an
+     inner-loop verifier unless the user supplies objective acceptance criteria.
    - Use `schemas/semantic-candidates.schema.json` only as the handoff
      envelope.
 

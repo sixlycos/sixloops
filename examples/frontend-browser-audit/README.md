@@ -53,12 +53,13 @@ This is not just a checklist because verification often discovers new visible fa
 
 ## Try This Case
 
+First write a model-authored design handoff with `domain`, `team_mode`, `level`,
+`change_map`, and `rationale`, then render the packet:
+
 ```bash
 python skills/sixloops/scripts/design_goal_loop.py \
   --goal "After frontend route or i18n changes, verify browser screenshots, fix low-risk UI regressions, and stop when product or visual judgment is needed." \
-  --domain frontend \
-  --team-mode auto \
-  --level isolated-draft \
+  --model-design-file <model-authored.json> \
   --out-dir .sixloops/tmp/frontend-browser-audit \
   --overwrite
 ```

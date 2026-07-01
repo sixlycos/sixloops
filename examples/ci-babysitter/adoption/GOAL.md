@@ -6,9 +6,20 @@ Use this after the user starts `ci-babysitter` as `low-risk edit`.
 
 Keep CI failures moving toward a verified fix without guessing.
 
+## Change Map
+
+- Current X: CI failures often require a human to remind the agent to inspect logs before guessing.
+- Target B: The loop reads CI status and failed logs first, patches only evidenced local failures, runs focused verification, and returns before push or merge.
+- User perception: the maintainer receives a concrete failure class, a small verified patch or blocker, updated state, and no surprise repository actions.
+- Transformation thesis: log-first triage plus low-risk local edits turns repeated CI rescue into a bounded stateful loop.
+- Affected surfaces: CI status, failed job logs, current git diff, focused local tests, patch files, and state.
+- Regression path: reproduce or inspect the failing check, apply the smallest evidenced fix, run the focused verifier, and record pass/block evidence.
+- Rollout waves: inspect logs, classify failure, patch low-risk local cause, verify, return before push or merge.
+- Decision packet required when: push, merge, broad refactor, dependency change, release judgment, or unclear verifier evidence is needed.
+
 ## Start Mode
 
-`low-risk edit` (`goal-loop` internally): Run as a delegated goal loop. Ask before edits unless the user explicitly grants edit scope.
+`low-risk edit` (`goal-loop` internally): Run as a delegated goal loop. The start string authorizes bounded, local, reversible edits with direct evidence and a focused verifier. Ask before push, merge, deploy, production calls, data mutation, credentials, billing, dependency changes, schema changes, or scope expansion.
 
 ## State
 

@@ -14,6 +14,10 @@ progression fields, and state, and return one clear status: `DONE`,
 1. Identify the selected candidate and mode.
    - Use the exact reply string when present.
    - Prefer the most capable mode that is approved, reversible, and verifiable.
+   - If the user selects `as low-risk edit`, treat local, bounded, reversible
+     edits with direct evidence as approved for this cycle. Still ask before
+     push, merge, deploy, production calls, data mutation, credentials, billing,
+     dependency changes, schema changes, or scope expansion.
    - Do not infer approval for merge, deploy, production, credentials, data,
      payment, deletion, or schema changes.
 

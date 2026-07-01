@@ -229,7 +229,7 @@ def delegation_gate(raw: dict, normalized: dict) -> dict:
         "high_impact_has_approval": (not high_impact) or has_human_gate,
         "evidence_not_stale_or_conflicting": not stale_or_conflicting,
     }
-    required = [key for key in criteria if key not in {"has_progression_contract", "has_autonomy_contract"}]
+    required = list(criteria)
     missing = [key for key in required if not criteria[key]]
     return {
         "eligible": not missing,
