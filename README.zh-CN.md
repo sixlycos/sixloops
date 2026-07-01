@@ -86,8 +86,8 @@ SixLoops 可以渲染：
 flowchart TD
   A["选择入口"] --> B{"请求类型"}
 
-  B -->|直接目标| C["运行 design_goal_loop.py"]
-  C --> D["读取 GOAL、STATE、HANDOFF、TEAM 和 goal-loop-design"]
+  B -->|直接目标| C["宿主模型先写 Change Map<br/>和 model-design JSON"]
+  C --> D["运行 design_goal_loop.py<br/>--model-design-file，并读取产物"]
   D --> L["展示改造图景 + Start Plan<br/>波及面、回归、验证器、状态、返回点"]
 
   B -->|会话日志或项目证据| E["运行 sixloops.py --input"]

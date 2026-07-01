@@ -93,8 +93,8 @@ SixLoops can render:
 flowchart TD
   A["Choose an entrypoint"] --> B{"Request type"}
 
-  B -->|Direct goal| C["Run design_goal_loop.py"]
-  C --> D["Read GOAL, STATE, HANDOFF, TEAM, and goal-loop-design"]
+  B -->|Direct goal| C["Host model drafts Change Map<br/>and model-design JSON"]
+  C --> D["Run design_goal_loop.py<br/>--model-design-file, then read artifacts"]
   D --> L["Present Change Map + Start Plan<br/>blast radius, regression, verifier, state, return point"]
 
   B -->|Session logs or project evidence| E["Run sixloops.py --input"]
