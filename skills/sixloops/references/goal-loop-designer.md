@@ -100,7 +100,7 @@ When the user explicitly asks to start, run, delegate, or use a subagent team:
 - Spawn maker roles only when edit scope is explicit and bounded.
 - Give each subagent one role prompt, the goal, allowed scope, expected output, and a reminder not to expand scope.
 - While subagents run, continue non-overlapping work in the main thread.
-- Integrate role outputs into `STATE.json` and return one status: `DONE`, `CONTINUE`, `BLOCKED`, review-needed, or `BUDGET_STOPPED`.
+- Integrate role outputs into `STATE.json` and return one status code: `DONE`, `CONTINUE`, `BLOCKED`, `NEEDS_HUMAN`, or `BUDGET_STOPPED` (in user-facing copy, `NEEDS_HUMAN` is called review-needed).
 
 Default team roles:
 

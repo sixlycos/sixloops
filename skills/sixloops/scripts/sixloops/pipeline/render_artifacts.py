@@ -1103,7 +1103,7 @@ def autopilot_contract(candidate: dict, managed_loop: dict, contract: dict, lang
             f"Read/update `{state_file}` first and resume unfinished items before starting new work.",
             f"Handle at most {max_items} item(s) per cycle and {max_iterations} iteration(s) per run.",
             "Keep cycling without step-by-step prompting while the objective is unchanged, risk stays in mode, and the verifier can decide.",
-            "Return only with `DONE`, review-needed, `BLOCKED`, or `BUDGET_STOPPED`.",
+            "Return only with `DONE`, `NEEDS_HUMAN`, `BLOCKED`, or `BUDGET_STOPPED` (user-facing copy calls `NEEDS_HUMAN` review-needed).",
             f"Review boundary before returning: {first_run['first_run_human_gate']}",
         ],
         language,
@@ -1266,7 +1266,7 @@ def safe_autopilot_summary(candidate: dict, language: str = "en") -> dict:
         "max_iterations_per_run": managed_loop.get("max_iterations_per_run", 8) if enabled else None,
         "runs_without_prompting_until": [
             "DONE",
-            "review-needed",
+            "NEEDS_HUMAN",
             "BLOCKED",
             "BUDGET_STOPPED",
         ] if enabled else [],

@@ -26,7 +26,7 @@ resume naturally.
    - Before returning `CONTINUE`, record `next_cursor`,
      `next_expected_evidence`, `next_verifier`, and `human_friction_delta`.
    - `next_cursor` must be one selected non-blocked path. Put alternatives in
-     `candidate_next_items`; return review-needed if a human decision blocks
+     `candidate_next_items`; return `NEEDS_HUMAN` if a human decision blocks
      the selected path.
    - When multiple next actions are plausible, rank and choose the best
      non-blocking shot inside the approved mode before asking the user.
@@ -35,8 +35,9 @@ resume naturally.
    - If product, architecture, release, UI, data, or migration judgment appears,
      produce a decision packet with options, impact, regression path, and a
      recommendation before returning for review.
-5. Update state and return exactly one status: `DONE`, `CONTINUE`,
-   review-needed, `BLOCKED`, or `BUDGET_STOPPED`.
+5. Update state and return exactly one status code: `DONE`, `CONTINUE`,
+   `NEEDS_HUMAN`, `BLOCKED`, or `BUDGET_STOPPED` (in user-facing copy,
+   `NEEDS_HUMAN` is called review-needed).
 
 ## Ask Before High-Impact Finalization
 
