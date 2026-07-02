@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from sixloops.core.text import merge_missing, positive_int, strings
+
 
 ALLOWED_EXIT_STATUSES = ["CONTINUE", "DONE", "NEEDS_HUMAN", "BLOCKED", "BUDGET_STOPPED"]
 
@@ -23,33 +25,6 @@ REQUIRED_CONTRACT_KEYS = {
     "budget_stopped_when",
     "status_protocol",
 }
-
-
-def as_list(value: Any) -> list:
-    if value is None:
-        return []
-    if isinstance(value, list):
-        return value
-    return [value]
-
-
-def strings(value: Any) -> list[str]:
-    return [str(item) for item in as_list(value) if str(item).strip()]
-
-
-def positive_int(value: Any, default: int) -> int:
-    try:
-        parsed = int(value)
-    except (TypeError, ValueError):
-        return default
-    return parsed if parsed > 0 else default
-
-
-def merge_missing(primary: list[str], required: list[str]) -> list[str]:
-    result = list(primary)
-    seen = set(primary)
-    result.extend(item for item in required if item not in seen)
-    return result
 
 
 def build_exit_contract(

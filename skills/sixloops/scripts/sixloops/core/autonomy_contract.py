@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from sixloops.core.text import merge_missing, strings
+
 
 REQUIRED_AUTONOMY_KEYS = {
     "decision_policy",
@@ -11,25 +13,6 @@ REQUIRED_AUTONOMY_KEYS = {
     "subagent_control",
     "human_return_policy",
 }
-
-
-def as_list(value: Any) -> list:
-    if value is None:
-        return []
-    if isinstance(value, list):
-        return value
-    return [value]
-
-
-def strings(value: Any) -> list[str]:
-    return [str(item) for item in as_list(value) if str(item).strip()]
-
-
-def merge_missing(primary: list[str], required: list[str]) -> list[str]:
-    result = list(primary)
-    seen = set(primary)
-    result.extend(item for item in required if item not in seen)
-    return result
 
 
 def build_autonomy_contract(team_mode: str = "phased") -> dict:

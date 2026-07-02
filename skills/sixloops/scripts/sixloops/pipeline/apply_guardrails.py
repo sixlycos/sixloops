@@ -14,6 +14,7 @@ from typing import Any
 from sixloops.core.autonomy_contract import normalize_autonomy_contract, validate_autonomy_contract
 from sixloops.core.loop_contract import normalize_exit_contract, validate_exit_contract
 from sixloops.core.progression_contract import normalize_progression_contract, validate_progression_contract
+from sixloops.core.text import as_list, positive_int, strings
 
 
 DEFAULT_SEMANTIC = Path(".sixloops/private/semantic-candidates.json")
@@ -92,26 +93,6 @@ def slug(value: str) -> str:
     return text or "candidate"
 
 
-def as_list(value: Any) -> list:
-    if value is None:
-        return []
-    if isinstance(value, list):
-        return value
-    return [value]
-
-
-def strings(value: Any) -> list[str]:
-    return [str(item) for item in as_list(value) if str(item)]
-
-
-def positive_int(value: Any, default: int) -> int:
-    try:
-        parsed = int(value)
-    except (TypeError, ValueError):
-        return default
-    return parsed if parsed > 0 else default
-
-
 def integer(value: Any, default: int) -> int:
     try:
         return int(value)
@@ -170,7 +151,8 @@ def raw_change_map(raw: dict) -> dict:
 def has_change_map_value(value: Any) -> bool:
     if isinstance(value, dict):
         return False
-    return bool([item for item in strings(value) if item.strip()])
+    # strings() 已丢弃纯空白项，这里只需判断是否还剩非空内容。
+    return bool(strings(value))
 
 
 def has_model_change_map(raw: dict) -> bool:
@@ -668,12 +650,10 @@ def semantic_candidates(data: dict) -> list[dict]:
     missing_top = sorted(REQUIRED_SEMANTIC_TOP_LEVEL - set(data))
     if missing_top:
         raise ValueError(f"Semantic candidates JSON missing required top-level fields: {missing_top}")
-    if isinstance(data.get("candidates"), list):
-        candidates = data["candidates"]
-    if isinstance(data.get("top_findings"), list):
-        candidates = data["top_findings"]
-    if not isinstance(data.get("candidates"), list) and not isinstance(data.get("top_findings"), list):
+    # candidates 是必需的顶层字段（见 REQUIRED_SEMANTIC_TOP_LEVEL），上面已校验存在，这里只需确认它是数组。
+    if not isinstance(data.get("candidates"), list):
         raise ValueError("Semantic candidates JSON must contain a candidates array.")
+    candidates = data["candidates"]
     for index, candidate in enumerate(candidates):
         if not isinstance(candidate, dict):
             raise ValueError(f"Semantic candidate at index {index} must be an object.")
